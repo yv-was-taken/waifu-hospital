@@ -9,6 +9,8 @@ services:
     restart: unless-stopped
     environment:
       - MONGO_INITDB_DATABASE=waifuhospital
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - app_network
       
@@ -27,6 +29,8 @@ services:
       - JWT_SECRET=waifu_hospital_secret_key_12345
       - PORT=5000
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - app_network
       
@@ -44,6 +48,8 @@ services:
     restart: unless-stopped
     networks:
       - app_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   frontend:
     build: ./frontend
@@ -59,16 +65,11 @@ services:
       - backend
       - ai_service
     environment:
-      - REACT_APP_API_URL=http://backend:5000
-      - REACT_APP_AI_SERVICE_URL=http://ai_service:5001
+      - REACT_APP_API_URL=http://localhost:5000
+      - REACT_APP_AI_SERVICE_URL=http://localhost:5001
       - WATCHPACK_POLLING=true
       - CHOKIDAR_USEPOLLING=true
       - DISABLE_ESLINT_PLUGIN=true
-      - HOST=0.0.0.0
-      - WDS_SOCKET_HOST=0.0.0.0
-      - WDS_SOCKET_PORT=3000
-      - DANGEROUSLY_DISABLE_HOST_CHECK=true
-      - PORT=3000
     restart: unless-stopped
     stdin_open: true
     tty: true

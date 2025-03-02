@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Set default base URL for all requests
-axios.defaults.baseURL = 'http://localhost:5000';
+// NOTE: We're using the proxy in package.json, so we don't need to set baseURL
+// If we're running in development, React will proxy requests to http://localhost:5000
 
 // Set or remove x-auth-token in request headers
 export const setAuthToken = (token) => {

@@ -18,8 +18,19 @@ exports.registerUser = async (req, res) => {
 
   try {
     console.log('Checking if user exists...');
-    // Check if user already exists
-    let user = await User.findOne({ email });
+    // Check if user already exists - add retry logic
+    let user;
+    const maxRetries = 3;
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        user = await User.findOne({ email });
+        break; // If successful, exit the loop
+      } catch (err) {
+        console.log(`Attempt ${i+1}/${maxRetries} failed: ${err.message}`);
+        if (i === maxRetries - 1) throw err; // If last attempt, rethrow
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+      }
+    }
     if (user) {
       console.log('User with this email already exists');
       return res.status(400).json({ msg: 'User already exists' });
@@ -33,22 +44,32 @@ exports.registerUser = async (req, res) => {
       password
     });
 
-    // Save user to database
+    // Save user to database with retry logic
     console.log('Saving user to database...');
-    try {
-      await user.save();
-      console.log('User saved successfully');
-    } catch (saveErr) {
-      console.error('Error saving user:', saveErr);
-      if (saveErr.code === 11000) {
-        // Duplicate key error
-        return res.status(400).json({ 
-          msg: 'Username or email already exists',
-          error: saveErr.message
-        });
+    const saveWithRetry = async (userData, maxRetries = 3) => {
+      for (let i = 0; i < maxRetries; i++) {
+        try {
+          await userData.save();
+          console.log('User saved successfully');
+          return true;
+        } catch (saveErr) {
+          console.error(`Save attempt ${i+1}/${maxRetries} failed:`, saveErr.message);
+          
+          if (saveErr.code === 11000) {
+            // Duplicate key error - don't retry
+            return res.status(400).json({ 
+              msg: 'Username or email already exists',
+              error: saveErr.message
+            });
+          }
+          
+          if (i === maxRetries - 1) throw saveErr; // If last attempt, rethrow
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait before retry
+        }
       }
-      throw saveErr;
-    }
+    };
+    
+    await saveWithRetry(user);
 
     // Create JWT token
     console.log('Creating JWT token...');

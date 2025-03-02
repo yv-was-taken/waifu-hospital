@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCharacterById } from '../features/characters/characterSlice';
-import axios from 'axios';
+import api from '../utils/api';
+import aiApi from '../utils/aiApi';
 import Spinner from '../components/layout/Spinner';
 import styled from 'styled-components';
 
@@ -268,8 +269,8 @@ const CharacterChat = () => {
     setSending(true);
     
     try {
-      // Call the AI service API
-      const response = await axios.post('http://localhost:5000/api/chat', {
+      // Call the AI service API using our aiApi instance
+      const response = await aiApi.post('/api/chat', {
         message: message,
         characterId: id
       });

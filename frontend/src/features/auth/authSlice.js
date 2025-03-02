@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../../utils/api';
 import axios from 'axios';
 import { setAuthToken } from '../../utils/setAuthToken';
 import { setAlert } from '../alerts/alertSlice';
@@ -8,15 +9,13 @@ export const loadUser = createAsyncThunk(
   'auth/loadUser',
   async (_, { rejectWithValue }) => {
     try {
-      if (localStorage.token) {
-        setAuthToken(localStorage.token);
-      }
-      
-      const res = await axios.get('/api/users/profile');
+      // Token is handled in api interceptor
+      const res = await api.get('/api/users/profile');
       return res.data;
     } catch (err) {
+      console.error('Load user error:', err);
       localStorage.removeItem('token');
-      return rejectWithValue(err.response.data.msg || 'Failed to load user');
+      return rejectWithValue(err.response?.data?.msg || 'Failed to load user');
     }
   }
 );
@@ -26,7 +25,7 @@ export const register = createAsyncThunk(
   'auth/register',
   async (formData, { dispatch, rejectWithValue }) => {
     try {
-      const res = await axios.post('/api/users/register', formData);
+      const res = await api.post('/api/users/register', formData);
       
       dispatch(setAlert({
         msg: 'Registration successful! You are now logged in.',
@@ -35,16 +34,23 @@ export const register = createAsyncThunk(
       
       return res.data;
     } catch (err) {
-      const errors = err.response.data.errors;
+      console.error('Registration error:', err);
+      
+      const errors = err.response?.data?.errors;
       
       if (errors) {
         errors.forEach(error => dispatch(setAlert({
           msg: error.msg,
           type: 'error'
         })));
+      } else {
+        dispatch(setAlert({
+          msg: err.message || 'Network error - cannot reach server',
+          type: 'error'
+        }));
       }
       
-      return rejectWithValue(err.response.data.msg || 'Registration failed');
+      return rejectWithValue(err.response?.data?.msg || 'Registration failed');
     }
   }
 );
@@ -54,7 +60,7 @@ export const login = createAsyncThunk(
   'auth/login',
   async (formData, { dispatch, rejectWithValue }) => {
     try {
-      const res = await axios.post('/api/users/login', formData);
+      const res = await api.post('/api/users/login', formData);
       
       dispatch(setAlert({
         msg: 'Login successful!',
@@ -63,12 +69,14 @@ export const login = createAsyncThunk(
       
       return res.data;
     } catch (err) {
+      console.error('Login error:', err);
+      
       dispatch(setAlert({
-        msg: err.response.data.msg || 'Invalid credentials',
+        msg: err.response?.data?.msg || 'Invalid credentials',
         type: 'error'
       }));
       
-      return rejectWithValue(err.response.data.msg || 'Login failed');
+      return rejectWithValue(err.response?.data?.msg || 'Login failed');
     }
   }
 );
@@ -78,7 +86,7 @@ export const updateProfile = createAsyncThunk(
   'auth/updateProfile',
   async (formData, { dispatch, rejectWithValue }) => {
     try {
-      const res = await axios.put('/api/users/profile', formData);
+      const res = await api.put('/api/users/profile', formData);
       
       dispatch(setAlert({
         msg: 'Profile updated successfully!',
@@ -87,12 +95,14 @@ export const updateProfile = createAsyncThunk(
       
       return res.data;
     } catch (err) {
+      console.error('Update profile error:', err);
+      
       dispatch(setAlert({
-        msg: err.response.data.msg || 'Failed to update profile',
+        msg: err.response?.data?.msg || 'Failed to update profile',
         type: 'error'
       }));
       
-      return rejectWithValue(err.response.data.msg || 'Update failed');
+      return rejectWithValue(err.response?.data?.msg || 'Update failed');
     }
   }
 );

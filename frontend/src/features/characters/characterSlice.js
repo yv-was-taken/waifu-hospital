@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../../utils/api';
 import axios from 'axios';
 import { setAlert } from '../alerts/alertSlice';
 
@@ -7,10 +8,11 @@ export const getCharacters = createAsyncThunk(
   'character/getCharacters',
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get('/api/characters');
+      const res = await api.get('/api/characters');
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response.data.msg || 'Failed to fetch characters');
+      console.error('Get characters error:', err);
+      return rejectWithValue(err.response?.data?.msg || 'Failed to fetch characters');
     }
   }
 );
@@ -20,10 +22,11 @@ export const getUserCharacters = createAsyncThunk(
   'character/getUserCharacters',
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get('/api/characters/user');
+      const res = await api.get('/api/characters/user');
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response.data.msg || 'Failed to fetch your characters');
+      console.error('Get user characters error:', err);
+      return rejectWithValue(err.response?.data?.msg || 'Failed to fetch your characters');
     }
   }
 );
@@ -33,10 +36,11 @@ export const getPopularCharacters = createAsyncThunk(
   'character/getPopularCharacters',
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get('/api/characters/popular');
+      const res = await api.get('/api/characters/popular');
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response.data.msg || 'Failed to fetch popular characters');
+      console.error('Get popular characters error:', err);
+      return rejectWithValue(err.response?.data?.msg || 'Failed to fetch popular characters');
     }
   }
 );

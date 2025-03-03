@@ -126,9 +126,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     dispatch(getUserCharacters());
-    if (user && user.isCreator) {
-      dispatch(getCreatorMerchandise());
-    }
+    dispatch(getCreatorMerchandise());
     dispatch(getUserOrders());
   }, [dispatch, user]);
 
@@ -140,7 +138,7 @@ const Dashboard = () => {
     <DashboardContainer>
       <DashboardHeader>
         <DashboardTitle>Dashboard</DashboardTitle>
-        {user && user.isCreator && (
+        {user && (
           <CreateButton to="/create-character">Create Character</CreateButton>
         )}
       </DashboardHeader>
@@ -164,45 +162,39 @@ const Dashboard = () => {
         ) : (
           <EmptyMessage>
             You haven't created any characters yet. 
-            {user.isCreator ? (
-              <span> <Link to="/create-character">Create your first character</Link></span>
-            ) : (
-              <span> You need to be a creator to create characters.</span>
-            )}
+            <span> <Link to="/create-character">Create your first character!</Link></span>
           </EmptyMessage>
         )}
       </DashboardSection>
 
-      {user && user.isCreator && (
-        <DashboardSection>
-          <SectionTitle>My Merchandise</SectionTitle>
-          {creatorMerchandise && creatorMerchandise.length > 0 ? (
-            <Grid>
-              {creatorMerchandise.map(item => (
-                <CardLink to={`/merchandise/${item._id}`} key={item._id}>
-                  <Card>
-                    <CardImage src={item.imageUrl} alt={item.name} />
-                    <CardContent>
-                      <CardTitle>{item.name}</CardTitle>
-                      <CardText>${item.price.toFixed(2)}</CardText>
-                      <CardText>Sold: {item.sold}</CardText>
-                    </CardContent>
-                  </Card>
-                </CardLink>
-              ))}
-            </Grid>
-          ) : (
-            <EmptyMessage>
-              You haven't created any merchandise yet. 
-              {userCharacters && userCharacters.length > 0 ? (
-                <span> Go to one of your characters to create merchandise.</span>
-              ) : (
-                <span> Create a character first to start selling merchandise.</span>
-              )}
-            </EmptyMessage>
-          )}
-        </DashboardSection>
-      )}
+      <DashboardSection>
+        <SectionTitle>My Merchandise</SectionTitle>
+        {creatorMerchandise && creatorMerchandise.length > 0 ? (
+          <Grid>
+            {creatorMerchandise.map(item => (
+              <CardLink to={`/merchandise/${item._id}`} key={item._id}>
+                <Card>
+                  <CardImage src={item.imageUrl} alt={item.name} />
+                  <CardContent>
+                    <CardTitle>{item.name}</CardTitle>
+                    <CardText>${item.price.toFixed(2)}</CardText>
+                    <CardText>Sold: {item.sold}</CardText>
+                  </CardContent>
+                </Card>
+              </CardLink>
+            ))}
+          </Grid>
+        ) : (
+          <EmptyMessage>
+            You haven't created any merchandise yet. 
+            {userCharacters && userCharacters.length > 0 ? (
+              <span> Go to one of your characters to create merchandise.</span>
+            ) : (
+              <span> Create a character first to start selling merchandise.</span>
+            )}
+          </EmptyMessage>
+        )}
+      </DashboardSection>
 
       <DashboardSection>
         <SectionTitle>My Orders</SectionTitle>

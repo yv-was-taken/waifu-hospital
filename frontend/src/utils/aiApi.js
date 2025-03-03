@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Get the AI API URL from environment variable or use container name as fallback
-const AI_API_URL = process.env.REACT_APP_AI_SERVICE_URL || 'http://ai_service:5001';
+// Get the AI API URL from environment variable or use localhost for development
+const AI_API_URL = process.env.REACT_APP_AI_SERVICE_URL || 'http://localhost:5001';
 
 const aiApi = axios.create({
   baseURL: AI_API_URL,
@@ -29,5 +29,27 @@ aiApi.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
+
+/**
+ * Generate a character image based on description, personality, and style
+ * @param {object} params - Image generation params
+ * @param {string} params.description - Character description
+ * @param {string} params.personality - Character personality
+ * @param {string} params.style - Visual style (anime, neogothic, etc.)
+ * @returns {Promise<string>} URL of the generated image
+ */
+export const generateCharacterImage = async ({ description, personality, style }) => {
+  try {
+    const response = await aiApi.post('/api/generate-image', {
+      description,
+      personality,
+      style
+    });
+    return response.data.imageUrl;
+  } catch (error) {
+    console.error('Image generation failed:', error);
+    throw error;
+  }
+};
 
 export default aiApi;

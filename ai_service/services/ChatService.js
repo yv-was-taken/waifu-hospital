@@ -7,7 +7,7 @@ const { getCharacterById } = require('../models/Character');
 class ChatService {
   constructor() {
     this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
+      apiKey: process.env.OPENAI_CHAT_API_KEY
     });
   }
 

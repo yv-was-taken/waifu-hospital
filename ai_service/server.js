@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const ChatService = require('./services/ChatService');
+const ImageService = require('./services/ImageService');
 const logger = require('./utils/logger');
 
 // Initialize Express app
@@ -49,6 +50,43 @@ app.post('/api/chat', async (req, res) => {
     logger.info('Using fallback response', { characterId });
     
     res.json({ response: fallbackResponse });
+  }
+});
+
+// AI Image Generation endpoint
+app.post('/api/generate-image', async (req, res) => {
+  const { description, personality, style } = req.body;
+  
+  if (!description) {
+    logger.warn('API request missing description');
+    return res.status(400).json({ error: 'Description is required' });
+  }
+  
+  if (!style) {
+    logger.warn('API request missing style');
+    return res.status(400).json({ error: 'Style is required' });
+  }
+  
+  logger.debug('Received image generation request', { style, descLength: description.length });
+  
+  try {
+    // Generate image using image service
+    const imageUrl = await ImageService.generateImage({
+      description,
+      personality: personality || '',
+      style
+    });
+    
+    logger.info('Generated image', { style });
+    res.json({ imageUrl });
+  } catch (error) {
+    logger.error('Error in image generation endpoint', error);
+    
+    // Use fallback image if generation fails
+    const fallbackUrl = ImageService.getFallbackImage(style);
+    logger.info('Using fallback image', { style });
+    
+    res.json({ imageUrl: fallbackUrl });
   }
 });
 

@@ -33,10 +33,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
-  isCreator: {
-    type: Boolean,
-    default: false,
-  },
+  // isCreator field removed - all users can create characters
   characters: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Character',

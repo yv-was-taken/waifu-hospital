@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { createCharacter } from '../features/characters/characterSlice';
 import { setAlert } from '../features/alerts/alertSlice';
+import { generateCharacterImage } from '../utils/aiApi';
 import Spinner from '../components/layout/Spinner';
 import styled from 'styled-components';
 
@@ -164,9 +165,9 @@ const ButtonGroup = styled.div`
 `;
 
 const Button = styled.button`
-  background-color: ${props => props.secondary ? 'transparent' : 'var(--primary-color)'};
-  color: ${props => props.secondary ? 'var(--primary-color)' : 'white'};
-  border: ${props => props.secondary ? '1px solid var(--primary-color)' : 'none'};
+  background-color: ${props => props.secondary === 'true' ? 'transparent' : 'var(--primary-color)'};
+  color: ${props => props.secondary === 'true' ? 'var(--primary-color)' : 'white'};
+  border: ${props => props.secondary === 'true' ? '1px solid var(--primary-color)' : 'none'};
   padding: 0.8rem 1.5rem;
   border-radius: 4px;
   font-size: 1rem;
@@ -175,7 +176,7 @@ const Button = styled.button`
   transition: all 0.3s ease;
 
   &:hover {
-    background-color: ${props => props.secondary ? 'rgba(255, 107, 129, 0.1)' : 'var(--primary-dark)'};
+    background-color: ${props => props.secondary === 'true' ? 'rgba(255, 107, 129, 0.1)' : 'var(--primary-dark)'};
   }
 
   &:disabled {
@@ -265,26 +266,60 @@ const CharacterCreator = () => {
     }
   };
 
-  const handleGenerateImage = () => {
-    // In a real app, this would call the AI service to generate an image
-    // For this MVP, we'll use a placeholder image
+  const handleGenerateImage = async () => {
+    // Validate required fields for image generation
+    const requiredFields = { name, description, personality };
+    const missingFields = {};
+    let hasMissingFields = false;
     
-    if (!name) {
-      setErrors({ ...errors, name: 'Please provide a name first' });
+    Object.entries(requiredFields).forEach(([field, value]) => {
+      if (!value) {
+        missingFields[field] = `Please provide ${field} first`;
+        hasMissingFields = true;
+      }
+    });
+    
+    if (hasMissingFields) {
+      setErrors({ ...errors, ...missingFields });
+      dispatch(setAlert({
+        msg: 'Please fill in name, description, and personality before generating an image',
+        type: 'error'
+      }));
       return;
     }
 
     setGeneratingImage(true);
     
-    // Simulate API call with timeout
-    setTimeout(() => {
-      // Placeholder images based on style
+    try {
+      // Call the AI service to generate an image
+      const imageUrl = await generateCharacterImage({
+        description,
+        personality,
+        style
+      });
+
+      setFormData({
+        ...formData,
+        imageUrl
+      });
+      
+      dispatch(setAlert({
+        msg: 'Image generated successfully!',
+        type: 'success'
+      }));
+    } catch (error) {
+      console.error('Image generation error:', error);
+      dispatch(setAlert({
+        msg: 'Failed to generate image. Please try again.',
+        type: 'error'
+      }));
+      
+      // Use a placeholder image as fallback
       const placeholderImages = {
         anime: 'https://i.pinimg.com/736x/a1/1a/c5/a11ac53d6c37a8f3ed2cf9afbe9e5e0a.jpg',
         retro: 'https://i.pinimg.com/564x/0a/53/c2/0a53c2a681df11c0e2f70d80a9a6c289.jpg',
         gothic: 'https://i.pinimg.com/564x/8e/0d/57/8e0d5790a4644ab4c93c5f3b953fcc0c.jpg',
         neocyber: 'https://i.pinimg.com/564x/bd/57/a3/bd57a33e4ee9e67671b8c7ff6b75cda1.jpg',
-        realistic: 'https://i.pinimg.com/564x/11/97/3e/11973e4b0efb0c36af1a1af54c2357f6.jpg',
         fantasy: 'https://i.pinimg.com/564x/c3/0c/13/c30c1320b64f4a13e1046b2d7b5c4a7a.jpg',
         'sci-fi': 'https://i.pinimg.com/564x/a1/52/10/a15210aa82e5385bd190c0e2dd0a9281.jpg',
         chibi: 'https://i.pinimg.com/564x/b5/86/80/b58680b0d06c752b0d3f3e6e5ea47c04.jpg'
@@ -294,9 +329,9 @@ const CharacterCreator = () => {
         ...formData,
         imageUrl: placeholderImages[style] || placeholderImages.anime
       });
-      
+    } finally {
       setGeneratingImage(false);
-    }, 1500);
+    }
   };
 
   const validateForm = () => {
@@ -311,8 +346,8 @@ const CharacterCreator = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const onSubmit = e => {
-    e.preventDefault();
+  const saveCharacter = (e) => {
+    if (e) e.preventDefault();
     
     if (validateForm()) {
       const characterData = { 
@@ -323,6 +358,10 @@ const CharacterCreator = () => {
       dispatch(createCharacter(characterData))
         .unwrap()
         .then(character => {
+          dispatch(setAlert({
+            msg: 'Character created successfully!',
+            type: 'success'
+          }));
           navigate(`/characters/${character._id}`);
         })
         .catch(err => {
@@ -337,6 +376,11 @@ const CharacterCreator = () => {
         type: 'error'
       }));
     }
+  };
+  
+  const onSubmit = e => {
+    e.preventDefault();
+    saveCharacter();
   };
 
   if (loading) {
@@ -371,37 +415,10 @@ const CharacterCreator = () => {
             <option value="retro">Retro</option>
             <option value="gothic">Gothic</option>
             <option value="neocyber">Neocyber</option>
-            <option value="realistic">Realistic</option>
             <option value="fantasy">Fantasy</option>
             <option value="sci-fi">Sci-Fi</option>
             <option value="chibi">Chibi</option>
           </Select>
-        </FormGroup>
-
-        <FormGroup>
-          <Label>Character Image *</Label>
-          <Button 
-            type="button" 
-            onClick={handleGenerateImage}
-            disabled={generatingImage}
-          >
-            Generate Image
-          </Button>
-          <ImagePreview>
-            {imageUrl ? (
-              <PreviewImage src={imageUrl} alt={name} />
-            ) : generatingImage ? (
-              <ImageLoader>
-                <div className="spinner"></div>
-                <p>Generating image...</p>
-              </ImageLoader>
-            ) : (
-              <ImageLoader>
-                <p>No image generated yet</p>
-              </ImageLoader>
-            )}
-          </ImagePreview>
-          {errors.imageUrl && <ErrorMessage>{errors.imageUrl}</ErrorMessage>}
         </FormGroup>
 
         <FormGroup>
@@ -426,6 +443,37 @@ const CharacterCreator = () => {
             placeholder="Describe your character's personality traits..."
           ></TextArea>
           {errors.personality && <ErrorMessage>{errors.personality}</ErrorMessage>}
+        </FormGroup>
+
+        <FormGroup>
+          <Label>Character Image *</Label>
+          <div style={{ marginBottom: '1rem' }}>
+            <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>
+              Fill in name, description, and personality above before generating an image.
+            </p>
+            <Button 
+              type="button" 
+              onClick={handleGenerateImage}
+              disabled={generatingImage || !name || !description || !personality}
+            >
+              Generate Image Based on Description
+            </Button>
+          </div>
+          <ImagePreview>
+            {imageUrl ? (
+              <PreviewImage src={imageUrl} alt={name} />
+            ) : generatingImage ? (
+              <ImageLoader>
+                <div className="spinner"></div>
+                <p>Generating image based on your description...</p>
+              </ImageLoader>
+            ) : (
+              <ImageLoader>
+                <p>No image generated yet. Fill in character details first.</p>
+              </ImageLoader>
+            )}
+          </ImagePreview>
+          {errors.imageUrl && <ErrorMessage>{errors.imageUrl}</ErrorMessage>}
         </FormGroup>
 
         <FormGroup>
@@ -503,10 +551,15 @@ const CharacterCreator = () => {
         </FormGroup>
 
         <ButtonGroup>
-          <Button type="button" secondary onClick={() => navigate('/dashboard')}>
+          <Button type="button" secondary="true" onClick={() => navigate('/dashboard')}>
             Cancel
           </Button>
-          <Button type="submit">Create Character</Button>
+          <Button 
+            type="button" 
+            onClick={saveCharacter}
+          >
+            Create Character
+          </Button>
         </ButtonGroup>
       </Form>
     </CreatorContainer>

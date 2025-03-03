@@ -78,7 +78,9 @@ exports.getCharacters = async (req, res) => {
 // @access  Private
 exports.getUserCharacters = async (req, res) => {
   try {
+    // Include creator info to match other character endpoints
     const characters = await Character.find({ creator: req.user.id })
+      .populate('creator', ['username', 'profilePicture'])
       .sort({ createdAt: -1 });
     
     res.json(characters);
@@ -209,8 +211,8 @@ exports.deleteCharacter = async (req, res) => {
       return res.status(401).json({ msg: 'Not authorized to delete this character' });
     }
 
-    // Remove character from database
-    await character.remove();
+    // Remove character from database (modern approach)
+    await Character.deleteOne({ _id: req.params.id });
 
     // Remove character from user's characters array
     await User.findByIdAndUpdate(

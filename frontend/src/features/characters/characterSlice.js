@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../utils/api';
-import axios from 'axios';
 import { setAlert } from '../alerts/alertSlice';
 
 // Get all characters
@@ -50,10 +49,10 @@ export const getCharacterById = createAsyncThunk(
   'character/getCharacterById',
   async (id, { rejectWithValue }) => {
     try {
-      const res = await axios.get(`/api/characters/${id}`);
+      const res = await api.get(`/api/characters/${id}`);
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response.data.msg || 'Failed to fetch character');
+      return rejectWithValue(err.response?.data?.msg || 'Failed to fetch character');
     }
   }
 );
@@ -63,7 +62,8 @@ export const createCharacter = createAsyncThunk(
   'character/createCharacter',
   async (formData, { dispatch, rejectWithValue }) => {
     try {
-      const res = await axios.post('/api/characters', formData);
+      // Use the configured api instance instead of axios directly
+      const res = await api.post('/api/characters', formData);
       
       dispatch(setAlert({
         msg: 'Character created successfully!',
@@ -72,12 +72,13 @@ export const createCharacter = createAsyncThunk(
       
       return res.data;
     } catch (err) {
+      console.error('Character creation error:', err);
       dispatch(setAlert({
-        msg: err.response.data.msg || 'Failed to create character',
+        msg: err.response?.data?.msg || 'Failed to create character',
         type: 'error'
       }));
       
-      return rejectWithValue(err.response.data.msg || 'Character creation failed');
+      return rejectWithValue(err.response?.data?.msg || 'Character creation failed');
     }
   }
 );
@@ -87,7 +88,7 @@ export const updateCharacter = createAsyncThunk(
   'character/updateCharacter',
   async ({ id, formData }, { dispatch, rejectWithValue }) => {
     try {
-      const res = await axios.put(`/api/characters/${id}`, formData);
+      const res = await api.put(`/api/characters/${id}`, formData);
       
       dispatch(setAlert({
         msg: 'Character updated successfully!',
@@ -97,11 +98,11 @@ export const updateCharacter = createAsyncThunk(
       return res.data;
     } catch (err) {
       dispatch(setAlert({
-        msg: err.response.data.msg || 'Failed to update character',
+        msg: err.response?.data?.msg || 'Failed to update character',
         type: 'error'
       }));
       
-      return rejectWithValue(err.response.data.msg || 'Character update failed');
+      return rejectWithValue(err.response?.data?.msg || 'Character update failed');
     }
   }
 );
@@ -111,7 +112,7 @@ export const deleteCharacter = createAsyncThunk(
   'character/deleteCharacter',
   async (id, { dispatch, rejectWithValue }) => {
     try {
-      await axios.delete(`/api/characters/${id}`);
+      await api.delete(`/api/characters/${id}`);
       
       dispatch(setAlert({
         msg: 'Character deleted successfully!',
@@ -121,11 +122,11 @@ export const deleteCharacter = createAsyncThunk(
       return id;
     } catch (err) {
       dispatch(setAlert({
-        msg: err.response.data.msg || 'Failed to delete character',
+        msg: err.response?.data?.msg || 'Failed to delete character',
         type: 'error'
       }));
       
-      return rejectWithValue(err.response.data.msg || 'Character deletion failed');
+      return rejectWithValue(err.response?.data?.msg || 'Character deletion failed');
     }
   }
 );
@@ -135,10 +136,10 @@ export const likeCharacter = createAsyncThunk(
   'character/likeCharacter',
   async (id, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`/api/characters/${id}/like`);
+      const res = await api.post(`/api/characters/${id}/like`);
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response.data.msg || 'Failed to like character');
+      return rejectWithValue(err.response?.data?.msg || 'Failed to like character');
     }
   }
 );
@@ -148,10 +149,10 @@ export const unlikeCharacter = createAsyncThunk(
   'character/unlikeCharacter',
   async (id, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`/api/characters/${id}/unlike`);
+      const res = await api.post(`/api/characters/${id}/unlike`);
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response.data.msg || 'Failed to unlike character');
+      return rejectWithValue(err.response?.data?.msg || 'Failed to unlike character');
     }
   }
 );

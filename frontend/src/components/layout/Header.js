@@ -86,9 +86,7 @@ const Header = () => {
   const authLinks = (
     <>
       <NavLink to="/dashboard">Dashboard</NavLink>
-      {user && user.isCreator && (
-        <NavLink to="/create-character">Create Character</NavLink>
-      )}
+      <NavLink to="/create-character">Create Character</NavLink>
       <NavLink to="/merchandise">Store</NavLink>
       <NavLink to="/cart">
         Cart

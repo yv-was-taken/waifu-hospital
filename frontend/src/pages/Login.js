@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { login } from '../features/auth/authSlice';
+import { login, loadUser } from '../features/auth/authSlice';
 import { setAlert } from '../features/alerts/alertSlice';
 import Spinner from '../components/layout/Spinner';
 import styled from 'styled-components';
@@ -98,7 +98,7 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const onSubmit = e => {
+  const onSubmit = async e => {
     e.preventDefault();
     if (email === '' || password === '') {
       dispatch(setAlert({
@@ -106,7 +106,13 @@ const Login = () => {
         type: 'error'
       }));
     } else {
-      dispatch(login({ email, password }));
+      try {
+        // Login and then load user data to ensure it's up to date
+        await dispatch(login({ email, password })).unwrap();
+        dispatch(loadUser());
+      } catch (error) {
+        console.error('Login failed:', error);
+      }
     }
   };
 

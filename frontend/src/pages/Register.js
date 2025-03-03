@@ -91,11 +91,10 @@ const Register = () => {
     username: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    isCreator: false
+    confirmPassword: ''
   });
 
-  const { username, email, password, confirmPassword, isCreator } = formData;
+  const { username, email, password, confirmPassword } = formData;
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isAuthenticated, loading } = useSelector(state => state.auth);
@@ -122,7 +121,7 @@ const Register = () => {
         type: 'error'
       }));
     } else {
-      dispatch(register({ username, email, password, isCreator }));
+      dispatch(register({ username, email, password }));
     }
   };
 
@@ -180,20 +179,7 @@ const Register = () => {
             minLength="6"
           />
         </FormGroup>
-        <FormGroup>
-          <Checkbox>
-            <CheckboxInput
-              type="checkbox"
-              name="isCreator"
-              id="isCreator"
-              checked={isCreator}
-              onChange={onChange}
-            />
-            <Label htmlFor="isCreator" style={{ margin: 0 }}>
-              Register as a Content Creator
-            </Label>
-          </Checkbox>
-        </FormGroup>
+        {/* Creator checkbox removed - all users can create characters */}
         <Button type="submit">Register</Button>
       </Form>
       <LoginLink>

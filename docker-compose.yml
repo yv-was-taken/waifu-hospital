@@ -39,12 +39,16 @@ services:
     container_name: waifuhospital-ai-service
     ports:
       - "5001:5001"
+    dns:
+      - 8.8.8.8  # Google's primary DNS
+      - 8.8.4.4  # Google's secondary DNS
     volumes:
       - ./ai_service:/app
       - /app/node_modules
     environment:
       - PORT=5001
-      - OPENAI_API_KEY=your_openai_api_key_here
+      - OPENAI_CHAT_API_KEY=your_openai_api_key_here
+      - OPENAI_IMAGE_API_KEY=your_openai_api_key_here
     restart: unless-stopped
     networks:
       - app_network

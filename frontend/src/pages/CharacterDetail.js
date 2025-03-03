@@ -108,9 +108,9 @@ const ActionButtons = styled.div`
 `;
 
 const Button = styled.button`
-  background-color: ${props => props.secondary ? 'transparent' : 'var(--primary-color)'};
-  color: ${props => props.secondary ? 'var(--primary-color)' : 'white'};
-  border: ${props => props.secondary ? '1px solid var(--primary-color)' : 'none'};
+  background-color: ${props => props.secondary === 'true' ? 'transparent' : 'var(--primary-color)'};
+  color: ${props => props.secondary === 'true' ? 'var(--primary-color)' : 'white'};
+  border: ${props => props.secondary === 'true' ? '1px solid var(--primary-color)' : 'none'};
   padding: 0.8rem 1.5rem;
   border-radius: 4px;
   font-size: 1rem;
@@ -122,7 +122,7 @@ const Button = styled.button`
   justify-content: center;
 
   &:hover {
-    background-color: ${props => props.secondary ? 'rgba(255, 107, 129, 0.1)' : 'var(--primary-dark)'};
+    background-color: ${props => props.secondary === 'true' ? 'rgba(255, 107, 129, 0.1)' : 'var(--primary-dark)'};
   }
 
   &:disabled {
@@ -132,9 +132,9 @@ const Button = styled.button`
 `;
 
 const LinkButton = styled(Link)`
-  background-color: ${props => props.secondary ? 'transparent' : 'var(--primary-color)'};
-  color: ${props => props.secondary ? 'var(--primary-color)' : 'white'};
-  border: ${props => props.secondary ? '1px solid var(--primary-color)' : 'none'};
+  background-color: ${props => props.secondary === 'true' ? 'transparent' : 'var(--primary-color)'};
+  color: ${props => props.secondary === 'true' ? 'var(--primary-color)' : 'white'};
+  border: ${props => props.secondary === 'true' ? '1px solid var(--primary-color)' : 'none'};
   padding: 0.8rem 1.5rem;
   border-radius: 4px;
   font-size: 1rem;
@@ -147,17 +147,17 @@ const LinkButton = styled(Link)`
   justify-content: center;
 
   &:hover {
-    background-color: ${props => props.secondary ? 'rgba(255, 107, 129, 0.1)' : 'var(--primary-dark)'};
+    background-color: ${props => props.secondary === 'true' ? 'rgba(255, 107, 129, 0.1)' : 'var(--primary-dark)'};
   }
 `;
 
 const DangerButton = styled(Button)`
-  background-color: ${props => props.secondary ? 'transparent' : 'var(--error-color)'};
+  background-color: ${props => props.secondary === 'true' ? 'transparent' : 'var(--error-color)'};
   border-color: var(--error-color);
-  color: ${props => props.secondary ? 'var(--error-color)' : 'white'};
+  color: ${props => props.secondary === 'true' ? 'var(--error-color)' : 'white'};
 
   &:hover {
-    background-color: ${props => props.secondary ? 'rgba(214, 48, 49, 0.1)' : '#c0392b'};
+    background-color: ${props => props.secondary === 'true' ? 'rgba(214, 48, 49, 0.1)' : '#c0392b'};
   }
 `;
 
@@ -385,15 +385,15 @@ const CharacterDetail = () => {
 
           <ActionButtons>
             {isAuthenticated && (
-              <Button onClick={handleLike} secondary={isLiked}>
+              <Button onClick={handleLike} secondary={isLiked ? 'true' : 'false'}>
                 {isLiked ? 'Unlike' : 'Like'}
               </Button>
             )}
             <LinkButton to={`/characters/${character._id}/chat`}>Chat with {character.name}</LinkButton>
             {isCreator && (
               <>
-                <LinkButton to={`/characters/${character._id}/edit`} secondary>Edit</LinkButton>
-                <DangerButton secondary onClick={() => setShowDeleteModal(true)}>Delete</DangerButton>
+                <LinkButton to={`/characters/${character._id}/edit`} secondary="true">Edit</LinkButton>
+                <DangerButton secondary="true" onClick={() => setShowDeleteModal(true)}>Delete</DangerButton>
               </>
             )}
           </ActionButtons>
@@ -489,7 +489,7 @@ const CharacterDetail = () => {
             <ModalTitle>Delete Character</ModalTitle>
             <p>Are you sure you want to delete {character.name}? This action cannot be undone.</p>
             <ModalButtons>
-              <Button secondary onClick={() => setShowDeleteModal(false)}>Cancel</Button>
+              <Button secondary="true" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
               <DangerButton onClick={handleDelete}>Delete</DangerButton>
             </ModalButtons>
           </ModalContent>

@@ -37,7 +37,7 @@ exports.registerUser = async (req, res) => {
     }
 
     console.log('Creating new user...');
-    // Create new user
+    // Create new user (all users can create characters now)
     user = new User({
       username,
       email,
@@ -98,7 +98,7 @@ exports.registerUser = async (req, res) => {
             email: user.email,
             profilePicture: user.profilePicture,
             bio: user.bio,
-            isCreator: user.isCreator,
+            // isCreator field removed - all users can create characters
             createdAt: user.createdAt
           }
         });
@@ -149,7 +149,19 @@ exports.loginUser = async (req, res) => {
       { expiresIn: '7d' },
       (err, token) => {
         if (err) throw err;
-        res.json({ token });
+        // Return user data with token, similar to register endpoint
+        res.json({
+          token,
+          user: {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            profilePicture: user.profilePicture,
+            bio: user.bio,
+            // isCreator field removed - all users can create characters
+            createdAt: user.createdAt
+          }
+        });
       }
     );
   } catch (err) {
@@ -214,12 +226,13 @@ exports.updateUserProfile = async (req, res) => {
   }
 };
 
-// @desc    Get all creators
+// @desc    Get all creators (now returns all users with characters)
 // @route   GET /api/users/creators
 // @access  Public
 exports.getCreators = async (req, res) => {
   try {
-    const creators = await User.find({ isCreator: true })
+    // Get users who have created at least one character
+    const creators = await User.find({ characters: { $exists: true, $not: { $size: 0 } } })
       .select('-password')
       .populate('characters');
     

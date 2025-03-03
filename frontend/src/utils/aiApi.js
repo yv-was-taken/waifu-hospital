@@ -52,4 +52,23 @@ export const generateCharacterImage = async ({ description, personality, style }
   }
 };
 
+/**
+ * Send a chat message to a character and get a response
+ * @param {string} characterId - ID of the character (MongoDB ObjectId)
+ * @param {string} message - User's message to the character
+ * @returns {Promise<string>} Character's response
+ */
+export const sendChatMessage = async (characterId, message) => {
+  try {
+    const response = await aiApi.post('/api/chat', {
+      characterId,
+      message
+    });
+    return response.data.response;
+  } catch (error) {
+    console.error('Chat message failed:', error);
+    throw error;
+  }
+};
+
 export default aiApi;

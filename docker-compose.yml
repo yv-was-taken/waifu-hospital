@@ -47,8 +47,6 @@ services:
       - /app/node_modules
     environment:
       - PORT=5001
-      - OPENAI_CHAT_API_KEY=your_openai_api_key_here
-      - OPENAI_IMAGE_API_KEY=your_openai_api_key_here
     restart: unless-stopped
     networks:
       - app_network

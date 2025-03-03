@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCharacterById } from '../features/characters/characterSlice';
 import api from '../utils/api';
-import aiApi from '../utils/aiApi';
+import aiApi, { sendChatMessage } from '../utils/aiApi';
 import Spinner from '../components/layout/Spinner';
 import styled from 'styled-components';
 
@@ -269,18 +269,15 @@ const CharacterChat = () => {
     setSending(true);
     
     try {
-      // Call the AI service API using our aiApi instance
-      const response = await aiApi.post('/api/chat', {
-        message: message,
-        characterId: id
-      });
+      // Call the AI service using our sendChatMessage utility function
+      const aiResponse = await sendChatMessage(id, message);
       
-      if (response.data && response.data.response) {
+      if (aiResponse) {
         setChat(prev => ({
           ...prev,
           messages: [
             ...prev.messages,
-            { sender: 'character', content: response.data.response }
+            { sender: 'character', content: aiResponse }
           ]
         }));
       } else {

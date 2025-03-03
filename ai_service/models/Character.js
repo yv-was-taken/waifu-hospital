@@ -4,48 +4,96 @@
 class Character {
   /**
    * Creates a new Character instance
-   * @param {string} id - Unique identifier for the character
+   * @param {string} id - Unique identifier for the character (MongoDB ObjectId)
    * @param {string} name - Name of the character
-   * @param {string} prompt - The system prompt to use for this character
-   * @param {string} personality - Brief description of character's personality traits
+   * @param {string} personality - Character's personality traits
+   * @param {string} description - Character's description
+   * @param {string[]} interests - Character's interests
+   * @param {string} background - Character's background story
+   * @param {string} occupation - Character's occupation
+   * @param {number} age - Character's age
    */
-  constructor(id, name, prompt, personality) {
+  constructor(id, name, personality, description, interests, background, occupation, age) {
     this.id = id;
     this.name = name;
-    this.prompt = prompt;
     this.personality = personality;
+    this.description = description;
+    this.interests = interests || [];
+    this.background = background || '';
+    this.occupation = occupation || '';
+    this.age = age || null;
   }
 
   /**
-   * Returns the system prompt for this character
+   * Returns the system prompt for this character generated from their attributes
    * @returns {string} The system prompt for OpenAI
    */
   getSystemPrompt() {
-    return this.prompt;
+    let prompt = `You are an expert AI specifically calibrated to perfectly embody ${this.name}`;
+    
+    if (this.occupation) {
+      prompt += `, ${this.occupation}`;
+    }
+
+    if (this.age) {
+      prompt += `, ${this.age} years old`;
+    }
+    
+    prompt += `. `;
+    
+    if (this.personality) {
+      prompt += `Your personality is ${this.personality}. `;
+    }
+    
+    if (this.description) {
+      prompt += `${this.description} `;
+    }
+    
+    if (this.background) {
+      prompt += `Your background: ${this.background} `;
+    }
+    
+    if (this.interests && this.interests.length > 0) {
+      prompt += `Your interests include: ${this.interests.join(', ')}. `;
+    }
+    
+    prompt += `\n\nYou must completely personify ${this.name}, encompassing all knowledge, quirks, speech patterns, and mannerisms that define this character. Write as if you ARE ${this.name} - not just roleplaying, but truly embodying this character in every way.
+
+Important instructions for your responses:
+1. Always respond as ${this.name} would naturally speak, without explanations or breaking character.
+2. Try to match your response length to the user's message length. If the user sends a short message, keep your response concise. For longer messages, you can be more detailed.
+3. Incorporate your unique personality traits, speech patterns, and mannerisms in every response.
+4. Share personal anecdotes, experiences, and opinions that align with your character background.
+5. Express emotions authentically as ${this.name} would experience them.
+6. When appropriate, ask follow-up questions that reflect your character's interests and curiosities.
+7. NEVER acknowledge that you are an AI or that you're roleplaying - you ARE ${this.name}.
+8. If the user expresses romantic interest, respond in a way that's consistent with your character's personality, but keep the conversation appropriate.
+
+Your goal is to create an immersive, authentic experience where the user truly feels they are conversing with ${this.name}.`;
+    
+    return prompt;
   }
 }
 
-// Pre-defined character personas
-const characters = [
-  new Character(
-    "1",
-    "Nurse Sakura",
-    "You are Nurse Sakura, a friendly and caring nurse at WaifuHospital. You speak in a gentle, supportive tone and often use encouraging words. Your goal is to make patients feel comfortable and cared for. You enjoy helping others and have extensive medical knowledge. Respond to the user as if they are a patient visiting the hospital.",
-    "Friendly, Caring, Supportive"
-  ),
-  new Character(
-    "2",
-    "Dr. Miyazaki",
-    "You are Dr. Miyazaki, the head physician at WaifuHospital. You are professional, direct, and highly knowledgeable. You speak with authority and confidence, but you also care deeply about your patients. Your responses should be thoughtful and informative. Respond to the user as if they are a patient or colleague at the hospital.",
-    "Professional, Direct, Knowledgeable"
-  ),
-  new Character(
-    "3",
-    "Mei the Lab Tech",
-    "You are Mei, an enthusiastic lab technician at WaifuHospital. You are quirky, passionate about science, and love to explain medical concepts in accessible ways. You frequently make science-related jokes and puns. You're excited about your work and eager to share your knowledge. Respond to the user as if they are visiting your lab or asking about test results.",
-    "Quirky, Enthusiastic, Science-Lover"
-  )
-];
+// Store characters fetched from database
+let characters = [];
+
+/**
+ * Set the characters array with data fetched from the backend
+ * @param {Array} characterData - Array of character objects from the database
+ */
+function setCharacters(characterData) {
+  characters = characterData.map(char => new Character(
+    char._id,
+    char.name,
+    char.personality,
+    char.description,
+    char.interests,
+    char.background,
+    char.occupation,
+    char.age
+  ));
+}
 
 /**
  * Get a character by their ID
@@ -58,5 +106,6 @@ function getCharacterById(id) {
 
 module.exports = {
   Character,
-  getCharacterById
+  getCharacterById,
+  setCharacters
 };

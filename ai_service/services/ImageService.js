@@ -74,7 +74,7 @@ class ImageService {
     prompt += styleGuides[style] || styleGuides.anime;
     
     // Quality and technical specifications
-    prompt += ' Render in extremely high detail with professional illustration quality. Use strong depth of field, perfect composition, and masterful color theory. Ensure 8k resolution quality, professional lighting, and ray-traced shadows. No text, watermarks, or signatures. Full character visibility with clean background elements.';
+    prompt += ' Render in extremely high detail with professional illustration quality. Use strong depth of field, perfect composition, and masterful color theory. Ensure 8k resolution quality, professional lighting, and ray-traced shadows. IMPORTANT: Generate ONLY ONE girl character - no additional characters, no multiple faces, and no split personalities in the same image. No text, watermarks, or signatures. Full character visibility with clean background elements.';
     
     return prompt;
   }

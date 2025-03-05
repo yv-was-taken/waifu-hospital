@@ -34,11 +34,9 @@ exports.createMerchandise = async (req, res) => {
 
     // Verify that the user is the creator of the character
     if (characterObj.creator.toString() !== req.user.id) {
-      return res
-        .status(401)
-        .json({
-          msg: "Not authorized to create merchandise for this character",
-        });
+      return res.status(401).json({
+        msg: "Not authorized to create merchandise for this character",
+      });
     }
 
     // Create new merchandise item

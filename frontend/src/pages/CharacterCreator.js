@@ -202,6 +202,7 @@ const CharacterCreator = () => {
     interests: [],
     occupation: '',
     age: '',
+    greedFactor: 2,
     public: true
   });
 
@@ -223,6 +224,7 @@ const CharacterCreator = () => {
     interests, 
     occupation, 
     age, 
+    greedFactor,
     public: isPublic 
   } = formData;
 
@@ -510,6 +512,26 @@ const CharacterCreator = () => {
             min="0"
             placeholder="Character's age (optional)"
           />
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="greedFactor">Greed Factor (0-5)</Label>
+          <Select
+            name="greedFactor"
+            id="greedFactor"
+            value={greedFactor}
+            onChange={onChange}
+          >
+            <option value="0">0 - Not greedy at all (never mentions merch or donations)</option>
+            <option value="1">1 - Slightly greedy (very rarely mentions merch or donations)</option>
+            <option value="2">2 - Somewhat greedy (occasionally mentions merch or donations)</option>
+            <option value="3">3 - Moderately greedy (regularly mentions merch or donations)</option>
+            <option value="4">4 - Quite greedy (frequently mentions merch or donations)</option>
+            <option value="5">5 - Extremely greedy (constantly mentions merch or donations)</option>
+          </Select>
+          <div style={{ fontSize: '0.9rem', marginTop: '0.5rem', color: 'var(--light-text)' }}>
+            This determines how often your character will promote merchandise or ask for donations during chat conversations.
+          </div>
         </FormGroup>
 
         <FormGroup>

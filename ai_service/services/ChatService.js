@@ -44,7 +44,8 @@ class ChatService {
             charData.interests,
             charData.background,
             charData.occupation,
-            charData.age
+            charData.age,
+            charData.greedFactor
           );
         }
       } catch (error) {

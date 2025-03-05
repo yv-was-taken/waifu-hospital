@@ -43,6 +43,12 @@ const CharacterSchema = new mongoose.Schema({
     type: Number,
     min: 0,
   },
+  greedFactor: {
+    type: Number,
+    min: 0,
+    max: 5,
+    default: 0,
+  },
   public: {
     type: Boolean,
     default: true,

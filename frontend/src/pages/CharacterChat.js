@@ -25,14 +25,39 @@ const ChatHeader = styled.div`
   padding: 1rem;
   background-color: var(--primary-color);
   color: white;
+  position: relative;
+  overflow: hidden;
+  height: 80px;
+`;
+
+const HeaderBackground = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url(${props => props.image});
+  background-size: cover;
+  background-position: center;
+  filter: blur(8px);
+  opacity: 0.3;
+  transform: scale(1.1);
 `;
 
 const CharacterImage = styled.img`
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   margin-right: 1rem;
   object-fit: cover;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
 `;
 
 const CharacterName = styled.h3`
@@ -80,8 +105,8 @@ const MessageBubble = styled.div`
 `;
 
 const AvatarContainer = styled.div`
-  width: 32px;
-  height: 32px;
+  width: ${props => props.isUser ? '32px' : '40px'};
+  height: ${props => props.isUser ? '32px' : '40px'};
   margin: ${props => props.isUser ? '0 0 0 8px' : '0 8px 0 0'};
 `;
 
@@ -90,6 +115,8 @@ const Avatar = styled.img`
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 `;
 
 const UserAvatar = styled.div`
@@ -325,6 +352,7 @@ const CharacterChat = () => {
   return (
     <ChatContainer>
       <ChatHeader>
+        <HeaderBackground image={character.imageUrl} />
         <CharacterImage src={character.imageUrl} alt={character.name} />
         <CharacterName>{character.name}</CharacterName>
         <BackLink to={`/characters/${id}`}>Back to Profile</BackLink>

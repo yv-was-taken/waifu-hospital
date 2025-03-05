@@ -94,6 +94,11 @@ const MessageContainer = styled.div`
   align-self: ${(props) => (props.isUser ? "flex-end" : "flex-start")};
 `;
 
+const MessageContent = styled.div`
+  flex: 1;
+  min-width: 0; /* Prevents flex items from overflowing */
+`;
+
 const MessageBubble = styled.div`
   padding: 0.8rem 1rem;
   border-radius: 18px;
@@ -103,9 +108,11 @@ const MessageBubble = styled.div`
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   position: relative;
   line-height: 1.4;
+  word-wrap: break-word;
 `;
 
 const AvatarContainer = styled.div`
+  flex: 0 0 auto; /* Prevents the avatar from shrinking */
   width: ${(props) => (props.isUser ? "32px" : "40px")};
   height: ${(props) => (props.isUser ? "32px" : "40px")};
   margin: ${(props) => (props.isUser ? "0 0 0 8px" : "0 8px 0 0")};
@@ -384,9 +391,11 @@ const CharacterChat = () => {
                   <Avatar src={character.imageUrl} alt={character.name} />
                 )}
               </AvatarContainer>
-              <MessageBubble isUser={msg.sender === "user"}>
-                {msg.content}
-              </MessageBubble>
+              <MessageContent>
+                <MessageBubble isUser={msg.sender === "user"}>
+                  {msg.content}
+                </MessageBubble>
+              </MessageContent>
             </MessageContainer>
           ))
         )}
@@ -396,11 +405,13 @@ const CharacterChat = () => {
             <AvatarContainer>
               <Avatar src={character.imageUrl} alt={character.name} />
             </AvatarContainer>
-            <ThinkingIndicator>
-              <span></span>
-              <span></span>
-              <span></span>
-            </ThinkingIndicator>
+            <MessageContent>
+              <ThinkingIndicator>
+                <span></span>
+                <span></span>
+                <span></span>
+              </ThinkingIndicator>
+            </MessageContent>
           </MessageContainer>
         )}
       </ChatBody>

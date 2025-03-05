@@ -1,9 +1,9 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const MessageSchema = new mongoose.Schema({
   sender: {
     type: String,
-    enum: ['user', 'character'],
+    enum: ["user", "character"],
     required: true,
   },
   content: {
@@ -19,12 +19,12 @@ const MessageSchema = new mongoose.Schema({
 const ChatSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: true,
   },
   character: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Character',
+    ref: "Character",
     required: true,
   },
   messages: [MessageSchema],
@@ -38,4 +38,4 @@ const ChatSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Chat', ChatSchema);
+module.exports = mongoose.model("Chat", ChatSchema);

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const MerchandiseSchema = new mongoose.Schema({
   name: {
@@ -21,26 +21,39 @@ const MerchandiseSchema = new mongoose.Schema({
   },
   character: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Character',
+    ref: "Character",
     required: true,
   },
   creator: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: true,
   },
   category: {
     type: String,
-    enum: ['t-shirt', 'mug', 'poster', 'sticker', 'hoodie', 'hat', 'phonecase', 'other'],
+    enum: [
+      "t-shirt",
+      "mug",
+      "poster",
+      "sticker",
+      "hoodie",
+      "hat",
+      "phonecase",
+      "other",
+    ],
     required: true,
   },
-  availableSizes: [{
-    type: String,
-    enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'N/A'],
-  }],
-  availableColors: [{
-    type: String,
-  }],
+  availableSizes: [
+    {
+      type: String,
+      enum: ["XS", "S", "M", "L", "XL", "XXL", "N/A"],
+    },
+  ],
+  availableColors: [
+    {
+      type: String,
+    },
+  ],
   stock: {
     type: Number,
     default: 100,
@@ -64,4 +77,4 @@ const MerchandiseSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Merchandise', MerchandiseSchema);
+module.exports = mongoose.model("Merchandise", MerchandiseSchema);

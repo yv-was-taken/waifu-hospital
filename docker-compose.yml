@@ -13,7 +13,7 @@ services:
       - "host.docker.internal:host-gateway"
     networks:
       - app_network
-      
+
   backend:
     build: ./backend
     container_name: waifuhospital-backend
@@ -33,15 +33,15 @@ services:
       - "host.docker.internal:host-gateway"
     networks:
       - app_network
-      
+
   ai_service:
     build: ./ai_service
     container_name: waifuhospital-ai-service
     ports:
       - "5001:5001"
     dns:
-      - 8.8.8.8  # Google's primary DNS
-      - 8.8.4.4  # Google's secondary DNS
+      - 8.8.8.8 # Google's primary DNS
+      - 8.8.4.4 # Google's secondary DNS
     volumes:
       - ./ai_service:/app
       - /app/node_modules

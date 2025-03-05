@@ -1,8 +1,8 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../../features/auth/authSlice';
-import styled from 'styled-components';
+import React from "react";
+import { Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "../../features/auth/authSlice";
+import styled from "styled-components";
 
 const HeaderContainer = styled.header`
   background-color: var(--primary-color);
@@ -69,8 +69,8 @@ const CartCount = styled.span`
 
 const Header = () => {
   const dispatch = useDispatch();
-  const { isAuthenticated, user } = useSelector(state => state.auth);
-  const { cartItems } = useSelector(state => state.cart);
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { cartItems } = useSelector((state) => state.cart);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -90,9 +90,7 @@ const Header = () => {
       <NavLink to="/merchandise">Store</NavLink>
       <NavLink to="/cart">
         Cart
-        {cartItems.length > 0 && (
-          <CartCount>{cartItems.length}</CartCount>
-        )}
+        {cartItems.length > 0 && <CartCount>{cartItems.length}</CartCount>}
       </NavLink>
       <Button onClick={handleLogout}>Logout</Button>
     </>

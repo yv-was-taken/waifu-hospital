@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { createCharacter } from '../features/characters/characterSlice';
-import { setAlert } from '../features/alerts/alertSlice';
-import { generateCharacterImage } from '../utils/aiApi';
-import Spinner from '../components/layout/Spinner';
-import styled from 'styled-components';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { createCharacter } from "../features/characters/characterSlice";
+import { setAlert } from "../features/alerts/alertSlice";
+import { generateCharacterImage } from "../utils/aiApi";
+import Spinner from "../components/layout/Spinner";
+import styled from "styled-components";
 
 const CreatorContainer = styled.div`
   max-width: 800px;
@@ -165,9 +165,12 @@ const ButtonGroup = styled.div`
 `;
 
 const Button = styled.button`
-  background-color: ${props => props.secondary === 'true' ? 'transparent' : 'var(--primary-color)'};
-  color: ${props => props.secondary === 'true' ? 'var(--primary-color)' : 'white'};
-  border: ${props => props.secondary === 'true' ? '1px solid var(--primary-color)' : 'none'};
+  background-color: ${(props) =>
+    props.secondary === "true" ? "transparent" : "var(--primary-color)"};
+  color: ${(props) =>
+    props.secondary === "true" ? "var(--primary-color)" : "white"};
+  border: ${(props) =>
+    props.secondary === "true" ? "1px solid var(--primary-color)" : "none"};
   padding: 0.8rem 1.5rem;
   border-radius: 4px;
   font-size: 1rem;
@@ -176,7 +179,10 @@ const Button = styled.button`
   transition: all 0.3s ease;
 
   &:hover {
-    background-color: ${props => props.secondary === 'true' ? 'rgba(255, 107, 129, 0.1)' : 'var(--primary-dark)'};
+    background-color: ${(props) =>
+      props.secondary === "true"
+        ? "rgba(255, 107, 129, 0.1)"
+        : "var(--primary-dark)"};
   }
 
   &:disabled {
@@ -193,46 +199,46 @@ const ErrorMessage = styled.div`
 
 const CharacterCreator = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    imageUrl: '',
-    style: 'anime',
-    description: '',
-    personality: '',
-    background: '',
+    name: "",
+    imageUrl: "",
+    style: "anime",
+    description: "",
+    personality: "",
+    background: "",
     interests: [],
-    occupation: '',
-    age: '',
+    occupation: "",
+    age: "",
     greedFactor: 2,
-    public: true
+    public: true,
   });
 
-  const [currentInterest, setCurrentInterest] = useState('');
+  const [currentInterest, setCurrentInterest] = useState("");
   const [generatingImage, setGeneratingImage] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const { loading } = useSelector(state => state.character);
+  const { loading } = useSelector((state) => state.character);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { 
-    name, 
-    imageUrl, 
-    style, 
-    description, 
-    personality, 
-    background, 
-    interests, 
-    occupation, 
-    age, 
+  const {
+    name,
+    imageUrl,
+    style,
+    description,
+    personality,
+    background,
+    interests,
+    occupation,
+    age,
     greedFactor,
-    public: isPublic 
+    public: isPublic,
   } = formData;
 
-  const onChange = e => {
+  const onChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     // For checkbox inputs, use the checked property
-    if (type === 'checkbox') {
+    if (type === "checkbox") {
       setFormData({ ...formData, [name]: checked });
     } else {
       setFormData({ ...formData, [name]: value });
@@ -245,24 +251,27 @@ const CharacterCreator = () => {
   };
 
   const addInterest = () => {
-    if (currentInterest.trim() !== '' && !interests.includes(currentInterest.trim())) {
+    if (
+      currentInterest.trim() !== "" &&
+      !interests.includes(currentInterest.trim())
+    ) {
       setFormData({
         ...formData,
-        interests: [...interests, currentInterest.trim()]
+        interests: [...interests, currentInterest.trim()],
       });
-      setCurrentInterest('');
+      setCurrentInterest("");
     }
   };
 
   const removeInterest = (index) => {
     setFormData({
       ...formData,
-      interests: interests.filter((_, i) => i !== index)
+      interests: interests.filter((_, i) => i !== index),
     });
   };
 
   const handleInterestKeyDown = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       addInterest();
     }
@@ -273,63 +282,76 @@ const CharacterCreator = () => {
     const requiredFields = { name, description, personality };
     const missingFields = {};
     let hasMissingFields = false;
-    
+
     Object.entries(requiredFields).forEach(([field, value]) => {
       if (!value) {
         missingFields[field] = `Please provide ${field} first`;
         hasMissingFields = true;
       }
     });
-    
+
     if (hasMissingFields) {
       setErrors({ ...errors, ...missingFields });
-      dispatch(setAlert({
-        msg: 'Please fill in name, description, and personality before generating an image',
-        type: 'error'
-      }));
+      dispatch(
+        setAlert({
+          msg: "Please fill in name, description, and personality before generating an image",
+          type: "error",
+        }),
+      );
       return;
     }
 
     setGeneratingImage(true);
-    
+
     try {
       // Call the AI service to generate an image
       const imageUrl = await generateCharacterImage({
         description,
         personality,
-        style
+        style,
       });
 
       setFormData({
         ...formData,
-        imageUrl
+        imageUrl,
       });
-      
-      dispatch(setAlert({
-        msg: 'Image generated successfully!',
-        type: 'success'
-      }));
+
+      dispatch(
+        setAlert({
+          msg: "Image generated successfully!",
+          type: "success",
+        }),
+      );
     } catch (error) {
-      console.error('Image generation error:', error);
-      dispatch(setAlert({
-        msg: 'Failed to generate image. Please try again.',
-        type: 'error'
-      }));
-      
+      console.error("Image generation error:", error);
+      dispatch(
+        setAlert({
+          msg: "Failed to generate image. Please try again.",
+          type: "error",
+        }),
+      );
+
       // Use a placeholder image as fallback
       const placeholderImages = {
-        anime: 'https://i.pinimg.com/736x/a1/1a/c5/a11ac53d6c37a8f3ed2cf9afbe9e5e0a.jpg',
-        retro: 'https://i.pinimg.com/564x/0a/53/c2/0a53c2a681df11c0e2f70d80a9a6c289.jpg',
-        gothic: 'https://i.pinimg.com/564x/8e/0d/57/8e0d5790a4644ab4c93c5f3b953fcc0c.jpg',
-        neocyber: 'https://i.pinimg.com/564x/bd/57/a3/bd57a33e4ee9e67671b8c7ff6b75cda1.jpg',
-        fantasy: 'https://i.pinimg.com/564x/c3/0c/13/c30c1320b64f4a13e1046b2d7b5c4a7a.jpg',
-        'sci-fi': 'https://i.pinimg.com/564x/a1/52/10/a15210aa82e5385bd190c0e2dd0a9281.jpg',
-        chibi: 'https://i.pinimg.com/564x/b5/86/80/b58680b0d06c752b0d3f3e6e5ea47c04.jpg'
+        anime:
+          "https://i.pinimg.com/736x/a1/1a/c5/a11ac53d6c37a8f3ed2cf9afbe9e5e0a.jpg",
+        retro:
+          "https://i.pinimg.com/564x/0a/53/c2/0a53c2a681df11c0e2f70d80a9a6c289.jpg",
+        gothic:
+          "https://i.pinimg.com/564x/8e/0d/57/8e0d5790a4644ab4c93c5f3b953fcc0c.jpg",
+        neocyber:
+          "https://i.pinimg.com/564x/bd/57/a3/bd57a33e4ee9e67671b8c7ff6b75cda1.jpg",
+        fantasy:
+          "https://i.pinimg.com/564x/c3/0c/13/c30c1320b64f4a13e1046b2d7b5c4a7a.jpg",
+        "sci-fi":
+          "https://i.pinimg.com/564x/a1/52/10/a15210aa82e5385bd190c0e2dd0a9281.jpg",
+        chibi:
+          "https://i.pinimg.com/564x/b5/86/80/b58680b0d06c752b0d3f3e6e5ea47c04.jpg",
       };
 
       setFormData({
         ...formData,
-        imageUrl: placeholderImages[style] || placeholderImages.anime
+        imageUrl: placeholderImages[style] || placeholderImages.anime,
       });
     } finally {
       setGeneratingImage(false);
@@ -338,49 +360,55 @@ const CharacterCreator = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
-    if (!name) newErrors.name = 'Name is required';
-    if (!imageUrl) newErrors.imageUrl = 'Image is required';
-    if (!description) newErrors.description = 'Description is required';
-    if (!personality) newErrors.personality = 'Personality is required';
-    
+
+    if (!name) newErrors.name = "Name is required";
+    if (!imageUrl) newErrors.imageUrl = "Image is required";
+    if (!description) newErrors.description = "Description is required";
+    if (!personality) newErrors.personality = "Personality is required";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const saveCharacter = (e) => {
     if (e) e.preventDefault();
-    
+
     if (validateForm()) {
-      const characterData = { 
+      const characterData = {
         ...formData,
-        age: age !== '' ? Number(age) : undefined
+        age: age !== "" ? Number(age) : undefined,
       };
-      
+
       dispatch(createCharacter(characterData))
         .unwrap()
-        .then(character => {
-          dispatch(setAlert({
-            msg: 'Character created successfully!',
-            type: 'success'
-          }));
+        .then((character) => {
+          dispatch(
+            setAlert({
+              msg: "Character created successfully!",
+              type: "success",
+            }),
+          );
           navigate(`/characters/${character._id}`);
         })
-        .catch(err => {
-          dispatch(setAlert({
-            msg: err || 'Failed to create character',
-            type: 'error'
-          }));
+        .catch((err) => {
+          dispatch(
+            setAlert({
+              msg: err || "Failed to create character",
+              type: "error",
+            }),
+          );
         });
     } else {
-      dispatch(setAlert({
-        msg: 'Please fill in all required fields',
-        type: 'error'
-      }));
+      dispatch(
+        setAlert({
+          msg: "Please fill in all required fields",
+          type: "error",
+        }),
+      );
     }
   };
-  
-  const onSubmit = e => {
+
+  const onSubmit = (e) => {
     e.preventDefault();
     saveCharacter();
   };
@@ -407,12 +435,7 @@ const CharacterCreator = () => {
 
         <FormGroup>
           <Label htmlFor="style">Style *</Label>
-          <Select
-            name="style"
-            id="style"
-            value={style}
-            onChange={onChange}
-          >
+          <Select name="style" id="style" value={style} onChange={onChange}>
             <option value="anime">Anime</option>
             <option value="retro">Retro</option>
             <option value="gothic">Gothic</option>
@@ -432,7 +455,9 @@ const CharacterCreator = () => {
             onChange={onChange}
             placeholder="A brief description of your character..."
           ></TextArea>
-          {errors.description && <ErrorMessage>{errors.description}</ErrorMessage>}
+          {errors.description && (
+            <ErrorMessage>{errors.description}</ErrorMessage>
+          )}
         </FormGroup>
 
         <FormGroup>
@@ -444,19 +469,24 @@ const CharacterCreator = () => {
             onChange={onChange}
             placeholder="Describe your character's personality traits..."
           ></TextArea>
-          {errors.personality && <ErrorMessage>{errors.personality}</ErrorMessage>}
+          {errors.personality && (
+            <ErrorMessage>{errors.personality}</ErrorMessage>
+          )}
         </FormGroup>
 
         <FormGroup>
           <Label>Character Image *</Label>
-          <div style={{ marginBottom: '1rem' }}>
-            <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>
-              Fill in name, description, and personality above before generating an image.
+          <div style={{ marginBottom: "1rem" }}>
+            <p style={{ fontSize: "0.9rem", marginBottom: "0.5rem" }}>
+              Fill in name, description, and personality above before generating
+              an image.
             </p>
-            <Button 
-              type="button" 
+            <Button
+              type="button"
               onClick={handleGenerateImage}
-              disabled={generatingImage || !name || !description || !personality}
+              disabled={
+                generatingImage || !name || !description || !personality
+              }
             >
               Generate Image Based on Description
             </Button>
@@ -522,15 +552,34 @@ const CharacterCreator = () => {
             value={greedFactor}
             onChange={onChange}
           >
-            <option value="0">0 - Not greedy at all (never mentions merch or donations)</option>
-            <option value="1">1 - Slightly greedy (very rarely mentions merch or donations)</option>
-            <option value="2">2 - Somewhat greedy (occasionally mentions merch or donations)</option>
-            <option value="3">3 - Moderately greedy (regularly mentions merch or donations)</option>
-            <option value="4">4 - Quite greedy (frequently mentions merch or donations)</option>
-            <option value="5">5 - Extremely greedy (constantly mentions merch or donations)</option>
+            <option value="0">
+              0 - Not greedy at all (never mentions merch or donations)
+            </option>
+            <option value="1">
+              1 - Slightly greedy (very rarely mentions merch or donations)
+            </option>
+            <option value="2">
+              2 - Somewhat greedy (occasionally mentions merch or donations)
+            </option>
+            <option value="3">
+              3 - Moderately greedy (regularly mentions merch or donations)
+            </option>
+            <option value="4">
+              4 - Quite greedy (frequently mentions merch or donations)
+            </option>
+            <option value="5">
+              5 - Extremely greedy (constantly mentions merch or donations)
+            </option>
           </Select>
-          <div style={{ fontSize: '0.9rem', marginTop: '0.5rem', color: 'var(--light-text)' }}>
-            This determines how often your character will promote merchandise or ask for donations during chat conversations.
+          <div
+            style={{
+              fontSize: "0.9rem",
+              marginTop: "0.5rem",
+              color: "var(--light-text)",
+            }}
+          >
+            This determines how often your character will promote merchandise or
+            ask for donations during chat conversations.
           </div>
         </FormGroup>
 
@@ -543,9 +592,11 @@ const CharacterCreator = () => {
               onChange={(e) => setCurrentInterest(e.target.value)}
               onKeyDown={handleInterestKeyDown}
               placeholder="Add interests and press Enter"
-              style={{ borderRadius: '4px 0 0 4px' }}
+              style={{ borderRadius: "4px 0 0 4px" }}
             />
-            <TagButton type="button" onClick={addInterest}>Add</TagButton>
+            <TagButton type="button" onClick={addInterest}>
+              Add
+            </TagButton>
           </AddTagInput>
           <TagInput>
             {interests.map((interest, index) => (
@@ -573,13 +624,14 @@ const CharacterCreator = () => {
         </FormGroup>
 
         <ButtonGroup>
-          <Button type="button" secondary="true" onClick={() => navigate('/dashboard')}>
+          <Button
+            type="button"
+            secondary="true"
+            onClick={() => navigate("/dashboard")}
+          >
             Cancel
           </Button>
-          <Button 
-            type="button" 
-            onClick={saveCharacter}
-          >
+          <Button type="button" onClick={saveCharacter}>
             Create Character
           </Button>
         </ButtonGroup>

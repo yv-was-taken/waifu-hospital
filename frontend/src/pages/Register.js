@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { register } from '../features/auth/authSlice';
-import { setAlert } from '../features/alerts/alertSlice';
-import Spinner from '../components/layout/Spinner';
-import styled from 'styled-components';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { register } from "../features/auth/authSlice";
+import { setAlert } from "../features/alerts/alertSlice";
+import Spinner from "../components/layout/Spinner";
+import styled from "styled-components";
 
 const RegisterContainer = styled.div`
   max-width: 500px;
@@ -88,38 +88,41 @@ const LoginLink = styled.div`
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
 
   const { username, email, password, confirmPassword } = formData;
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isAuthenticated, loading } = useSelector(state => state.auth);
+  const { isAuthenticated, loading } = useSelector((state) => state.auth);
 
   useEffect(() => {
     // Redirect if logged in
     if (isAuthenticated) {
-      navigate('/dashboard');
+      navigate("/dashboard");
     }
   }, [isAuthenticated, navigate]);
 
-  const onChange = e => {
+  const onChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.type === 'checkbox' ? e.target.checked : e.target.value
+      [e.target.name]:
+        e.target.type === "checkbox" ? e.target.checked : e.target.value,
     });
   };
 
-  const onSubmit = e => {
+  const onSubmit = (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      dispatch(setAlert({
-        msg: 'Passwords do not match',
-        type: 'error'
-      }));
+      dispatch(
+        setAlert({
+          msg: "Passwords do not match",
+          type: "error",
+        }),
+      );
     } else {
       dispatch(register({ username, email, password }));
     }

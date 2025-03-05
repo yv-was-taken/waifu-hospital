@@ -1,129 +1,155 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import { setAlert } from '../alerts/alertSlice';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+import { setAlert } from "../alerts/alertSlice";
 
 // Get all merchandise
 export const getMerchandise = createAsyncThunk(
-  'merchandise/getMerchandise',
+  "merchandise/getMerchandise",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get('/api/merchandise');
+      const res = await axios.get("/api/merchandise");
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response.data.msg || 'Failed to fetch merchandise');
+      return rejectWithValue(
+        err.response.data.msg || "Failed to fetch merchandise",
+      );
     }
-  }
+  },
 );
 
 // Get creator merchandise
 export const getCreatorMerchandise = createAsyncThunk(
-  'merchandise/getCreatorMerchandise',
+  "merchandise/getCreatorMerchandise",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get('/api/merchandise/creator');
+      const res = await axios.get("/api/merchandise/creator");
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response.data.msg || 'Failed to fetch your merchandise');
+      return rejectWithValue(
+        err.response.data.msg || "Failed to fetch your merchandise",
+      );
     }
-  }
+  },
 );
 
 // Get character merchandise
 export const getCharacterMerchandise = createAsyncThunk(
-  'merchandise/getCharacterMerchandise',
+  "merchandise/getCharacterMerchandise",
   async (characterId, { rejectWithValue }) => {
     try {
       const res = await axios.get(`/api/merchandise/character/${characterId}`);
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response.data.msg || 'Failed to fetch character merchandise');
+      return rejectWithValue(
+        err.response.data.msg || "Failed to fetch character merchandise",
+      );
     }
-  }
+  },
 );
 
 // Get merchandise by ID
 export const getMerchandiseById = createAsyncThunk(
-  'merchandise/getMerchandiseById',
+  "merchandise/getMerchandiseById",
   async (id, { rejectWithValue }) => {
     try {
       const res = await axios.get(`/api/merchandise/${id}`);
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response.data.msg || 'Failed to fetch merchandise item');
+      return rejectWithValue(
+        err.response.data.msg || "Failed to fetch merchandise item",
+      );
     }
-  }
+  },
 );
 
 // Create new merchandise
 export const createMerchandise = createAsyncThunk(
-  'merchandise/createMerchandise',
+  "merchandise/createMerchandise",
   async (formData, { dispatch, rejectWithValue }) => {
     try {
-      const res = await axios.post('/api/merchandise', formData);
-      
-      dispatch(setAlert({
-        msg: 'Merchandise created successfully!',
-        type: 'success'
-      }));
-      
+      const res = await axios.post("/api/merchandise", formData);
+
+      dispatch(
+        setAlert({
+          msg: "Merchandise created successfully!",
+          type: "success",
+        }),
+      );
+
       return res.data;
     } catch (err) {
-      dispatch(setAlert({
-        msg: err.response.data.msg || 'Failed to create merchandise',
-        type: 'error'
-      }));
-      
-      return rejectWithValue(err.response.data.msg || 'Merchandise creation failed');
+      dispatch(
+        setAlert({
+          msg: err.response.data.msg || "Failed to create merchandise",
+          type: "error",
+        }),
+      );
+
+      return rejectWithValue(
+        err.response.data.msg || "Merchandise creation failed",
+      );
     }
-  }
+  },
 );
 
 // Update merchandise
 export const updateMerchandise = createAsyncThunk(
-  'merchandise/updateMerchandise',
+  "merchandise/updateMerchandise",
   async ({ id, formData }, { dispatch, rejectWithValue }) => {
     try {
       const res = await axios.put(`/api/merchandise/${id}`, formData);
-      
-      dispatch(setAlert({
-        msg: 'Merchandise updated successfully!',
-        type: 'success'
-      }));
-      
+
+      dispatch(
+        setAlert({
+          msg: "Merchandise updated successfully!",
+          type: "success",
+        }),
+      );
+
       return res.data;
     } catch (err) {
-      dispatch(setAlert({
-        msg: err.response.data.msg || 'Failed to update merchandise',
-        type: 'error'
-      }));
-      
-      return rejectWithValue(err.response.data.msg || 'Merchandise update failed');
+      dispatch(
+        setAlert({
+          msg: err.response.data.msg || "Failed to update merchandise",
+          type: "error",
+        }),
+      );
+
+      return rejectWithValue(
+        err.response.data.msg || "Merchandise update failed",
+      );
     }
-  }
+  },
 );
 
 // Delete merchandise
 export const deleteMerchandise = createAsyncThunk(
-  'merchandise/deleteMerchandise',
+  "merchandise/deleteMerchandise",
   async (id, { dispatch, rejectWithValue }) => {
     try {
       await axios.delete(`/api/merchandise/${id}`);
-      
-      dispatch(setAlert({
-        msg: 'Merchandise deleted successfully!',
-        type: 'success'
-      }));
-      
+
+      dispatch(
+        setAlert({
+          msg: "Merchandise deleted successfully!",
+          type: "success",
+        }),
+      );
+
       return id;
     } catch (err) {
-      dispatch(setAlert({
-        msg: err.response.data.msg || 'Failed to delete merchandise',
-        type: 'error'
-      }));
-      
-      return rejectWithValue(err.response.data.msg || 'Merchandise deletion failed');
+      dispatch(
+        setAlert({
+          msg: err.response.data.msg || "Failed to delete merchandise",
+          type: "error",
+        }),
+      );
+
+      return rejectWithValue(
+        err.response.data.msg || "Merchandise deletion failed",
+      );
     }
-  }
+  },
 );
 
 // Initial state
@@ -133,12 +159,12 @@ const initialState = {
   characterMerchandise: [],
   product: null,
   loading: false,
-  error: null
+  error: null,
 };
 
 // Slice
 const merchandiseSlice = createSlice({
-  name: 'merchandise',
+  name: "merchandise",
   initialState,
   reducers: {
     clearProduct: (state) => {
@@ -146,7 +172,7 @@ const merchandiseSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -162,7 +188,7 @@ const merchandiseSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Get creator merchandise
       .addCase(getCreatorMerchandise.pending, (state) => {
         state.loading = true;
@@ -175,7 +201,7 @@ const merchandiseSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Get character merchandise
       .addCase(getCharacterMerchandise.pending, (state) => {
         state.loading = true;
@@ -188,7 +214,7 @@ const merchandiseSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Get merchandise by ID
       .addCase(getMerchandiseById.pending, (state) => {
         state.loading = true;
@@ -201,7 +227,7 @@ const merchandiseSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Create new merchandise
       .addCase(createMerchandise.pending, (state) => {
         state.loading = true;
@@ -215,7 +241,7 @@ const merchandiseSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Update merchandise
       .addCase(updateMerchandise.pending, (state) => {
         state.loading = true;
@@ -223,21 +249,21 @@ const merchandiseSlice = createSlice({
       .addCase(updateMerchandise.fulfilled, (state, action) => {
         state.loading = false;
         state.product = action.payload;
-        state.creatorMerchandise = state.creatorMerchandise.map(item => 
-          item._id === action.payload._id ? action.payload : item
+        state.creatorMerchandise = state.creatorMerchandise.map((item) =>
+          item._id === action.payload._id ? action.payload : item,
         );
-        state.merchandise = state.merchandise.map(item => 
-          item._id === action.payload._id ? action.payload : item
+        state.merchandise = state.merchandise.map((item) =>
+          item._id === action.payload._id ? action.payload : item,
         );
-        state.characterMerchandise = state.characterMerchandise.map(item => 
-          item._id === action.payload._id ? action.payload : item
+        state.characterMerchandise = state.characterMerchandise.map((item) =>
+          item._id === action.payload._id ? action.payload : item,
         );
       })
       .addCase(updateMerchandise.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Delete merchandise
       .addCase(deleteMerchandise.pending, (state) => {
         state.loading = true;
@@ -245,13 +271,13 @@ const merchandiseSlice = createSlice({
       .addCase(deleteMerchandise.fulfilled, (state, action) => {
         state.loading = false;
         state.creatorMerchandise = state.creatorMerchandise.filter(
-          item => item._id !== action.payload
+          (item) => item._id !== action.payload,
         );
         state.merchandise = state.merchandise.filter(
-          item => item._id !== action.payload
+          (item) => item._id !== action.payload,
         );
         state.characterMerchandise = state.characterMerchandise.filter(
-          item => item._id !== action.payload
+          (item) => item._id !== action.payload,
         );
         if (state.product && state.product._id === action.payload) {
           state.product = null;
@@ -261,7 +287,7 @@ const merchandiseSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       });
-  }
+  },
 });
 
 export const { clearProduct, clearError } = merchandiseSlice.actions;

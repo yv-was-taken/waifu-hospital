@@ -1,9 +1,11 @@
-const Purchase = require('../models/Purchase');
-const Merchandise = require('../models/Merchandise');
-const User = require('../models/User');
-const { validationResult } = require('express-validator');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'YOUR_STRIPE_SECRET_KEY');
-const crypto = require('crypto');
+const Purchase = require("../models/Purchase");
+const Merchandise = require("../models/Merchandise");
+const User = require("../models/User");
+const { validationResult } = require("express-validator");
+const stripe = require("stripe")(
+  process.env.STRIPE_SECRET_KEY || "YOUR_STRIPE_SECRET_KEY",
+);
+const crypto = require("crypto");
 
 // @desc    Create payment intent for Stripe
 // @route   POST /api/payments/create-payment-intent
@@ -20,19 +22,19 @@ exports.createPaymentIntent = async (req, res) => {
     // Create a PaymentIntent with the order amount and currency
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(totalAmount * 100), // Stripe requires amounts in cents
-      currency: 'usd',
+      currency: "usd",
       metadata: {
         userId: req.user.id,
-        itemsCount: items.length
-      }
+        itemsCount: items.length,
+      },
     });
 
     res.json({
-      clientSecret: paymentIntent.client_secret
+      clientSecret: paymentIntent.client_secret,
     });
   } catch (err) {
-    console.error('Error creating payment intent:', err);
-    res.status(500).json({ msg: 'Failed to create payment intent' });
+    console.error("Error creating payment intent:", err);
+    res.status(500).json({ msg: "Failed to create payment intent" });
   }
 };
 
@@ -52,16 +54,16 @@ exports.processCryptoPayment = async (req, res) => {
     // For demo purposes, we'll simulate a successful payment
 
     // Generate a unique payment ID
-    const paymentId = crypto.randomBytes(16).toString('hex');
+    const paymentId = crypto.randomBytes(16).toString("hex");
 
     res.json({
       paymentId,
-      status: 'pending',
-      message: `Please send ${totalAmount} ${cryptoType} to the wallet address: ${walletAddress || 'DEMO_WALLET_ADDRESS'}`
+      status: "pending",
+      message: `Please send ${totalAmount} ${cryptoType} to the wallet address: ${walletAddress || "DEMO_WALLET_ADDRESS"}`,
     });
   } catch (err) {
-    console.error('Error processing crypto payment:', err);
-    res.status(500).json({ msg: 'Failed to process crypto payment' });
+    console.error("Error processing crypto payment:", err);
+    res.status(500).json({ msg: "Failed to process crypto payment" });
   }
 };
 
@@ -69,8 +71,9 @@ exports.processCryptoPayment = async (req, res) => {
 // @route   POST /api/payments/webhook
 // @access  Public
 exports.webhook = async (req, res) => {
-  const sig = req.headers['stripe-signature'];
-  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || 'YOUR_STRIPE_WEBHOOK_SECRET';
+  const sig = req.headers["stripe-signature"];
+  const endpointSecret =
+    process.env.STRIPE_WEBHOOK_SECRET || "YOUR_STRIPE_WEBHOOK_SECRET";
 
   let event;
 
@@ -85,10 +88,12 @@ exports.webhook = async (req, res) => {
 
     // Handle the event
     switch (event.type) {
-      case 'payment_intent.succeeded':
+      case "payment_intent.succeeded":
         const paymentIntent = event.data.object;
         // Handle successful payment here
-        console.log(`PaymentIntent for ${paymentIntent.amount} was successful!`);
+        console.log(
+          `PaymentIntent for ${paymentIntent.amount} was successful!`,
+        );
         break;
       default:
         console.log(`Unhandled event type ${event.type}`);
@@ -120,13 +125,15 @@ exports.completePayment = async (req, res) => {
     for (const item of items) {
       const merchandise = await Merchandise.findById(item.merchandiseId);
       if (!merchandise) {
-        return res.status(404).json({ msg: `Merchandise with ID ${item.merchandiseId} not found` });
+        return res
+          .status(404)
+          .json({ msg: `Merchandise with ID ${item.merchandiseId} not found` });
       }
 
       // Check if item is in stock
       if (merchandise.stock < item.quantity) {
-        return res.status(400).json({ 
-          msg: `Item ${merchandise.name} is out of stock. Only ${merchandise.stock} units available.` 
+        return res.status(400).json({
+          msg: `Item ${merchandise.name} is out of stock. Only ${merchandise.stock} units available.`,
         });
       }
 
@@ -134,9 +141,9 @@ exports.completePayment = async (req, res) => {
       itemsWithDetails.push({
         merchandise: merchandise._id,
         quantity: item.quantity,
-        size: item.size || 'N/A',
-        color: item.color || '',
-        price: merchandise.price
+        size: item.size || "N/A",
+        color: item.color || "",
+        price: merchandise.price,
       });
 
       // Update total
@@ -144,10 +151,10 @@ exports.completePayment = async (req, res) => {
 
       // Update stock
       await Merchandise.findByIdAndUpdate(merchandise._id, {
-        $inc: { 
+        $inc: {
           stock: -item.quantity,
-          sold: item.quantity
-        }
+          sold: item.quantity,
+        },
       });
     }
 
@@ -161,15 +168,15 @@ exports.completePayment = async (req, res) => {
       paymentId,
       isPaid: true,
       paidAt: Date.now(),
-      status: 'processing'
+      status: "processing",
     });
 
     await purchase.save();
 
     res.json(purchase);
   } catch (err) {
-    console.error('Error completing payment:', err);
-    res.status(500).json({ msg: 'Failed to complete payment' });
+    console.error("Error completing payment:", err);
+    res.status(500).json({ msg: "Failed to complete payment" });
   }
 };
 
@@ -180,19 +187,19 @@ exports.getUserOrders = async (req, res) => {
   try {
     const orders = await Purchase.find({ user: req.user.id })
       .populate({
-        path: 'items.merchandise',
-        select: 'name imageUrl price category',
+        path: "items.merchandise",
+        select: "name imageUrl price category",
         populate: {
-          path: 'character',
-          select: 'name imageUrl'
-        }
+          path: "character",
+          select: "name imageUrl",
+        },
       })
       .sort({ createdAt: -1 });
-    
+
     res.json(orders);
   } catch (err) {
-    console.error('Error getting orders:', err);
-    res.status(500).json({ msg: 'Failed to get orders' });
+    console.error("Error getting orders:", err);
+    res.status(500).json({ msg: "Failed to get orders" });
   }
 };
 
@@ -201,31 +208,30 @@ exports.getUserOrders = async (req, res) => {
 // @access  Private
 exports.getOrderById = async (req, res) => {
   try {
-    const order = await Purchase.findById(req.params.id)
-      .populate({
-        path: 'items.merchandise',
-        select: 'name imageUrl price category',
-        populate: {
-          path: 'character',
-          select: 'name imageUrl'
-        }
-      });
-    
+    const order = await Purchase.findById(req.params.id).populate({
+      path: "items.merchandise",
+      select: "name imageUrl price category",
+      populate: {
+        path: "character",
+        select: "name imageUrl",
+      },
+    });
+
     if (!order) {
-      return res.status(404).json({ msg: 'Order not found' });
+      return res.status(404).json({ msg: "Order not found" });
     }
 
     // Check if order belongs to user
     if (order.user.toString() !== req.user.id) {
-      return res.status(401).json({ msg: 'Not authorized to view this order' });
+      return res.status(401).json({ msg: "Not authorized to view this order" });
     }
 
     res.json(order);
   } catch (err) {
-    console.error('Error getting order:', err);
-    if (err.kind === 'ObjectId') {
-      return res.status(404).json({ msg: 'Order not found' });
+    console.error("Error getting order:", err);
+    if (err.kind === "ObjectId") {
+      return res.status(404).json({ msg: "Order not found" });
     }
-    res.status(500).json({ msg: 'Failed to get order' });
+    res.status(500).json({ msg: "Failed to get order" });
   }
 };

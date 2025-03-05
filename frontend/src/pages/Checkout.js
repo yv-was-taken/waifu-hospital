@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { clearCart } from '../features/cart/cartSlice';
-import { setAlert } from '../features/alerts/alertSlice';
-import styled from 'styled-components';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { clearCart } from "../features/cart/cartSlice";
+import { setAlert } from "../features/alerts/alertSlice";
+import styled from "styled-components";
 
 const CheckoutContainer = styled.div`
   padding: 2rem 0;
@@ -29,7 +29,7 @@ const CheckoutContent = styled.div`
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 2rem;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -56,7 +56,7 @@ const FormRow = styled.div`
   display: flex;
   gap: 1rem;
   margin-bottom: 1rem;
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 0;
@@ -64,7 +64,7 @@ const FormRow = styled.div`
 `;
 
 const FormGroup = styled.div`
-  flex: ${props => props.flex || 1};
+  flex: ${(props) => props.flex || 1};
   margin-bottom: 1rem;
 `;
 
@@ -81,7 +81,7 @@ const FormInput = styled.input`
   border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 1rem;
-  
+
   &:focus {
     outline: none;
     border-color: var(--primary-color);
@@ -94,7 +94,7 @@ const FormSelect = styled.select`
   border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 1rem;
-  
+
   &:focus {
     outline: none;
     border-color: var(--primary-color);
@@ -152,7 +152,7 @@ const Item = styled.div`
   margin-bottom: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--border-color);
-  
+
   &:last-child {
     border-bottom: none;
   }
@@ -193,10 +193,11 @@ const SummaryRow = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: 0.8rem;
-  font-size: ${props => props.total ? '1.2rem' : '1rem'};
-  font-weight: ${props => props.total ? '600' : '400'};
-  padding-top: ${props => props.total ? '1rem' : '0'};
-  border-top: ${props => props.total ? '1px solid var(--border-color)' : 'none'};
+  font-size: ${(props) => (props.total ? "1.2rem" : "1rem")};
+  font-weight: ${(props) => (props.total ? "600" : "400")};
+  padding-top: ${(props) => (props.total ? "1rem" : "0")};
+  border-top: ${(props) =>
+    props.total ? "1px solid var(--border-color)" : "none"};
 `;
 
 const PlaceOrderButton = styled.button`
@@ -211,11 +212,11 @@ const PlaceOrderButton = styled.button`
   cursor: pointer;
   transition: background-color 0.3s ease;
   margin-top: 1.5rem;
-  
+
   &:hover {
     background-color: var(--primary-dark);
   }
-  
+
   &:disabled {
     background-color: #ccc;
     cursor: not-allowed;
@@ -235,80 +236,82 @@ const CheckboxLabel = styled.label`
 const Checkout = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { cartItems } = useSelector(state => state.cart);
-  const { user } = useSelector(state => state.auth);
-  
+  const { cartItems } = useSelector((state) => state.cart);
+  const { user } = useSelector((state) => state.auth);
+
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    address: '',
-    city: '',
-    state: '',
-    zip: '',
-    country: 'US',
-    paymentMethod: 'credit',
-    cardName: '',
-    cardNumber: '',
-    cardExpiry: '',
-    cardCvv: '',
-    sameAsShipping: false
+    firstName: "",
+    lastName: "",
+    email: "",
+    address: "",
+    city: "",
+    state: "",
+    zip: "",
+    country: "US",
+    paymentMethod: "credit",
+    cardName: "",
+    cardNumber: "",
+    cardExpiry: "",
+    cardCvv: "",
+    sameAsShipping: false,
   });
-  
+
   const [billingData, setBillingData] = useState({
-    firstName: '',
-    lastName: '',
-    address: '',
-    city: '',
-    state: '',
-    zip: '',
-    country: 'US'
+    firstName: "",
+    lastName: "",
+    address: "",
+    city: "",
+    state: "",
+    zip: "",
+    country: "US",
   });
-  
+
   useEffect(() => {
     if (user) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        email: user.email || ''
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
       }));
     }
   }, [user]);
-  
+
   useEffect(() => {
     if (cartItems.length === 0) {
-      navigate('/cart');
-      dispatch(setAlert({
-        msg: 'Your cart is empty',
-        type: 'info'
-      }));
+      navigate("/cart");
+      dispatch(
+        setAlert({
+          msg: "Your cart is empty",
+          type: "info",
+        }),
+      );
     }
   }, [cartItems, navigate, dispatch]);
-  
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
-  
+
   const handleBillingChange = (e) => {
     const { name, value } = e.target;
-    setBillingData(prev => ({
+    setBillingData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
-  
+
   const handleSameAsShipping = (e) => {
     const { checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      sameAsShipping: checked
+      sameAsShipping: checked,
     }));
-    
+
     if (checked) {
       setBillingData({
         firstName: formData.firstName,
@@ -317,63 +320,69 @@ const Checkout = () => {
         city: formData.city,
         state: formData.state,
         zip: formData.zip,
-        country: formData.country
+        country: formData.country,
       });
     }
   };
-  
+
   const calculateSubtotal = () => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cartItems.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0,
+    );
   };
-  
+
   const calculateTax = () => {
     return calculateSubtotal() * 0.08; // 8% tax rate
   };
-  
+
   const calculateShipping = () => {
     // Simple shipping calculation
     const subtotal = calculateSubtotal();
     if (subtotal > 100) return 0; // Free shipping over $100
     return 5.99;
   };
-  
+
   const calculateTotal = () => {
     return calculateSubtotal() + calculateTax() + calculateShipping();
   };
-  
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Here you would typically integrate with a payment processor
     // and send order details to your backend
-    
+
     // For demo purposes, we'll just simulate a successful order
-    
+
     // Simulate API call delay
     setTimeout(() => {
       // Clear the cart
       dispatch(clearCart());
-      
+
       // Show success message
-      dispatch(setAlert({
-        msg: 'Order placed successfully!',
-        type: 'success'
-      }));
-      
+      dispatch(
+        setAlert({
+          msg: "Order placed successfully!",
+          type: "success",
+        }),
+      );
+
       // Redirect to a thank you page (or back to dashboard)
-      navigate('/dashboard');
+      navigate("/dashboard");
     }, 1500);
   };
-  
+
   return (
     <CheckoutContainer>
       <CheckoutHeader>
         <CheckoutTitle>Checkout</CheckoutTitle>
         <CheckoutDescription>
-          Complete your purchase by providing your shipping, billing, and payment details below.
+          Complete your purchase by providing your shipping, billing, and
+          payment details below.
         </CheckoutDescription>
       </CheckoutHeader>
-      
+
       <CheckoutContent>
         <CheckoutForm onSubmit={handleSubmit}>
           <FormSection>
@@ -402,7 +411,7 @@ const Checkout = () => {
                 />
               </FormGroup>
             </FormRow>
-            
+
             <FormGroup>
               <FormLabel htmlFor="email">Email Address</FormLabel>
               <FormInput
@@ -414,7 +423,7 @@ const Checkout = () => {
                 required
               />
             </FormGroup>
-            
+
             <FormGroup>
               <FormLabel htmlFor="address">Street Address</FormLabel>
               <FormInput
@@ -426,7 +435,7 @@ const Checkout = () => {
                 required
               />
             </FormGroup>
-            
+
             <FormRow>
               <FormGroup>
                 <FormLabel htmlFor="city">City</FormLabel>
@@ -462,7 +471,7 @@ const Checkout = () => {
                 />
               </FormGroup>
             </FormRow>
-            
+
             <FormGroup>
               <FormLabel htmlFor="country">Country</FormLabel>
               <FormSelect
@@ -480,9 +489,15 @@ const Checkout = () => {
               </FormSelect>
             </FormGroup>
           </FormSection>
-          
+
           <FormSection>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
               <FormTitle>Billing Information</FormTitle>
               <CheckboxLabel>
                 <Checkbox
@@ -495,7 +510,7 @@ const Checkout = () => {
                 Same as shipping
               </CheckboxLabel>
             </div>
-            
+
             {!formData.sameAsShipping ? (
               <>
                 <FormRow>
@@ -522,7 +537,7 @@ const Checkout = () => {
                     />
                   </FormGroup>
                 </FormRow>
-                
+
                 <FormGroup>
                   <FormLabel htmlFor="billingAddress">Street Address</FormLabel>
                   <FormInput
@@ -534,7 +549,7 @@ const Checkout = () => {
                     required
                   />
                 </FormGroup>
-                
+
                 <FormRow>
                   <FormGroup>
                     <FormLabel htmlFor="billingCity">City</FormLabel>
@@ -570,7 +585,7 @@ const Checkout = () => {
                     />
                   </FormGroup>
                 </FormRow>
-                
+
                 <FormGroup>
                   <FormLabel htmlFor="billingCountry">Country</FormLabel>
                   <FormSelect
@@ -590,7 +605,7 @@ const Checkout = () => {
               </>
             ) : null}
           </FormSection>
-          
+
           <FormSection>
             <FormTitle>Payment Method</FormTitle>
             <FormGroup>
@@ -602,7 +617,7 @@ const Checkout = () => {
                     id="creditCard"
                     name="paymentMethod"
                     value="credit"
-                    checked={formData.paymentMethod === 'credit'}
+                    checked={formData.paymentMethod === "credit"}
                     onChange={handleChange}
                   />
                   <RadioLabel htmlFor="creditCard">
@@ -616,7 +631,7 @@ const Checkout = () => {
                     id="paypal"
                     name="paymentMethod"
                     value="paypal"
-                    checked={formData.paymentMethod === 'paypal'}
+                    checked={formData.paymentMethod === "paypal"}
                     onChange={handleChange}
                   />
                   <RadioLabel htmlFor="paypal">
@@ -630,7 +645,7 @@ const Checkout = () => {
                     id="crypto"
                     name="paymentMethod"
                     value="crypto"
-                    checked={formData.paymentMethod === 'crypto'}
+                    checked={formData.paymentMethod === "crypto"}
                     onChange={handleChange}
                   />
                   <RadioLabel htmlFor="crypto">
@@ -640,8 +655,8 @@ const Checkout = () => {
                 </FormRadioOption>
               </FormRadioGroup>
             </FormGroup>
-            
-            {formData.paymentMethod === 'credit' && (
+
+            {formData.paymentMethod === "credit" && (
               <>
                 <FormGroup>
                   <FormLabel htmlFor="cardName">Name on Card</FormLabel>
@@ -654,7 +669,7 @@ const Checkout = () => {
                     required
                   />
                 </FormGroup>
-                
+
                 <FormGroup>
                   <FormLabel htmlFor="cardNumber">Card Number</FormLabel>
                   <FormInput
@@ -667,7 +682,7 @@ const Checkout = () => {
                     required
                   />
                 </FormGroup>
-                
+
                 <FormRow>
                   <FormGroup>
                     <FormLabel htmlFor="cardExpiry">Expiration Date</FormLabel>
@@ -696,45 +711,47 @@ const Checkout = () => {
                 </FormRow>
               </>
             )}
-            
-            {formData.paymentMethod === 'paypal' && (
-              <p style={{ marginTop: '1rem', color: 'var(--light-text)' }}>
-                You will be redirected to PayPal to complete your payment after reviewing your order.
+
+            {formData.paymentMethod === "paypal" && (
+              <p style={{ marginTop: "1rem", color: "var(--light-text)" }}>
+                You will be redirected to PayPal to complete your payment after
+                reviewing your order.
               </p>
             )}
-            
-            {formData.paymentMethod === 'crypto' && (
-              <p style={{ marginTop: '1rem', color: 'var(--light-text)' }}>
-                You will be provided with crypto payment details after reviewing your order.
+
+            {formData.paymentMethod === "crypto" && (
+              <p style={{ marginTop: "1rem", color: "var(--light-text)" }}>
+                You will be provided with crypto payment details after reviewing
+                your order.
               </p>
             )}
           </FormSection>
-          
+
           <PlaceOrderButton type="submit">Place Order</PlaceOrderButton>
         </CheckoutForm>
-        
+
         <OrderSummary>
           <SummaryTitle>Order Summary</SummaryTitle>
-          
+
           <ItemList>
-            {cartItems.map(item => (
+            {cartItems.map((item) => (
               <Item key={`${item._id}-${item.size}-${item.color}`}>
                 <ItemImage src={item.imageUrl} alt={item.name} />
                 <ItemInfo>
                   <ItemTitle>{item.name}</ItemTitle>
                   <ItemMeta>Quantity: {item.quantity}</ItemMeta>
-                  {item.size && item.size !== 'N/A' && (
+                  {item.size && item.size !== "N/A" && (
                     <ItemMeta>Size: {item.size}</ItemMeta>
                   )}
-                  {item.color && (
-                    <ItemMeta>Color: {item.color}</ItemMeta>
-                  )}
+                  {item.color && <ItemMeta>Color: {item.color}</ItemMeta>}
                 </ItemInfo>
-                <ItemPrice>${(item.price * item.quantity).toFixed(2)}</ItemPrice>
+                <ItemPrice>
+                  ${(item.price * item.quantity).toFixed(2)}
+                </ItemPrice>
               </Item>
             ))}
           </ItemList>
-          
+
           <SummaryRow>
             <span>Subtotal:</span>
             <span>${calculateSubtotal().toFixed(2)}</span>
@@ -746,7 +763,9 @@ const Checkout = () => {
           <SummaryRow>
             <span>Shipping:</span>
             <span>
-              {calculateShipping() === 0 ? 'Free' : `$${calculateShipping().toFixed(2)}`}
+              {calculateShipping() === 0
+                ? "Free"
+                : `$${calculateShipping().toFixed(2)}`}
             </span>
           </SummaryRow>
           <SummaryRow total>

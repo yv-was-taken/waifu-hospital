@@ -8,7 +8,7 @@ class Logger {
    * @param {Object} data - Optional data to include
    */
   info(message, data = null) {
-    this.log('INFO', message, data);
+    this.log("INFO", message, data);
   }
 
   /**
@@ -17,7 +17,7 @@ class Logger {
    * @param {Error|Object} error - Error object or data
    */
   error(message, error = null) {
-    this.log('ERROR', message, error);
+    this.log("ERROR", message, error);
   }
 
   /**
@@ -26,7 +26,7 @@ class Logger {
    * @param {Object} data - Optional data to include
    */
   warn(message, data = null) {
-    this.log('WARN', message, data);
+    this.log("WARN", message, data);
   }
 
   /**
@@ -35,8 +35,8 @@ class Logger {
    * @param {Object} data - Optional data to include
    */
   debug(message, data = null) {
-    if (process.env.NODE_ENV !== 'production') {
-      this.log('DEBUG', message, data);
+    if (process.env.NODE_ENV !== "production") {
+      this.log("DEBUG", message, data);
     }
   }
 
@@ -50,7 +50,7 @@ class Logger {
   log(level, message, data) {
     const timestamp = new Date().toISOString();
     const formattedMessage = `[${timestamp}] [${level}] ${message}`;
-    
+
     if (data instanceof Error) {
       console.log(formattedMessage);
       console.error(data);
@@ -58,7 +58,7 @@ class Logger {
       // For security, don't log OpenAI API key if present
       const sanitizedData = { ...data };
       if (sanitizedData.apiKey) {
-        sanitizedData.apiKey = '[REDACTED]';
+        sanitizedData.apiKey = "[REDACTED]";
       }
       console.log(formattedMessage, sanitizedData);
     } else {

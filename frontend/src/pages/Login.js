@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { login, loadUser } from '../features/auth/authSlice';
-import { setAlert } from '../features/alerts/alertSlice';
-import Spinner from '../components/layout/Spinner';
-import styled from 'styled-components';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { login, loadUser } from "../features/auth/authSlice";
+import { setAlert } from "../features/alerts/alertSlice";
+import Spinner from "../components/layout/Spinner";
+import styled from "styled-components";
 
 const LoginContainer = styled.div`
   max-width: 500px;
@@ -78,40 +78,42 @@ const RegisterLink = styled.div`
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
 
   const { email, password } = formData;
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isAuthenticated, loading } = useSelector(state => state.auth);
+  const { isAuthenticated, loading } = useSelector((state) => state.auth);
 
   useEffect(() => {
     // Redirect if logged in
     if (isAuthenticated) {
-      navigate('/dashboard');
+      navigate("/dashboard");
     }
   }, [isAuthenticated, navigate]);
 
-  const onChange = e => {
+  const onChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const onSubmit = async e => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    if (email === '' || password === '') {
-      dispatch(setAlert({
-        msg: 'Please fill in all fields',
-        type: 'error'
-      }));
+    if (email === "" || password === "") {
+      dispatch(
+        setAlert({
+          msg: "Please fill in all fields",
+          type: "error",
+        }),
+      );
     } else {
       try {
         // Login and then load user data to ensure it's up to date
         await dispatch(login({ email, password })).unwrap();
         dispatch(loadUser());
       } catch (error) {
-        console.error('Login failed:', error);
+        console.error("Login failed:", error);
       }
     }
   };

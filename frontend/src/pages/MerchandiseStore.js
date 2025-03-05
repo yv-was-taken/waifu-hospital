@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { getMerchandise } from '../features/merchandise/merchandiseSlice';
-import Spinner from '../components/layout/Spinner';
-import styled from 'styled-components';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { getMerchandise } from "../features/merchandise/merchandiseSlice";
+import Spinner from "../components/layout/Spinner";
+import styled from "styled-components";
 
 const StoreContainer = styled.div`
   padding: 2rem 0;
@@ -53,7 +53,7 @@ const FilterSelect = styled.select`
   border: 1px solid var(--border-color);
   border-radius: 4px;
   background-color: white;
-  
+
   &:focus {
     outline: none;
     border-color: var(--primary-color);
@@ -74,7 +74,7 @@ const ProductCard = styled(Link)`
   transition: transform 0.3s ease;
   text-decoration: none;
   color: var(--text-color);
-  
+
   &:hover {
     transform: translateY(-5px);
   }
@@ -160,88 +160,95 @@ const EmptyText = styled.p`
 
 const MerchandiseStore = () => {
   const dispatch = useDispatch();
-  const { merchandise, loading } = useSelector(state => state.merchandise);
-  
+  const { merchandise, loading } = useSelector((state) => state.merchandise);
+
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [filters, setFilters] = useState({
-    category: 'all',
-    priceRange: 'all',
-    sortBy: 'newest'
+    category: "all",
+    priceRange: "all",
+    sortBy: "newest",
   });
-  
+
   useEffect(() => {
     dispatch(getMerchandise());
   }, [dispatch]);
-  
+
   useEffect(() => {
     if (merchandise) {
       let filtered = [...merchandise];
-      
+
       // Apply category filter
-      if (filters.category !== 'all') {
-        filtered = filtered.filter(item => item.category === filters.category);
+      if (filters.category !== "all") {
+        filtered = filtered.filter(
+          (item) => item.category === filters.category,
+        );
       }
-      
+
       // Apply price range filter
-      if (filters.priceRange !== 'all') {
+      if (filters.priceRange !== "all") {
         switch (filters.priceRange) {
-          case 'under25':
-            filtered = filtered.filter(item => item.price < 25);
+          case "under25":
+            filtered = filtered.filter((item) => item.price < 25);
             break;
-          case '25to50':
-            filtered = filtered.filter(item => item.price >= 25 && item.price <= 50);
+          case "25to50":
+            filtered = filtered.filter(
+              (item) => item.price >= 25 && item.price <= 50,
+            );
             break;
-          case 'over50':
-            filtered = filtered.filter(item => item.price > 50);
+          case "over50":
+            filtered = filtered.filter((item) => item.price > 50);
             break;
           default:
             break;
         }
       }
-      
+
       // Apply sorting
       switch (filters.sortBy) {
-        case 'newest':
-          filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        case "newest":
+          filtered.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+          );
           break;
-        case 'priceAsc':
+        case "priceAsc":
           filtered.sort((a, b) => a.price - b.price);
           break;
-        case 'priceDesc':
+        case "priceDesc":
           filtered.sort((a, b) => b.price - a.price);
           break;
-        case 'popularity':
+        case "popularity":
           filtered.sort((a, b) => b.sold - a.sold);
           break;
         default:
           break;
       }
-      
+
       setFilteredProducts(filtered);
     }
   }, [merchandise, filters]);
-  
+
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
-  
+
   if (loading) {
     return <Spinner />;
   }
-  
+
   return (
     <StoreContainer>
       <StoreHeader>
         <StoreTitle>Merchandise Store</StoreTitle>
         <StoreDescription>
-          Browse and shop for merchandise featuring your favorite characters. From t-shirts to posters, find unique items created by our community.
+          Browse and shop for merchandise featuring your favorite characters.
+          From t-shirts to posters, find unique items created by our community.
         </StoreDescription>
       </StoreHeader>
-      
+
       <FilterContainer>
         <FilterGroup>
           <FilterLabel htmlFor="category">Category</FilterLabel>
@@ -262,7 +269,7 @@ const MerchandiseStore = () => {
             <option value="other">Other</option>
           </FilterSelect>
         </FilterGroup>
-        
+
         <FilterGroup>
           <FilterLabel htmlFor="priceRange">Price Range</FilterLabel>
           <FilterSelect
@@ -277,7 +284,7 @@ const MerchandiseStore = () => {
             <option value="over50">Over $50</option>
           </FilterSelect>
         </FilterGroup>
-        
+
         <FilterGroup>
           <FilterLabel htmlFor="sortBy">Sort By</FilterLabel>
           <FilterSelect
@@ -293,31 +300,31 @@ const MerchandiseStore = () => {
           </FilterSelect>
         </FilterGroup>
       </FilterContainer>
-      
+
       {filteredProducts.length > 0 ? (
         <ProductGrid>
-          {filteredProducts.map(product => (
+          {filteredProducts.map((product) => (
             <ProductCard key={product._id} to={`/merchandise/${product._id}`}>
               <ProductImage src={product.imageUrl} alt={product.name} />
               <ProductInfo>
                 <ProductTitle>{product.name}</ProductTitle>
                 <ProductPrice>${product.price.toFixed(2)}</ProductPrice>
                 <ProductCategory>{product.category}</ProductCategory>
-                
+
                 {product.character && (
                   <CharacterBadge>
-                    <CharacterImage 
+                    <CharacterImage
                       src={product.character.imageUrl}
                       alt={product.character.name}
                     />
                     {product.character.name}
                   </CharacterBadge>
                 )}
-                
+
                 {product.creator && (
                   <ProductCreator>
                     {product.creator.profilePicture && (
-                      <CreatorImage 
+                      <CreatorImage
                         src={product.creator.profilePicture}
                         alt={product.creator.username}
                       />

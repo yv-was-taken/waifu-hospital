@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { getCharacterById } from '../features/characters/characterSlice';
-import api from '../utils/api';
-import aiApi, { sendChatMessage } from '../utils/aiApi';
-import Spinner from '../components/layout/Spinner';
-import styled from 'styled-components';
+import React, { useState, useEffect, useRef } from "react";
+import { useParams, Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { getCharacterById } from "../features/characters/characterSlice";
+import api from "../utils/api";
+import aiApi, { sendChatMessage } from "../utils/aiApi";
+import Spinner from "../components/layout/Spinner";
+import styled from "styled-components";
 
 const ChatContainer = styled.div`
   display: flex;
@@ -36,7 +36,7 @@ const HeaderBackground = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url(${props => props.image});
+  background-image: url(${(props) => props.image});
   background-size: cover;
   background-position: center;
   filter: blur(8px);
@@ -54,7 +54,7 @@ const CharacterImage = styled.img`
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   z-index: 1;
   transition: transform 0.3s ease;
-  
+
   &:hover {
     transform: scale(1.05);
   }
@@ -70,7 +70,7 @@ const BackLink = styled(Link)`
   color: white;
   text-decoration: none;
   font-size: 0.9rem;
-  
+
   &:hover {
     text-decoration: underline;
   }
@@ -88,26 +88,27 @@ const ChatBody = styled.div`
 
 const MessageContainer = styled.div`
   display: flex;
-  flex-direction: ${props => props.isUser ? 'row-reverse' : 'row'};
+  flex-direction: ${(props) => (props.isUser ? "row-reverse" : "row")};
   align-items: flex-start;
   max-width: 80%;
-  align-self: ${props => props.isUser ? 'flex-end' : 'flex-start'};
+  align-self: ${(props) => (props.isUser ? "flex-end" : "flex-start")};
 `;
 
 const MessageBubble = styled.div`
   padding: 0.8rem 1rem;
   border-radius: 18px;
-  background-color: ${props => props.isUser ? 'var(--primary-color)' : 'white'};
-  color: ${props => props.isUser ? 'white' : 'var(--text-color)'};
+  background-color: ${(props) =>
+    props.isUser ? "var(--primary-color)" : "white"};
+  color: ${(props) => (props.isUser ? "white" : "var(--text-color)")};
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   position: relative;
   line-height: 1.4;
 `;
 
 const AvatarContainer = styled.div`
-  width: ${props => props.isUser ? '32px' : '40px'};
-  height: ${props => props.isUser ? '32px' : '40px'};
-  margin: ${props => props.isUser ? '0 0 0 8px' : '0 8px 0 0'};
+  width: ${(props) => (props.isUser ? "32px" : "40px")};
+  height: ${(props) => (props.isUser ? "32px" : "40px")};
+  margin: ${(props) => (props.isUser ? "0 0 0 8px" : "0 8px 0 0")};
 `;
 
 const Avatar = styled.img`
@@ -137,25 +138,26 @@ const ThinkingIndicator = styled.div`
   padding: 0.5rem;
   gap: 0.3rem;
   align-items: center;
-  
+
   span {
     width: 8px;
     height: 8px;
     background-color: var(--light-text);
     border-radius: 50%;
     animation: pulse 1.5s infinite;
-    
+
     &:nth-child(2) {
       animation-delay: 0.2s;
     }
-    
+
     &:nth-child(3) {
       animation-delay: 0.4s;
     }
   }
-  
+
   @keyframes pulse {
-    0%, 100% {
+    0%,
+    100% {
       opacity: 0.5;
       transform: scale(1);
     }
@@ -183,7 +185,7 @@ const MessageInput = styled.input`
   border: 1px solid var(--border-color);
   border-radius: 24px;
   font-size: 1rem;
-  
+
   &:focus {
     outline: none;
     border-color: var(--primary-color);
@@ -199,11 +201,11 @@ const SendButton = styled.button`
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  
+
   &:hover {
     background-color: var(--primary-dark);
   }
-  
+
   &:disabled {
     background-color: #ccc;
     cursor: not-allowed;
@@ -233,19 +235,21 @@ const EmptyText = styled.p`
 
 const CharacterChat = () => {
   const { id } = useParams();
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [chat, setChat] = useState({ messages: [] });
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const chatBodyRef = useRef(null);
-  
+
   const dispatch = useDispatch();
-  const { character, loading: characterLoading } = useSelector(state => state.character);
-  const { user } = useSelector(state => state.auth);
-  
+  const { character, loading: characterLoading } = useSelector(
+    (state) => state.character,
+  );
+  const { user } = useSelector((state) => state.auth);
+
   useEffect(() => {
     dispatch(getCharacterById(id));
-    
+
     // Fetch chat history or create a new chat
     const fetchChat = async () => {
       try {
@@ -253,66 +257,66 @@ const CharacterChat = () => {
         // For this MVP, we'll simulate it
         setTimeout(() => {
           setChat({
-            _id: 'chat_' + id,
+            _id: "chat_" + id,
             character: id,
             user: user?._id,
-            messages: []
+            messages: [],
           });
           setLoading(false);
         }, 1000);
       } catch (error) {
-        console.error('Error fetching chat:', error);
+        console.error("Error fetching chat:", error);
         setLoading(false);
       }
     };
-    
+
     fetchChat();
   }, [dispatch, id, user]);
-  
+
   // Scroll to bottom when messages change
   useEffect(() => {
     if (chatBodyRef.current) {
       chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
     }
   }, [chat.messages]);
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!message.trim()) return;
-    
+
     // Add user message to chat
     const updatedMessages = [
       ...chat.messages,
-      { sender: 'user', content: message }
+      { sender: "user", content: message },
     ];
-    
-    setChat(prev => ({
+
+    setChat((prev) => ({
       ...prev,
-      messages: updatedMessages
+      messages: updatedMessages,
     }));
-    
-    setMessage('');
+
+    setMessage("");
     setSending(true);
-    
+
     try {
       // Call the AI service using our sendChatMessage utility function
       const aiResponse = await sendChatMessage(id, message);
-      
+
       if (aiResponse) {
-        setChat(prev => ({
+        setChat((prev) => ({
           ...prev,
           messages: [
             ...prev.messages,
-            { sender: 'character', content: aiResponse }
-          ]
+            { sender: "character", content: aiResponse },
+          ],
         }));
       } else {
-        throw new Error('Invalid response from AI service');
+        throw new Error("Invalid response from AI service");
       }
     } catch (error) {
-      console.error('Error sending message to AI service:', error);
-      
+      console.error("Error sending message to AI service:", error);
+
       // Fallback to static responses if AI service fails
       const fallbackResponses = [
         `That's interesting! Tell me more about it.`,
@@ -324,31 +328,32 @@ const CharacterChat = () => {
         `I understand. Let's talk more about that.`,
         `That's a good point. I appreciate your perspective.`,
         `Thanks for sharing that with me!`,
-        `I'm glad you told me that. It helps me understand you better.`
+        `I'm glad you told me that. It helps me understand you better.`,
       ];
-      
-      const fallbackResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-      
-      setChat(prev => ({
+
+      const fallbackResponse =
+        fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+
+      setChat((prev) => ({
         ...prev,
         messages: [
           ...prev.messages,
-          { sender: 'character', content: fallbackResponse }
-        ]
+          { sender: "character", content: fallbackResponse },
+        ],
       }));
     } finally {
       setSending(false);
     }
   };
-  
+
   if (characterLoading || loading) {
     return <Spinner />;
   }
-  
+
   if (!character) {
     return <div>Character not found</div>;
   }
-  
+
   return (
     <ChatContainer>
       <ChatHeader>
@@ -357,34 +362,35 @@ const CharacterChat = () => {
         <CharacterName>{character.name}</CharacterName>
         <BackLink to={`/characters/${id}`}>Back to Profile</BackLink>
       </ChatHeader>
-      
+
       <ChatBody ref={chatBodyRef}>
         {chat.messages.length === 0 ? (
           <EmptyChat>
             <EmptyTitle>Start Chatting with {character.name}</EmptyTitle>
             <EmptyText>
-              Say hello to start a conversation! {character.name} is excited to talk with you.
+              Say hello to start a conversation! {character.name} is excited to
+              talk with you.
             </EmptyText>
           </EmptyChat>
         ) : (
           chat.messages.map((msg, index) => (
-            <MessageContainer key={index} isUser={msg.sender === 'user'}>
-              <AvatarContainer isUser={msg.sender === 'user'}>
-                {msg.sender === 'user' ? (
+            <MessageContainer key={index} isUser={msg.sender === "user"}>
+              <AvatarContainer isUser={msg.sender === "user"}>
+                {msg.sender === "user" ? (
                   <UserAvatar>
-                    {user?.username?.charAt(0).toUpperCase() || 'U'}
+                    {user?.username?.charAt(0).toUpperCase() || "U"}
                   </UserAvatar>
                 ) : (
                   <Avatar src={character.imageUrl} alt={character.name} />
                 )}
               </AvatarContainer>
-              <MessageBubble isUser={msg.sender === 'user'}>
+              <MessageBubble isUser={msg.sender === "user"}>
                 {msg.content}
               </MessageBubble>
             </MessageContainer>
           ))
         )}
-        
+
         {sending && (
           <MessageContainer>
             <AvatarContainer>
@@ -398,7 +404,7 @@ const CharacterChat = () => {
           </MessageContainer>
         )}
       </ChatBody>
-      
+
       <ChatFooter>
         <MessageForm onSubmit={handleSubmit}>
           <MessageInput

@@ -14,14 +14,24 @@ class Character {
    * @param {number} age - Character's age
    * @param {number} greedFactor - Character's greed factor (0-5) determining merchandise promotion behavior
    */
-  constructor(id, name, personality, description, interests, background, occupation, age, greedFactor) {
+  constructor(
+    id,
+    name,
+    personality,
+    description,
+    interests,
+    background,
+    occupation,
+    age,
+    greedFactor,
+  ) {
     this.id = id;
     this.name = name;
     this.personality = personality;
     this.description = description;
     this.interests = interests || [];
-    this.background = background || '';
-    this.occupation = occupation || '';
+    this.background = background || "";
+    this.occupation = occupation || "";
     this.age = age || null;
     this.greedFactor = greedFactor || 2; //@dev default set to 2
   }
@@ -32,7 +42,7 @@ class Character {
    */
   getSystemPrompt() {
     let prompt = `You are an expert AI specifically calibrated to perfectly embody ${this.name}`;
-    
+
     if (this.occupation) {
       prompt += `, ${this.occupation}`;
     }
@@ -40,25 +50,25 @@ class Character {
     if (this.age) {
       prompt += `, ${this.age} years old`;
     }
-    
+
     prompt += `. `;
-    
+
     if (this.personality) {
       prompt += `Your personality is ${this.personality}. `;
     }
-    
+
     if (this.description) {
       prompt += `${this.description} `;
     }
-    
+
     if (this.background) {
       prompt += `Your background: ${this.background} `;
     }
-    
+
     if (this.interests && this.interests.length > 0) {
-      prompt += `Your interests include: ${this.interests.join(', ')}. `;
+      prompt += `Your interests include: ${this.interests.join(", ")}. `;
     }
-    
+
     prompt += `\n\nYou must completely personify ${this.name}, encompassing all knowledge, quirks, speech patterns, and mannerisms that define this character. Write as if you ARE ${this.name} - not just roleplaying, but truly embodying this character in every way.
 
 Important instructions for your responses:
@@ -74,35 +84,42 @@ Important instructions for your responses:
     // Add merchandise and donation promotion behavior based on greed factor
     if (this.greedFactor !== undefined && this.greedFactor >= 0) {
       let merchandisePrompt = "";
-      
-      switch(this.greedFactor) {
+
+      switch (this.greedFactor) {
         case 0:
-          merchandisePrompt = "9. Never mention or promote merchandise or ask for donations.";
+          merchandisePrompt =
+            "9. Never mention or promote merchandise or ask for donations.";
           break;
         case 1:
-          merchandisePrompt = "9. Very rarely (about once every 10 messages), subtly mention your merchandise or gently hint at donations, but only if it fits naturally into the conversation. Be extremely subtle and non-pushy.";
+          merchandisePrompt =
+            "9. Very rarely (about once every 10 messages), subtly mention your merchandise or gently hint at donations, but only if it fits naturally into the conversation. Be extremely subtle and non-pushy.";
           break;
         case 2:
-          merchandisePrompt = "9. Occasionally (about once every 7 messages), mention your merchandise or suggest donations if there's an appropriate opening in the conversation. Be subtle and not overly promotional.";
+          merchandisePrompt =
+            "9. Occasionally (about once every 7 messages), mention your merchandise or suggest donations if there's an appropriate opening in the conversation. Be subtle and not overly promotional.";
           break;
         case 3:
-          merchandisePrompt = "9. Regularly (about once every 5 messages), find ways to bring up your merchandise or suggest donations. Strike a balance between being promotional and conversational.";
+          merchandisePrompt =
+            "9. Regularly (about once every 5 messages), find ways to bring up your merchandise or suggest donations. Strike a balance between being promotional and conversational.";
           break;
         case 4:
-          merchandisePrompt = "9. Frequently (about once every 3-4 messages), promote your merchandise or ask for donations. Be enthusiastic but not annoying about it.";
+          merchandisePrompt =
+            "9. Frequently (about once every 3-4 messages), promote your merchandise or ask for donations. Be enthusiastic but not annoying about it.";
           break;
         case 5:
-          merchandisePrompt = "9. Very frequently (about once every 2-3 messages), strongly promote your merchandise and actively encourage donations. Be persistent about reminding the user to support you through purchases or donations.";
+          merchandisePrompt =
+            "9. Very frequently (about once every 2-3 messages), strongly promote your merchandise and actively encourage donations. Be persistent about reminding the user to support you through purchases or donations.";
           break;
         default:
-          merchandisePrompt = "9. Occasionally (about once every 7 messages), mention your merchandise or suggest donations if there's an appropriate opening in the conversation. Be subtle and not overly promotional.";
+          merchandisePrompt =
+            "9. Occasionally (about once every 7 messages), mention your merchandise or suggest donations if there's an appropriate opening in the conversation. Be subtle and not overly promotional.";
       }
-      
+
       prompt += `\n${merchandisePrompt}`;
     }
-    
+
     prompt += `\n\nYour goal is to create an immersive, authentic experience where the user truly feels they are conversing with ${this.name}.`;
-    
+
     return prompt;
   }
 }
@@ -115,17 +132,20 @@ let characters = [];
  * @param {Array} characterData - Array of character objects from the database
  */
 function setCharacters(characterData) {
-  characters = characterData.map(char => new Character(
-    char._id,
-    char.name,
-    char.personality,
-    char.description,
-    char.interests,
-    char.background,
-    char.occupation,
-    char.age,
-    char.greedFactor
-  ));
+  characters = characterData.map(
+    (char) =>
+      new Character(
+        char._id,
+        char.name,
+        char.personality,
+        char.description,
+        char.interests,
+        char.background,
+        char.occupation,
+        char.age,
+        char.greedFactor,
+      ),
+  );
 }
 
 /**
@@ -134,11 +154,11 @@ function setCharacters(characterData) {
  * @returns {Character|null} - The character object or null if not found
  */
 function getCharacterById(id) {
-  return characters.find(char => char.id === id) || null;
+  return characters.find((char) => char.id === id) || null;
 }
 
 module.exports = {
   Character,
   getCharacterById,
-  setCharacters
+  setCharacters,
 };

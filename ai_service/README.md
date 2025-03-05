@@ -11,13 +11,16 @@ This microservice handles AI-powered character interactions for the WaifuHospita
 ## Setup
 
 1. Install dependencies:
+
    ```
    npm install
    ```
 
 2. Configure environment variables:
+
    - Create a `.env` file in the root directory
    - Add your OpenAI API key:
+
    ```
    PORT=5000
    OPENAI_API_KEY=your_openai_api_key_here
@@ -35,25 +38,30 @@ This microservice handles AI-powered character interactions for the WaifuHospita
 ## API Endpoints
 
 ### Health Check
+
 ```
 GET /health
 ```
+
 Returns the status of the service.
 
 ### Character Chat
+
 ```
 POST /api/chat
 ```
 
 Request body:
+
 ```json
 {
   "message": "User's message here",
-  "characterId": "1"  // ID of the character to chat with
+  "characterId": "1" // ID of the character to chat with
 }
 ```
 
 Response:
+
 ```json
 {
   "response": "AI-generated character response"

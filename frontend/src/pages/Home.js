@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { getPopularCharacters } from '../features/characters/characterSlice';
-import Spinner from '../components/layout/Spinner';
-import styled from 'styled-components';
+import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { getPopularCharacters } from "../features/characters/characterSlice";
+import Spinner from "../components/layout/Spinner";
+import styled from "styled-components";
 
 const Hero = styled.section`
   background-color: var(--secondary-color);
@@ -165,8 +165,10 @@ const CharacterButton = styled(Link)`
 
 const Home = () => {
   const dispatch = useDispatch();
-  const { popularCharacters, loading } = useSelector(state => state.character);
-  const { isAuthenticated, user } = useSelector(state => state.auth);
+  const { popularCharacters, loading } = useSelector(
+    (state) => state.character,
+  );
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     dispatch(getPopularCharacters());
@@ -178,16 +180,21 @@ const Home = () => {
         <HeroContent>
           <HeroTitle>Create Your Perfect Anime Companion</HeroTitle>
           <HeroSubtitle>
-            Design, chat with, and own merchandise of your custom AI-generated anime characters
+            Design, chat with, and own merchandise of your custom AI-generated
+            anime characters
           </HeroSubtitle>
           <ButtonGroup>
             {isAuthenticated ? (
               <>
                 <PrimaryButton to="/dashboard">My Dashboard</PrimaryButton>
                 {user && user.isCreator ? (
-                  <SecondaryButton to="/create-character">Create Character</SecondaryButton>
+                  <SecondaryButton to="/create-character">
+                    Create Character
+                  </SecondaryButton>
                 ) : (
-                  <SecondaryButton to="/merchandise">Browse Store</SecondaryButton>
+                  <SecondaryButton to="/merchandise">
+                    Browse Store
+                  </SecondaryButton>
                 )}
               </>
             ) : (
@@ -206,25 +213,29 @@ const Home = () => {
           <FeatureCard>
             <FeatureTitle>Create</FeatureTitle>
             <FeatureText>
-              Design your own anime character with our AI-powered creator. Choose styles, personality, and more.
+              Design your own anime character with our AI-powered creator.
+              Choose styles, personality, and more.
             </FeatureText>
           </FeatureCard>
           <FeatureCard>
             <FeatureTitle>Chat</FeatureTitle>
             <FeatureText>
-              Engage in meaningful conversations with your character. They'll remember your interactions!
+              Engage in meaningful conversations with your character. They'll
+              remember your interactions!
             </FeatureText>
           </FeatureCard>
           <FeatureCard>
             <FeatureTitle>Customize</FeatureTitle>
             <FeatureText>
-              Add details to your character's background, interests, and story to make them unique.
+              Add details to your character's background, interests, and story
+              to make them unique.
             </FeatureText>
           </FeatureCard>
           <FeatureCard>
             <FeatureTitle>Merchandise</FeatureTitle>
             <FeatureText>
-              Create and sell custom merchandise featuring your character. T-shirts, mugs, and more!
+              Create and sell custom merchandise featuring your character.
+              T-shirts, mugs, and more!
             </FeatureText>
           </FeatureCard>
         </FeaturesGrid>
@@ -236,12 +247,14 @@ const Home = () => {
           <Spinner />
         ) : popularCharacters.length > 0 ? (
           <CharactersGrid>
-            {popularCharacters.slice(0, 8).map(character => (
+            {popularCharacters.slice(0, 8).map((character) => (
               <CharacterCard key={character._id}>
                 <CharacterImage src={character.imageUrl} alt={character.name} />
                 <CharacterInfo>
                   <CharacterName>{character.name}</CharacterName>
-                  <CharacterCreator>by {character.creator?.username || 'Unknown'}</CharacterCreator>
+                  <CharacterCreator>
+                    by {character.creator?.username || "Unknown"}
+                  </CharacterCreator>
                   <CharacterButton to={`/characters/${character._id}`}>
                     View Character
                   </CharacterButton>
@@ -250,7 +263,9 @@ const Home = () => {
             ))}
           </CharactersGrid>
         ) : (
-          <p className="text-center">No characters found. Be the first to create one!</p>
+          <p className="text-center">
+            No characters found. Be the first to create one!
+          </p>
         )}
       </Section>
     </>

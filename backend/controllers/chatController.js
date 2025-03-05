@@ -1,7 +1,7 @@
-const Chat = require('../models/Chat');
-const Character = require('../models/Character');
-const axios = require('axios');
-const { validationResult } = require('express-validator');
+const Chat = require("../models/Chat");
+const Character = require("../models/Character");
+const axios = require("axios");
+const { validationResult } = require("express-validator");
 
 // @desc    Get all chats for the logged in user
 // @route   GET /api/chat
@@ -9,13 +9,13 @@ const { validationResult } = require('express-validator');
 exports.getUserChats = async (req, res) => {
   try {
     const chats = await Chat.find({ user: req.user.id })
-      .populate('character', ['name', 'imageUrl', 'personality'])
+      .populate("character", ["name", "imageUrl", "personality"])
       .sort({ lastMessageTimestamp: -1 });
-    
+
     res.json(chats);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -27,37 +27,48 @@ exports.getChatWithCharacter = async (req, res) => {
     // Check if character exists
     const character = await Character.findById(req.params.characterId);
     if (!character) {
-      return res.status(404).json({ msg: 'Character not found' });
+      return res.status(404).json({ msg: "Character not found" });
     }
 
     // Check if chat exists, if not create it
     let chat = await Chat.findOne({
       user: req.user.id,
-      character: req.params.characterId
-    }).populate('character', ['name', 'imageUrl', 'personality', 'background', 'description']);
+      character: req.params.characterId,
+    }).populate("character", [
+      "name",
+      "imageUrl",
+      "personality",
+      "background",
+      "description",
+    ]);
 
     if (!chat) {
       // Create new chat
       chat = new Chat({
         user: req.user.id,
         character: req.params.characterId,
-        messages: []
+        messages: [],
       });
 
       await chat.save();
-      
+
       // Populate character details
-      chat = await Chat.findById(chat._id).populate('character', 
-        ['name', 'imageUrl', 'personality', 'background', 'description']);
+      chat = await Chat.findById(chat._id).populate("character", [
+        "name",
+        "imageUrl",
+        "personality",
+        "background",
+        "description",
+      ]);
     }
 
     res.json(chat);
   } catch (err) {
     console.error(err.message);
-    if (err.kind === 'ObjectId') {
-      return res.status(404).json({ msg: 'Character not found' });
+    if (err.kind === "ObjectId") {
+      return res.status(404).json({ msg: "Character not found" });
     }
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -76,27 +87,27 @@ exports.sendMessage = async (req, res) => {
     // Check if character exists
     const character = await Character.findById(req.params.characterId);
     if (!character) {
-      return res.status(404).json({ msg: 'Character not found' });
+      return res.status(404).json({ msg: "Character not found" });
     }
 
     // Find chat or create new one
     let chat = await Chat.findOne({
       user: req.user.id,
-      character: req.params.characterId
+      character: req.params.characterId,
     });
 
     if (!chat) {
       chat = new Chat({
         user: req.user.id,
         character: req.params.characterId,
-        messages: []
+        messages: [],
       });
     }
 
     // Add user message to chat
     chat.messages.push({
-      sender: 'user',
-      content: message
+      sender: "user",
+      content: message,
     });
 
     // Get character's reply
@@ -104,8 +115,8 @@ exports.sendMessage = async (req, res) => {
 
     // Add character's reply to chat
     chat.messages.push({
-      sender: 'character',
-      content: characterReply
+      sender: "character",
+      content: characterReply,
     });
 
     // Update last message timestamp
@@ -114,16 +125,21 @@ exports.sendMessage = async (req, res) => {
     await chat.save();
 
     // Populate character details and return chat
-    const updatedChat = await Chat.findById(chat._id)
-      .populate('character', ['name', 'imageUrl', 'personality', 'background', 'description']);
+    const updatedChat = await Chat.findById(chat._id).populate("character", [
+      "name",
+      "imageUrl",
+      "personality",
+      "background",
+      "description",
+    ]);
 
     res.json(updatedChat);
   } catch (err) {
     console.error(err.message);
-    if (err.kind === 'ObjectId') {
-      return res.status(404).json({ msg: 'Character not found' });
+    if (err.kind === "ObjectId") {
+      return res.status(404).json({ msg: "Character not found" });
     }
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -133,25 +149,27 @@ exports.sendMessage = async (req, res) => {
 exports.deleteChat = async (req, res) => {
   try {
     const chat = await Chat.findById(req.params.chatId);
-    
+
     if (!chat) {
-      return res.status(404).json({ msg: 'Chat not found' });
+      return res.status(404).json({ msg: "Chat not found" });
     }
 
     // Check if chat belongs to user
     if (chat.user.toString() !== req.user.id) {
-      return res.status(401).json({ msg: 'Not authorized to delete this chat' });
+      return res
+        .status(401)
+        .json({ msg: "Not authorized to delete this chat" });
     }
 
     await chat.remove();
 
-    res.json({ msg: 'Chat deleted' });
+    res.json({ msg: "Chat deleted" });
   } catch (err) {
     console.error(err.message);
-    if (err.kind === 'ObjectId') {
-      return res.status(404).json({ msg: 'Chat not found' });
+    if (err.kind === "ObjectId") {
+      return res.status(404).json({ msg: "Chat not found" });
     }
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -160,24 +178,27 @@ exports.deleteChat = async (req, res) => {
 const getCharacterReply = async (character, messages) => {
   // For basic implementation, we'll simulate AI response
   // In a production app, this would call the OpenAI API or similar
-  
+
   try {
     // Call AI service if configured
     if (process.env.AI_SERVICE_URL) {
-      const response = await axios.post(`${process.env.AI_SERVICE_URL}/api/chat`, {
-        character: {
-          name: character.name,
-          personality: character.personality,
-          background: character.background,
-          interests: character.interests,
-          occupation: character.occupation
+      const response = await axios.post(
+        `${process.env.AI_SERVICE_URL}/api/chat`,
+        {
+          character: {
+            name: character.name,
+            personality: character.personality,
+            background: character.background,
+            interests: character.interests,
+            occupation: character.occupation,
+          },
+          messages: messages,
         },
-        messages: messages
-      });
-      
+      );
+
       return response.data.reply;
     }
-    
+
     // Fallback responses if AI service is not available
     const fallbackResponses = [
       `Hi there! I'm ${character.name}. How can I help you today?`,
@@ -189,13 +210,13 @@ const getCharacterReply = async (character, messages) => {
       `Oh really? That's fascinating!`,
       `I see. That makes sense.`,
       `What a lovely conversation we're having!`,
-      `You're so nice to talk to!`
+      `You're so nice to talk to!`,
     ];
-    
+
     const randomIndex = Math.floor(Math.random() * fallbackResponses.length);
     return fallbackResponses[randomIndex];
   } catch (error) {
-    console.error('Error getting character reply:', error);
+    console.error("Error getting character reply:", error);
     return `Sorry, I'm having trouble processing that right now. Can we talk about something else?`;
   }
 };

@@ -1,37 +1,39 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const PurchaseSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: true,
   },
-  items: [{
-    merchandise: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Merchandise',
-      required: true,
+  items: [
+    {
+      merchandise: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Merchandise",
+        required: true,
+      },
+      quantity: {
+        type: Number,
+        required: true,
+        min: 1,
+      },
+      size: {
+        type: String,
+        enum: ["XS", "S", "M", "L", "XL", "XXL", "N/A"],
+        default: "N/A",
+      },
+      color: {
+        type: String,
+        default: "",
+      },
+      price: {
+        type: Number,
+        required: true,
+        min: 0,
+      },
     },
-    quantity: {
-      type: Number,
-      required: true,
-      min: 1,
-    },
-    size: {
-      type: String,
-      enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'N/A'],
-      default: 'N/A',
-    },
-    color: {
-      type: String,
-      default: '',
-    },
-    price: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-  }],
+  ],
   totalAmount: {
     type: Number,
     required: true,
@@ -61,7 +63,7 @@ const PurchaseSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ['credit_card', 'crypto', 'paypal'],
+    enum: ["credit_card", "crypto", "paypal"],
     required: true,
   },
   paymentId: {
@@ -90,8 +92,8 @@ const PurchaseSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
-    default: 'pending',
+    enum: ["pending", "processing", "shipped", "delivered", "cancelled"],
+    default: "pending",
   },
   createdAt: {
     type: Date,
@@ -99,4 +101,4 @@ const PurchaseSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Purchase', PurchaseSchema);
+module.exports = mongoose.model("Purchase", PurchaseSchema);

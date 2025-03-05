@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import styled from 'styled-components';
+import React from "react";
+import { Link } from "react-router-dom";
+import styled from "styled-components";
 
 const FooterContainer = styled.footer`
   background-color: var(--light-bg);
@@ -91,7 +91,9 @@ const Footer = () => {
       </FooterContent>
 
       <FooterBottom>
-        <FooterText>&copy; {new Date().getFullYear()} WaifuHospital. All rights reserved.</FooterText>
+        <FooterText>
+          &copy; {new Date().getFullYear()} WaifuHospital. All rights reserved.
+        </FooterText>
       </FooterBottom>
     </FooterContainer>
   );

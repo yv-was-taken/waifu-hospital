@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-const validator = require('validator');
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const validator = require("validator");
 
 const UserSchema = new mongoose.Schema({
   username: {
@@ -17,27 +17,29 @@ const UserSchema = new mongoose.Schema({
     lowercase: true,
     validate: {
       validator: validator.isEmail,
-      message: 'Please provide a valid email',
+      message: "Please provide a valid email",
     },
   },
   password: {
     type: String,
     required: true,
-    minlength: [6, 'Password must be at least 6 characters long'],
+    minlength: [6, "Password must be at least 6 characters long"],
   },
   profilePicture: {
     type: String,
-    default: '',
+    default: "",
   },
   bio: {
     type: String,
-    default: '',
+    default: "",
   },
   // isCreator field removed - all users can create characters
-  characters: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Character',
-  }],
+  characters: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Character",
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,
@@ -45,8 +47,8 @@ const UserSchema = new mongoose.Schema({
 });
 
 // Hash password before saving
-UserSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
+UserSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
     next();
   }
   const salt = await bcrypt.genSalt(10);
@@ -54,8 +56,8 @@ UserSchema.pre('save', async function(next) {
 });
 
 // Match password
-UserSchema.methods.matchPassword = async function(enteredPassword) {
+UserSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model("User", UserSchema);

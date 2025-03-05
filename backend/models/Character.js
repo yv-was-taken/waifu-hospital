@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const CharacterSchema = new mongoose.Schema({
   name: {
@@ -8,7 +8,7 @@ const CharacterSchema = new mongoose.Schema({
   },
   creator: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: true,
   },
   imageUrl: {
@@ -17,8 +17,17 @@ const CharacterSchema = new mongoose.Schema({
   },
   style: {
     type: String,
-    enum: ['retro', 'gothic', 'neocyber', 'anime', 'realistic', 'fantasy', 'sci-fi', 'chibi'],
-    default: 'anime',
+    enum: [
+      "retro",
+      "gothic",
+      "neocyber",
+      "anime",
+      "realistic",
+      "fantasy",
+      "sci-fi",
+      "chibi",
+    ],
+    default: "anime",
   },
   description: {
     type: String,
@@ -30,14 +39,16 @@ const CharacterSchema = new mongoose.Schema({
   },
   background: {
     type: String,
-    default: '',
+    default: "",
   },
-  interests: [{
-    type: String,
-  }],
+  interests: [
+    {
+      type: String,
+    },
+  ],
   occupation: {
     type: String,
-    default: '',
+    default: "",
   },
   age: {
     type: Number,
@@ -57,14 +68,16 @@ const CharacterSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  likedBy: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  }],
+  likedBy: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
 
-module.exports = mongoose.model('Character', CharacterSchema);
+module.exports = mongoose.model("Character", CharacterSchema);

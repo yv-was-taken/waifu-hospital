@@ -1,6 +1,6 @@
-const Merchandise = require('../models/Merchandise');
-const Character = require('../models/Character');
-const { validationResult } = require('express-validator');
+const Merchandise = require("../models/Merchandise");
+const Character = require("../models/Character");
+const { validationResult } = require("express-validator");
 
 // @desc    Create a new merchandise item
 // @route   POST /api/merchandise
@@ -22,19 +22,23 @@ exports.createMerchandise = async (req, res) => {
     availableColors,
     stock,
     productionCost,
-    creatorRevenue
+    creatorRevenue,
   } = req.body;
 
   try {
     // Check if character exists
     const characterObj = await Character.findById(character);
     if (!characterObj) {
-      return res.status(404).json({ msg: 'Character not found' });
+      return res.status(404).json({ msg: "Character not found" });
     }
 
     // Verify that the user is the creator of the character
     if (characterObj.creator.toString() !== req.user.id) {
-      return res.status(401).json({ msg: 'Not authorized to create merchandise for this character' });
+      return res
+        .status(401)
+        .json({
+          msg: "Not authorized to create merchandise for this character",
+        });
     }
 
     // Create new merchandise item
@@ -46,11 +50,11 @@ exports.createMerchandise = async (req, res) => {
       character,
       creator: req.user.id,
       category,
-      availableSizes: availableSizes || ['N/A'],
+      availableSizes: availableSizes || ["N/A"],
       availableColors: availableColors || [],
       stock: stock || 100,
       productionCost,
-      creatorRevenue
+      creatorRevenue,
     });
 
     const merchandise = await newMerchandise.save();
@@ -58,10 +62,10 @@ exports.createMerchandise = async (req, res) => {
     res.json(merchandise);
   } catch (err) {
     console.error(err.message);
-    if (err.kind === 'ObjectId') {
-      return res.status(404).json({ msg: 'Character not found' });
+    if (err.kind === "ObjectId") {
+      return res.status(404).json({ msg: "Character not found" });
     }
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -71,14 +75,14 @@ exports.createMerchandise = async (req, res) => {
 exports.getMerchandise = async (req, res) => {
   try {
     const merchandise = await Merchandise.find()
-      .populate('character', ['name', 'imageUrl'])
-      .populate('creator', ['username', 'profilePicture'])
+      .populate("character", ["name", "imageUrl"])
+      .populate("creator", ["username", "profilePicture"])
       .sort({ createdAt: -1 });
-    
+
     res.json(merchandise);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -88,13 +92,13 @@ exports.getMerchandise = async (req, res) => {
 exports.getCreatorMerchandise = async (req, res) => {
   try {
     const merchandise = await Merchandise.find({ creator: req.user.id })
-      .populate('character', ['name', 'imageUrl'])
+      .populate("character", ["name", "imageUrl"])
       .sort({ createdAt: -1 });
-    
+
     res.json(merchandise);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -103,17 +107,19 @@ exports.getCreatorMerchandise = async (req, res) => {
 // @access  Public
 exports.getCharacterMerchandise = async (req, res) => {
   try {
-    const merchandise = await Merchandise.find({ character: req.params.characterId })
-      .populate('creator', ['username', 'profilePicture'])
+    const merchandise = await Merchandise.find({
+      character: req.params.characterId,
+    })
+      .populate("creator", ["username", "profilePicture"])
       .sort({ createdAt: -1 });
-    
+
     res.json(merchandise);
   } catch (err) {
     console.error(err.message);
-    if (err.kind === 'ObjectId') {
-      return res.status(404).json({ msg: 'Character not found' });
+    if (err.kind === "ObjectId") {
+      return res.status(404).json({ msg: "Character not found" });
     }
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -123,20 +129,20 @@ exports.getCharacterMerchandise = async (req, res) => {
 exports.getMerchandiseById = async (req, res) => {
   try {
     const merchandise = await Merchandise.findById(req.params.id)
-      .populate('character', ['name', 'imageUrl', 'description', 'personality'])
-      .populate('creator', ['username', 'profilePicture']);
-    
+      .populate("character", ["name", "imageUrl", "description", "personality"])
+      .populate("creator", ["username", "profilePicture"]);
+
     if (!merchandise) {
-      return res.status(404).json({ msg: 'Merchandise not found' });
+      return res.status(404).json({ msg: "Merchandise not found" });
     }
 
     res.json(merchandise);
   } catch (err) {
     console.error(err.message);
-    if (err.kind === 'ObjectId') {
-      return res.status(404).json({ msg: 'Merchandise not found' });
+    if (err.kind === "ObjectId") {
+      return res.status(404).json({ msg: "Merchandise not found" });
     }
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -146,14 +152,16 @@ exports.getMerchandiseById = async (req, res) => {
 exports.updateMerchandise = async (req, res) => {
   try {
     const merchandise = await Merchandise.findById(req.params.id);
-    
+
     if (!merchandise) {
-      return res.status(404).json({ msg: 'Merchandise not found' });
+      return res.status(404).json({ msg: "Merchandise not found" });
     }
 
     // Check if merchandise belongs to user
     if (merchandise.creator.toString() !== req.user.id) {
-      return res.status(401).json({ msg: 'Not authorized to update this merchandise' });
+      return res
+        .status(401)
+        .json({ msg: "Not authorized to update this merchandise" });
     }
 
     const {
@@ -166,7 +174,7 @@ exports.updateMerchandise = async (req, res) => {
       availableColors,
       stock,
       productionCost,
-      creatorRevenue
+      creatorRevenue,
     } = req.body;
 
     // Build merchandise object
@@ -186,18 +194,18 @@ exports.updateMerchandise = async (req, res) => {
     const updatedMerchandise = await Merchandise.findByIdAndUpdate(
       req.params.id,
       { $set: merchandiseFields },
-      { new: true }
+      { new: true },
     )
-      .populate('character', ['name', 'imageUrl'])
-      .populate('creator', ['username', 'profilePicture']);
+      .populate("character", ["name", "imageUrl"])
+      .populate("creator", ["username", "profilePicture"]);
 
     res.json(updatedMerchandise);
   } catch (err) {
     console.error(err.message);
-    if (err.kind === 'ObjectId') {
-      return res.status(404).json({ msg: 'Merchandise not found' });
+    if (err.kind === "ObjectId") {
+      return res.status(404).json({ msg: "Merchandise not found" });
     }
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -207,24 +215,26 @@ exports.updateMerchandise = async (req, res) => {
 exports.deleteMerchandise = async (req, res) => {
   try {
     const merchandise = await Merchandise.findById(req.params.id);
-    
+
     if (!merchandise) {
-      return res.status(404).json({ msg: 'Merchandise not found' });
+      return res.status(404).json({ msg: "Merchandise not found" });
     }
 
     // Check if merchandise belongs to user
     if (merchandise.creator.toString() !== req.user.id) {
-      return res.status(401).json({ msg: 'Not authorized to delete this merchandise' });
+      return res
+        .status(401)
+        .json({ msg: "Not authorized to delete this merchandise" });
     }
 
     await merchandise.remove();
 
-    res.json({ msg: 'Merchandise removed' });
+    res.json({ msg: "Merchandise removed" });
   } catch (err) {
     console.error(err.message);
-    if (err.kind === 'ObjectId') {
-      return res.status(404).json({ msg: 'Merchandise not found' });
+    if (err.kind === "ObjectId") {
+      return res.status(404).json({ msg: "Merchandise not found" });
     }
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };

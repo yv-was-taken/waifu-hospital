@@ -1,111 +1,127 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import { setAlert } from '../alerts/alertSlice';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+import { setAlert } from "../alerts/alertSlice";
 
 // Create payment intent
 export const createPaymentIntent = createAsyncThunk(
-  'cart/createPaymentIntent',
+  "cart/createPaymentIntent",
   async ({ items, totalAmount }, { rejectWithValue }) => {
     try {
-      const res = await axios.post('/api/payments/create-payment-intent', { 
-        items, 
-        totalAmount 
+      const res = await axios.post("/api/payments/create-payment-intent", {
+        items,
+        totalAmount,
       });
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response.data.msg || 'Failed to create payment intent');
+      return rejectWithValue(
+        err.response.data.msg || "Failed to create payment intent",
+      );
     }
-  }
+  },
 );
 
 // Process crypto payment
 export const processCryptoPayment = createAsyncThunk(
-  'cart/processCryptoPayment',
-  async ({ items, totalAmount, cryptoType, walletAddress }, { rejectWithValue }) => {
+  "cart/processCryptoPayment",
+  async (
+    { items, totalAmount, cryptoType, walletAddress },
+    { rejectWithValue },
+  ) => {
     try {
-      const res = await axios.post('/api/payments/crypto', { 
-        items, 
+      const res = await axios.post("/api/payments/crypto", {
+        items,
         totalAmount,
         cryptoType,
-        walletAddress
+        walletAddress,
       });
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response.data.msg || 'Failed to process crypto payment');
+      return rejectWithValue(
+        err.response.data.msg || "Failed to process crypto payment",
+      );
     }
-  }
+  },
 );
 
 // Complete payment
 export const completePayment = createAsyncThunk(
-  'cart/completePayment',
-  async ({ paymentId, items, shippingAddress, paymentMethod }, { dispatch, rejectWithValue }) => {
+  "cart/completePayment",
+  async (
+    { paymentId, items, shippingAddress, paymentMethod },
+    { dispatch, rejectWithValue },
+  ) => {
     try {
-      const res = await axios.post('/api/payments/complete', {
+      const res = await axios.post("/api/payments/complete", {
         paymentId,
         items,
         shippingAddress,
-        paymentMethod
+        paymentMethod,
       });
-      
-      dispatch(setAlert({
-        msg: 'Order placed successfully!',
-        type: 'success'
-      }));
-      
+
+      dispatch(
+        setAlert({
+          msg: "Order placed successfully!",
+          type: "success",
+        }),
+      );
+
       return res.data;
     } catch (err) {
-      dispatch(setAlert({
-        msg: err.response.data.msg || 'Failed to complete order',
-        type: 'error'
-      }));
-      
-      return rejectWithValue(err.response.data.msg || 'Payment completion failed');
+      dispatch(
+        setAlert({
+          msg: err.response.data.msg || "Failed to complete order",
+          type: "error",
+        }),
+      );
+
+      return rejectWithValue(
+        err.response.data.msg || "Payment completion failed",
+      );
     }
-  }
+  },
 );
 
 // Get user orders
 export const getUserOrders = createAsyncThunk(
-  'cart/getUserOrders',
+  "cart/getUserOrders",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get('/api/payments/orders');
+      const res = await axios.get("/api/payments/orders");
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response.data.msg || 'Failed to fetch orders');
+      return rejectWithValue(err.response.data.msg || "Failed to fetch orders");
     }
-  }
+  },
 );
 
 // Get order by ID
 export const getOrderById = createAsyncThunk(
-  'cart/getOrderById',
+  "cart/getOrderById",
   async (id, { rejectWithValue }) => {
     try {
       const res = await axios.get(`/api/payments/orders/${id}`);
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response.data.msg || 'Failed to fetch order');
+      return rejectWithValue(err.response.data.msg || "Failed to fetch order");
     }
-  }
+  },
 );
 
 // Initial state
 const initialState = {
-  cartItems: localStorage.getItem('cartItems') 
-    ? JSON.parse(localStorage.getItem('cartItems')) 
+  cartItems: localStorage.getItem("cartItems")
+    ? JSON.parse(localStorage.getItem("cartItems"))
     : [],
-  shippingAddress: localStorage.getItem('shippingAddress')
-    ? JSON.parse(localStorage.getItem('shippingAddress'))
+  shippingAddress: localStorage.getItem("shippingAddress")
+    ? JSON.parse(localStorage.getItem("shippingAddress"))
     : {},
-  paymentMethod: localStorage.getItem('paymentMethod') || 'credit_card',
+  paymentMethod: localStorage.getItem("paymentMethod") || "credit_card",
   clientSecret: null,
   paymentId: null,
   orders: [],
   currentOrder: null,
   loading: false,
-  error: null
+  error: null,
 };
 
 // Helper function to update localStorage
@@ -115,61 +131,65 @@ const updateLocalStorage = (key, value) => {
 
 // Slice
 const cartSlice = createSlice({
-  name: 'cart',
+  name: "cart",
   initialState,
   reducers: {
     addToCart: (state, action) => {
       const item = action.payload;
-      
-      const existItem = state.cartItems.find(x => 
-        x._id === item._id && 
-        x.size === item.size && 
-        x.color === item.color
+
+      const existItem = state.cartItems.find(
+        (x) =>
+          x._id === item._id && x.size === item.size && x.color === item.color,
       );
-      
+
       if (existItem) {
-        state.cartItems = state.cartItems.map(x => 
-          (x._id === existItem._id && x.size === existItem.size && x.color === existItem.color) 
-            ? item 
-            : x
+        state.cartItems = state.cartItems.map((x) =>
+          x._id === existItem._id &&
+          x.size === existItem.size &&
+          x.color === existItem.color
+            ? item
+            : x,
         );
       } else {
         state.cartItems = [...state.cartItems, item];
       }
-      
-      updateLocalStorage('cartItems', state.cartItems);
+
+      updateLocalStorage("cartItems", state.cartItems);
     },
     removeFromCart: (state, action) => {
-      state.cartItems = state.cartItems.filter(x => 
-        !(x._id === action.payload._id && 
-          x.size === action.payload.size && 
-          x.color === action.payload.color)
+      state.cartItems = state.cartItems.filter(
+        (x) =>
+          !(
+            x._id === action.payload._id &&
+            x.size === action.payload.size &&
+            x.color === action.payload.color
+          ),
       );
-      
-      updateLocalStorage('cartItems', state.cartItems);
+
+      updateLocalStorage("cartItems", state.cartItems);
     },
     updateCartItemQuantity: (state, action) => {
       const { id, size, color, quantity } = action.payload;
-      
-      state.cartItems = state.cartItems.map(item => 
-        (item._id === id && item.size === size && item.color === color) 
-          ? { ...item, quantity } 
-          : item
+
+      state.cartItems = state.cartItems.map((item) =>
+        item._id === id && item.size === size && item.color === color
+          ? { ...item, quantity }
+          : item,
       );
-      
-      updateLocalStorage('cartItems', state.cartItems);
+
+      updateLocalStorage("cartItems", state.cartItems);
     },
     clearCart: (state) => {
       state.cartItems = [];
-      localStorage.removeItem('cartItems');
+      localStorage.removeItem("cartItems");
     },
     saveShippingAddress: (state, action) => {
       state.shippingAddress = action.payload;
-      updateLocalStorage('shippingAddress', action.payload);
+      updateLocalStorage("shippingAddress", action.payload);
     },
     savePaymentMethod: (state, action) => {
       state.paymentMethod = action.payload;
-      localStorage.setItem('paymentMethod', action.payload);
+      localStorage.setItem("paymentMethod", action.payload);
     },
     clearPaymentInfo: (state) => {
       state.clientSecret = null;
@@ -177,7 +197,7 @@ const cartSlice = createSlice({
     },
     clearOrderInfo: (state) => {
       state.currentOrder = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -193,7 +213,7 @@ const cartSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Process crypto payment
       .addCase(processCryptoPayment.pending, (state) => {
         state.loading = true;
@@ -206,7 +226,7 @@ const cartSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Complete payment
       .addCase(completePayment.pending, (state) => {
         state.loading = true;
@@ -215,13 +235,13 @@ const cartSlice = createSlice({
         state.loading = false;
         state.cartItems = [];
         state.currentOrder = action.payload;
-        localStorage.removeItem('cartItems');
+        localStorage.removeItem("cartItems");
       })
       .addCase(completePayment.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Get user orders
       .addCase(getUserOrders.pending, (state) => {
         state.loading = true;
@@ -234,7 +254,7 @@ const cartSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Get order by ID
       .addCase(getOrderById.pending, (state) => {
         state.loading = true;
@@ -247,18 +267,18 @@ const cartSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       });
-  }
+  },
 });
 
-export const { 
-  addToCart, 
-  removeFromCart, 
+export const {
+  addToCart,
+  removeFromCart,
   updateCartItemQuantity,
   clearCart,
   saveShippingAddress,
   savePaymentMethod,
   clearPaymentInfo,
-  clearOrderInfo
+  clearOrderInfo,
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

@@ -1,10 +1,10 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { v4 as uuidv4 } from 'uuid';
+import { createSlice } from "@reduxjs/toolkit";
+import { v4 as uuidv4 } from "uuid";
 
 const initialState = [];
 
 const alertSlice = createSlice({
-  name: 'alert',
+  name: "alert",
   initialState,
   reducers: {
     setAlert: {
@@ -18,15 +18,15 @@ const alertSlice = createSlice({
             id,
             msg,
             type,
-            timeout
-          }
+            timeout,
+          },
         };
-      }
+      },
     },
     removeAlert: (state, action) => {
-      return state.filter(alert => alert.id !== action.payload);
-    }
-  }
+      return state.filter((alert) => alert.id !== action.payload);
+    },
+  },
 });
 
 export const { setAlert, removeAlert } = alertSlice.actions;

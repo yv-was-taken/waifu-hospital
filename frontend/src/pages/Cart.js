@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { removeFromCart, updateCartItemQuantity, clearCart } from '../features/cart/cartSlice';
-import { setAlert } from '../features/alerts/alertSlice';
-import Spinner from '../components/layout/Spinner';
-import styled from 'styled-components';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  removeFromCart,
+  updateCartItemQuantity,
+  clearCart,
+} from "../features/cart/cartSlice";
+import { setAlert } from "../features/alerts/alertSlice";
+import Spinner from "../components/layout/Spinner";
+import styled from "styled-components";
 
 const CartContainer = styled.div`
   padding: 2rem 0;
@@ -20,7 +24,7 @@ const CartContent = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 2rem;
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
   }
@@ -33,7 +37,7 @@ const CartItems = styled.div`
 
 const CartSummary = styled.div`
   flex: 0 0 350px;
-  
+
   @media (max-width: 768px) {
     flex: 1 0 100%;
   }
@@ -58,11 +62,13 @@ const SummaryRow = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: 1rem;
-  font-size: ${props => props.total ? '1.2rem' : '1rem'};
-  font-weight: ${props => props.total ? '600' : '400'};
-  color: ${props => props.total ? 'var(--primary-color)' : 'var(--text-color)'};
-  padding-top: ${props => props.total ? '1rem' : '0'};
-  border-top: ${props => props.total ? '1px solid var(--border-color)' : 'none'};
+  font-size: ${(props) => (props.total ? "1.2rem" : "1rem")};
+  font-weight: ${(props) => (props.total ? "600" : "400")};
+  color: ${(props) =>
+    props.total ? "var(--primary-color)" : "var(--text-color)"};
+  padding-top: ${(props) => (props.total ? "1rem" : "0")};
+  border-top: ${(props) =>
+    props.total ? "1px solid var(--border-color)" : "none"};
 `;
 
 const CheckoutButton = styled.button`
@@ -77,11 +83,11 @@ const CheckoutButton = styled.button`
   cursor: pointer;
   transition: background-color 0.3s ease;
   margin-top: 1.5rem;
-  
+
   &:hover {
     background-color: var(--primary-dark);
   }
-  
+
   &:disabled {
     background-color: #ccc;
     cursor: not-allowed;
@@ -98,7 +104,7 @@ const ClearCartButton = styled.button`
   padding: 0;
   text-align: center;
   width: 100%;
-  
+
   &:hover {
     color: var(--error-color);
     text-decoration: underline;
@@ -112,7 +118,7 @@ const CartItemCard = styled.div`
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  
+
   @media (max-width: 576px) {
     flex-direction: column;
   }
@@ -124,7 +130,7 @@ const ItemImage = styled.img`
   object-fit: cover;
   border-radius: 4px;
   margin-right: 1.5rem;
-  
+
   @media (max-width: 576px) {
     width: 100%;
     height: 150px;
@@ -145,7 +151,7 @@ const ItemTitle = styled(Link)`
   color: var(--text-color);
   text-decoration: none;
   display: block;
-  
+
   &:hover {
     color: var(--primary-color);
   }
@@ -172,7 +178,7 @@ const ItemColorDot = styled.span`
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background-color: ${props => props.color};
+  background-color: ${(props) => props.color};
   margin-right: 0.3rem;
 `;
 
@@ -208,12 +214,12 @@ const QuantityButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   &:hover {
     border-color: var(--primary-color);
     color: var(--primary-color);
   }
-  
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -227,7 +233,7 @@ const QuantityInput = styled.input`
   border-radius: 4px;
   text-align: center;
   font-size: 0.9rem;
-  
+
   &:focus {
     outline: none;
     border-color: var(--primary-color);
@@ -240,7 +246,7 @@ const RemoveButton = styled.button`
   border: none;
   font-size: 0.9rem;
   cursor: pointer;
-  
+
   &:hover {
     color: var(--error-color);
     text-decoration: underline;
@@ -274,7 +280,7 @@ const ShopButton = styled(Link)`
   text-decoration: none;
   font-weight: 500;
   transition: background-color 0.3s ease;
-  
+
   &:hover {
     background-color: var(--primary-dark);
   }
@@ -283,50 +289,59 @@ const ShopButton = styled(Link)`
 const Cart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { cartItems, loading } = useSelector(state => state.cart);
-  
+  const { cartItems, loading } = useSelector((state) => state.cart);
+
   const handleQuantityChange = (item, newQuantity) => {
     const quantity = parseInt(newQuantity);
     if (!isNaN(quantity) && quantity > 0 && quantity <= 100) {
-      dispatch(updateCartItemQuantity({
-        id: item._id, 
-        size: item.size, 
-        color: item.color, 
-        quantity
-      }));
+      dispatch(
+        updateCartItemQuantity({
+          id: item._id,
+          size: item.size,
+          color: item.color,
+          quantity,
+        }),
+      );
     }
   };
-  
+
   const handleRemoveItem = (item) => {
     dispatch(removeFromCart(item));
-    dispatch(setAlert({
-      msg: 'Item removed from cart',
-      type: 'success'
-    }));
+    dispatch(
+      setAlert({
+        msg: "Item removed from cart",
+        type: "success",
+      }),
+    );
   };
-  
+
   const handleClearCart = () => {
     dispatch(clearCart());
-    dispatch(setAlert({
-      msg: 'Cart cleared',
-      type: 'success'
-    }));
+    dispatch(
+      setAlert({
+        msg: "Cart cleared",
+        type: "success",
+      }),
+    );
   };
-  
+
   const handleCheckout = () => {
-    navigate('/checkout');
+    navigate("/checkout");
   };
-  
+
   // Calculate order summary
-  const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const subtotal = cartItems.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0,
+  );
   const shipping = subtotal > 0 ? 5.99 : 0;
   const tax = subtotal * 0.08; // 8% tax
   const total = subtotal + shipping + tax;
-  
+
   if (loading) {
     return <Spinner />;
   }
-  
+
   if (cartItems.length === 0) {
     return (
       <CartContainer>
@@ -341,21 +356,30 @@ const Cart = () => {
       </CartContainer>
     );
   }
-  
+
   return (
     <CartContainer>
-      <CartTitle>Your Cart ({cartItems.length} {cartItems.length === 1 ? 'item' : 'items'})</CartTitle>
-      
+      <CartTitle>
+        Your Cart ({cartItems.length}{" "}
+        {cartItems.length === 1 ? "item" : "items"})
+      </CartTitle>
+
       <CartContent>
         <CartItems>
           {cartItems.map((item, index) => (
-            <CartItemCard key={`${item._id}-${item.size}-${item.color}-${index}`}>
+            <CartItemCard
+              key={`${item._id}-${item.size}-${item.color}-${index}`}
+            >
               <ItemImage src={item.imageUrl} alt={item.name} />
               <ItemDetails>
-                <ItemTitle to={`/merchandise/${item._id}`}>{item.name}</ItemTitle>
+                <ItemTitle to={`/merchandise/${item._id}`}>
+                  {item.name}
+                </ItemTitle>
                 <ItemMeta>
                   <ItemAttribute>{item.category}</ItemAttribute>
-                  {item.size !== 'N/A' && <ItemAttribute>Size: {item.size}</ItemAttribute>}
+                  {item.size !== "N/A" && (
+                    <ItemAttribute>Size: {item.size}</ItemAttribute>
+                  )}
                   {item.color && (
                     <ItemAttribute>
                       <ItemColorDot color={item.color} />
@@ -363,11 +387,15 @@ const Cart = () => {
                     </ItemAttribute>
                   )}
                 </ItemMeta>
-                <ItemPrice>${(item.price * item.quantity).toFixed(2)}</ItemPrice>
+                <ItemPrice>
+                  ${(item.price * item.quantity).toFixed(2)}
+                </ItemPrice>
                 <ItemActions>
                   <QuantityControl>
                     <QuantityButton
-                      onClick={() => handleQuantityChange(item, item.quantity - 1)}
+                      onClick={() =>
+                        handleQuantityChange(item, item.quantity - 1)
+                      }
                       disabled={item.quantity <= 1}
                     >
                       -
@@ -377,10 +405,14 @@ const Cart = () => {
                       min="1"
                       max="100"
                       value={item.quantity}
-                      onChange={(e) => handleQuantityChange(item, e.target.value)}
+                      onChange={(e) =>
+                        handleQuantityChange(item, e.target.value)
+                      }
                     />
                     <QuantityButton
-                      onClick={() => handleQuantityChange(item, item.quantity + 1)}
+                      onClick={() =>
+                        handleQuantityChange(item, item.quantity + 1)
+                      }
                       disabled={item.quantity >= 100}
                     >
                       +
@@ -394,7 +426,7 @@ const Cart = () => {
             </CartItemCard>
           ))}
         </CartItems>
-        
+
         <CartSummary>
           <SummaryCard>
             <SummaryTitle>Order Summary</SummaryTitle>
@@ -414,7 +446,7 @@ const Cart = () => {
               <span>Total</span>
               <span>${total.toFixed(2)}</span>
             </SummaryRow>
-            
+
             <CheckoutButton onClick={handleCheckout}>
               Proceed to Checkout
             </CheckoutButton>

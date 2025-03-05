@@ -22,22 +22,26 @@ The application is built as a microservices architecture with three main compone
 ## Technologies
 
 ### Frontend
+
 - React
 - Redux for state management
 - React Router for navigation
 - Styled-components for styling
 
 ### Backend
+
 - Node.js and Express
 - MongoDB with Mongoose
 - JWT authentication
 - RESTful API architecture
 
 ### AI Service
+
 - OpenAI integration for character responses
 - Express-based microservice
 
 ### Others
+
 - Stripe payment integration
 - Docker for containerization
 

@@ -1,7 +1,7 @@
-const User = require('../models/User');
-const jwt = require('jsonwebtoken');
-const { validationResult } = require('express-validator');
-const bcrypt = require('bcryptjs');
+const User = require("../models/User");
+const jwt = require("jsonwebtoken");
+const { validationResult } = require("express-validator");
+const bcrypt = require("bcryptjs");
 
 // @desc    Register user
 // @route   POST /api/users/register
@@ -13,11 +13,11 @@ exports.registerUser = async (req, res) => {
   }
 
   const { username, email, password } = req.body;
-  
-  console.log('Register attempt:', { username, email });
+
+  console.log("Register attempt:", { username, email });
 
   try {
-    console.log('Checking if user exists...');
+    console.log("Checking if user exists...");
     // Check if user already exists - add retry logic
     let user;
     const maxRetries = 3;
@@ -26,70 +26,75 @@ exports.registerUser = async (req, res) => {
         user = await User.findOne({ email });
         break; // If successful, exit the loop
       } catch (err) {
-        console.log(`Attempt ${i+1}/${maxRetries} failed: ${err.message}`);
+        console.log(`Attempt ${i + 1}/${maxRetries} failed: ${err.message}`);
         if (i === maxRetries - 1) throw err; // If last attempt, rethrow
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second before retry
       }
     }
     if (user) {
-      console.log('User with this email already exists');
-      return res.status(400).json({ msg: 'User already exists' });
+      console.log("User with this email already exists");
+      return res.status(400).json({ msg: "User already exists" });
     }
 
-    console.log('Creating new user...');
+    console.log("Creating new user...");
     // Create new user (all users can create characters now)
     user = new User({
       username,
       email,
-      password
+      password,
     });
 
     // Save user to database with retry logic
-    console.log('Saving user to database...');
+    console.log("Saving user to database...");
     const saveWithRetry = async (userData, maxRetries = 3) => {
       for (let i = 0; i < maxRetries; i++) {
         try {
           await userData.save();
-          console.log('User saved successfully');
+          console.log("User saved successfully");
           return true;
         } catch (saveErr) {
-          console.error(`Save attempt ${i+1}/${maxRetries} failed:`, saveErr.message);
-          
+          console.error(
+            `Save attempt ${i + 1}/${maxRetries} failed:`,
+            saveErr.message,
+          );
+
           if (saveErr.code === 11000) {
             // Duplicate key error - don't retry
-            return res.status(400).json({ 
-              msg: 'Username or email already exists',
-              error: saveErr.message
+            return res.status(400).json({
+              msg: "Username or email already exists",
+              error: saveErr.message,
             });
           }
-          
+
           if (i === maxRetries - 1) throw saveErr; // If last attempt, rethrow
-          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait before retry
+          await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait before retry
         }
       }
     };
-    
+
     await saveWithRetry(user);
 
     // Create JWT token
-    console.log('Creating JWT token...');
-    console.log('JWT Secret available:', !!process.env.JWT_SECRET);
-    
+    console.log("Creating JWT token...");
+    console.log("JWT Secret available:", !!process.env.JWT_SECRET);
+
     const payload = {
-      id: user.id
+      id: user.id,
     };
 
     jwt.sign(
       payload,
-      process.env.JWT_SECRET || 'secret',
-      { expiresIn: '7d' },
+      process.env.JWT_SECRET || "secret",
+      { expiresIn: "7d" },
       (err, token) => {
         if (err) {
-          console.error('JWT Sign error:', err);
-          return res.status(500).json({ msg: 'Error generating token', error: err.message });
+          console.error("JWT Sign error:", err);
+          return res
+            .status(500)
+            .json({ msg: "Error generating token", error: err.message });
         }
-        
-        console.log('Registration successful');
+
+        console.log("Registration successful");
         res.json({
           token,
           user: {
@@ -99,17 +104,17 @@ exports.registerUser = async (req, res) => {
             profilePicture: user.profilePicture,
             bio: user.bio,
             // isCreator field removed - all users can create characters
-            createdAt: user.createdAt
-          }
+            createdAt: user.createdAt,
+          },
         });
-      }
+      },
     );
   } catch (err) {
-    console.error('Register error:', err);
-    res.status(500).json({ 
-      msg: 'Server Error',
+    console.error("Register error:", err);
+    res.status(500).json({
+      msg: "Server Error",
       error: err.message,
-      stack: process.env.NODE_ENV === 'production' ? undefined : err.stack
+      stack: process.env.NODE_ENV === "production" ? undefined : err.stack,
     });
   }
 };
@@ -129,24 +134,24 @@ exports.loginUser = async (req, res) => {
     // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ msg: 'Invalid credentials' });
+      return res.status(400).json({ msg: "Invalid credentials" });
     }
 
     // Check password
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
-      return res.status(400).json({ msg: 'Invalid credentials' });
+      return res.status(400).json({ msg: "Invalid credentials" });
     }
 
     // Create JWT token
     const payload = {
-      id: user.id
+      id: user.id,
     };
 
     jwt.sign(
       payload,
-      process.env.JWT_SECRET || 'secret',
-      { expiresIn: '7d' },
+      process.env.JWT_SECRET || "secret",
+      { expiresIn: "7d" },
       (err, token) => {
         if (err) throw err;
         // Return user data with token, similar to register endpoint
@@ -159,14 +164,14 @@ exports.loginUser = async (req, res) => {
             profilePicture: user.profilePicture,
             bio: user.bio,
             // isCreator field removed - all users can create characters
-            createdAt: user.createdAt
-          }
+            createdAt: user.createdAt,
+          },
         });
-      }
+      },
     );
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -176,17 +181,17 @@ exports.loginUser = async (req, res) => {
 exports.getUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
-      .select('-password')
-      .populate('characters');
-    
+      .select("-password")
+      .populate("characters");
+
     if (!user) {
-      return res.status(404).json({ msg: 'User not found' });
+      return res.status(404).json({ msg: "User not found" });
     }
 
     res.json(user);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -198,9 +203,9 @@ exports.updateUserProfile = async (req, res) => {
 
   try {
     const user = await User.findById(req.user.id);
-    
+
     if (!user) {
-      return res.status(404).json({ msg: 'User not found' });
+      return res.status(404).json({ msg: "User not found" });
     }
 
     // Update fields if provided
@@ -208,7 +213,7 @@ exports.updateUserProfile = async (req, res) => {
     if (email) user.email = email;
     if (bio) user.bio = bio;
     if (profilePicture) user.profilePicture = profilePicture;
-    
+
     // Only update password if provided
     if (password) {
       // Password will be hashed in the pre-save hook
@@ -218,11 +223,11 @@ exports.updateUserProfile = async (req, res) => {
     await user.save();
 
     // Return user without password
-    const updatedUser = await User.findById(req.user.id).select('-password');
+    const updatedUser = await User.findById(req.user.id).select("-password");
     res.json(updatedUser);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -232,14 +237,16 @@ exports.updateUserProfile = async (req, res) => {
 exports.getCreators = async (req, res) => {
   try {
     // Get users who have created at least one character
-    const creators = await User.find({ characters: { $exists: true, $not: { $size: 0 } } })
-      .select('-password')
-      .populate('characters');
-    
+    const creators = await User.find({
+      characters: { $exists: true, $not: { $size: 0 } },
+    })
+      .select("-password")
+      .populate("characters");
+
     res.json(creators);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -249,19 +256,19 @@ exports.getCreators = async (req, res) => {
 exports.getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
-      .select('-password')
-      .populate('characters');
-    
+      .select("-password")
+      .populate("characters");
+
     if (!user) {
-      return res.status(404).json({ msg: 'User not found' });
+      return res.status(404).json({ msg: "User not found" });
     }
 
     res.json(user);
   } catch (err) {
     console.error(err.message);
-    if (err.kind === 'ObjectId') {
-      return res.status(404).json({ msg: 'User not found' });
+    if (err.kind === "ObjectId") {
+      return res.status(404).json({ msg: "User not found" });
     }
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };

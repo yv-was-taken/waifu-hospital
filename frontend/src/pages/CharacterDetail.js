@@ -1,11 +1,16 @@
-import React, { useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { getCharacterById, likeCharacter, unlikeCharacter, deleteCharacter } from '../features/characters/characterSlice';
-import { getCharacterMerchandise } from '../features/merchandise/merchandiseSlice';
-import { setAlert } from '../features/alerts/alertSlice';
-import Spinner from '../components/layout/Spinner';
-import styled from 'styled-components';
+import React, { useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getCharacterById,
+  likeCharacter,
+  unlikeCharacter,
+  deleteCharacter,
+} from "../features/characters/characterSlice";
+import { getCharacterMerchandise } from "../features/merchandise/merchandiseSlice";
+import { setAlert } from "../features/alerts/alertSlice";
+import Spinner from "../components/layout/Spinner";
+import styled from "styled-components";
 
 const CharacterContainer = styled.div`
   padding: 2rem 0;
@@ -108,9 +113,12 @@ const ActionButtons = styled.div`
 `;
 
 const Button = styled.button`
-  background-color: ${props => props.secondary === 'true' ? 'transparent' : 'var(--primary-color)'};
-  color: ${props => props.secondary === 'true' ? 'var(--primary-color)' : 'white'};
-  border: ${props => props.secondary === 'true' ? '1px solid var(--primary-color)' : 'none'};
+  background-color: ${(props) =>
+    props.secondary === "true" ? "transparent" : "var(--primary-color)"};
+  color: ${(props) =>
+    props.secondary === "true" ? "var(--primary-color)" : "white"};
+  border: ${(props) =>
+    props.secondary === "true" ? "1px solid var(--primary-color)" : "none"};
   padding: 0.8rem 1.5rem;
   border-radius: 4px;
   font-size: 1rem;
@@ -122,7 +130,10 @@ const Button = styled.button`
   justify-content: center;
 
   &:hover {
-    background-color: ${props => props.secondary === 'true' ? 'rgba(255, 107, 129, 0.1)' : 'var(--primary-dark)'};
+    background-color: ${(props) =>
+      props.secondary === "true"
+        ? "rgba(255, 107, 129, 0.1)"
+        : "var(--primary-dark)"};
   }
 
   &:disabled {
@@ -132,9 +143,12 @@ const Button = styled.button`
 `;
 
 const LinkButton = styled(Link)`
-  background-color: ${props => props.secondary === 'true' ? 'transparent' : 'var(--primary-color)'};
-  color: ${props => props.secondary === 'true' ? 'var(--primary-color)' : 'white'};
-  border: ${props => props.secondary === 'true' ? '1px solid var(--primary-color)' : 'none'};
+  background-color: ${(props) =>
+    props.secondary === "true" ? "transparent" : "var(--primary-color)"};
+  color: ${(props) =>
+    props.secondary === "true" ? "var(--primary-color)" : "white"};
+  border: ${(props) =>
+    props.secondary === "true" ? "1px solid var(--primary-color)" : "none"};
   padding: 0.8rem 1.5rem;
   border-radius: 4px;
   font-size: 1rem;
@@ -147,17 +161,23 @@ const LinkButton = styled(Link)`
   justify-content: center;
 
   &:hover {
-    background-color: ${props => props.secondary === 'true' ? 'rgba(255, 107, 129, 0.1)' : 'var(--primary-dark)'};
+    background-color: ${(props) =>
+      props.secondary === "true"
+        ? "rgba(255, 107, 129, 0.1)"
+        : "var(--primary-dark)"};
   }
 `;
 
 const DangerButton = styled(Button)`
-  background-color: ${props => props.secondary === 'true' ? 'transparent' : 'var(--error-color)'};
+  background-color: ${(props) =>
+    props.secondary === "true" ? "transparent" : "var(--error-color)"};
   border-color: var(--error-color);
-  color: ${props => props.secondary === 'true' ? 'var(--error-color)' : 'white'};
+  color: ${(props) =>
+    props.secondary === "true" ? "var(--error-color)" : "white"};
 
   &:hover {
-    background-color: ${props => props.secondary === 'true' ? 'rgba(214, 48, 49, 0.1)' : '#c0392b'};
+    background-color: ${(props) =>
+      props.secondary === "true" ? "rgba(214, 48, 49, 0.1)" : "#c0392b"};
   }
 `;
 
@@ -178,8 +198,10 @@ const TabButton = styled.button`
   font-size: 1.1rem;
   font-weight: 500;
   cursor: pointer;
-  color: ${props => props.active ? 'var(--primary-color)' : 'var(--light-text)'};
-  border-bottom: ${props => props.active ? '3px solid var(--primary-color)' : '3px solid transparent'};
+  color: ${(props) =>
+    props.active ? "var(--primary-color)" : "var(--light-text)"};
+  border-bottom: ${(props) =>
+    props.active ? "3px solid var(--primary-color)" : "3px solid transparent"};
   transition: all 0.3s ease;
 
   &:hover {
@@ -307,12 +329,14 @@ const CharacterDetail = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = React.useState('details');
+  const [activeTab, setActiveTab] = React.useState("details");
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
 
-  const { character, loading } = useSelector(state => state.character);
-  const { characterMerchandise, loading: merchandiseLoading } = useSelector(state => state.merchandise);
-  const { user, isAuthenticated } = useSelector(state => state.auth);
+  const { character, loading } = useSelector((state) => state.character);
+  const { characterMerchandise, loading: merchandiseLoading } = useSelector(
+    (state) => state.merchandise,
+  );
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
 
   useEffect(() => {
     dispatch(getCharacterById(id));
@@ -321,14 +345,19 @@ const CharacterDetail = () => {
 
   const handleLike = () => {
     if (!isAuthenticated) {
-      dispatch(setAlert({
-        msg: 'You need to be logged in to like characters',
-        type: 'info'
-      }));
+      dispatch(
+        setAlert({
+          msg: "You need to be logged in to like characters",
+          type: "info",
+        }),
+      );
       return;
     }
-    
-    if (character.likedBy && character.likedBy.some(userId => userId === user._id)) {
+
+    if (
+      character.likedBy &&
+      character.likedBy.some((userId) => userId === user._id)
+    ) {
       dispatch(unlikeCharacter(id));
     } else {
       dispatch(likeCharacter(id));
@@ -338,7 +367,7 @@ const CharacterDetail = () => {
   const handleDelete = () => {
     dispatch(deleteCharacter(id));
     setShowDeleteModal(false);
-    navigate('/dashboard');
+    navigate("/dashboard");
   };
 
   // Check if user is the creator of this character
@@ -356,7 +385,10 @@ const CharacterDetail = () => {
     );
   }
 
-  const isLiked = character.likedBy && user && character.likedBy.some(userId => userId === user._id);
+  const isLiked =
+    character.likedBy &&
+    user &&
+    character.likedBy.some((userId) => userId === user._id);
 
   return (
     <CharacterContainer>
@@ -369,7 +401,10 @@ const CharacterDetail = () => {
           <CreatorInfo>
             <CreatorLink to={`/users/${character.creator._id}`}>
               {character.creator.profilePicture && (
-                <CreatorAvatar src={character.creator.profilePicture} alt={character.creator.username} />
+                <CreatorAvatar
+                  src={character.creator.profilePicture}
+                  alt={character.creator.username}
+                />
               )}
               {character.creator.username}
             </CreatorLink>
@@ -385,15 +420,30 @@ const CharacterDetail = () => {
 
           <ActionButtons>
             {isAuthenticated && (
-              <Button onClick={handleLike} secondary={isLiked ? 'true' : 'false'}>
-                {isLiked ? 'Unlike' : 'Like'}
+              <Button
+                onClick={handleLike}
+                secondary={isLiked ? "true" : "false"}
+              >
+                {isLiked ? "Unlike" : "Like"}
               </Button>
             )}
-            <LinkButton to={`/characters/${character._id}/chat`}>Chat with {character.name}</LinkButton>
+            <LinkButton to={`/characters/${character._id}/chat`}>
+              Chat with {character.name}
+            </LinkButton>
             {isCreator && (
               <>
-                <LinkButton to={`/characters/${character._id}/edit`} secondary="true">Edit</LinkButton>
-                <DangerButton secondary="true" onClick={() => setShowDeleteModal(true)}>Delete</DangerButton>
+                <LinkButton
+                  to={`/characters/${character._id}/edit`}
+                  secondary="true"
+                >
+                  Edit
+                </LinkButton>
+                <DangerButton
+                  secondary="true"
+                  onClick={() => setShowDeleteModal(true)}
+                >
+                  Delete
+                </DangerButton>
               </>
             )}
           </ActionButtons>
@@ -402,21 +452,21 @@ const CharacterDetail = () => {
 
       <TabContainer>
         <TabButtons>
-          <TabButton 
-            active={activeTab === 'details'} 
-            onClick={() => setActiveTab('details')}
+          <TabButton
+            active={activeTab === "details"}
+            onClick={() => setActiveTab("details")}
           >
             Details
           </TabButton>
-          <TabButton 
-            active={activeTab === 'merchandise'} 
-            onClick={() => setActiveTab('merchandise')}
+          <TabButton
+            active={activeTab === "merchandise"}
+            onClick={() => setActiveTab("merchandise")}
           >
             Merchandise
           </TabButton>
         </TabButtons>
 
-        {activeTab === 'details' && (
+        {activeTab === "details" && (
           <TabContent>
             <DetailItem>
               <DetailTitle>Personality</DetailTitle>
@@ -453,22 +503,31 @@ const CharacterDetail = () => {
           </TabContent>
         )}
 
-        {activeTab === 'merchandise' && (
+        {activeTab === "merchandise" && (
           <TabContent>
             {isCreator && (
-              <ActionButtons style={{ marginBottom: '2rem' }}>
-                <LinkButton to={`/characters/${character._id}/create-merchandise`}>Create Merchandise</LinkButton>
+              <ActionButtons style={{ marginBottom: "2rem" }}>
+                <LinkButton
+                  to={`/characters/${character._id}/create-merchandise`}
+                >
+                  Create Merchandise
+                </LinkButton>
               </ActionButtons>
             )}
-            
+
             {characterMerchandise && characterMerchandise.length > 0 ? (
               <MerchandiseGrid>
-                {characterMerchandise.map(item => (
-                  <MerchandiseCard to={`/merchandise/${item._id}`} key={item._id}>
+                {characterMerchandise.map((item) => (
+                  <MerchandiseCard
+                    to={`/merchandise/${item._id}`}
+                    key={item._id}
+                  >
                     <MerchandiseImage src={item.imageUrl} alt={item.name} />
                     <MerchandiseContent>
                       <MerchandiseTitle>{item.name}</MerchandiseTitle>
-                      <MerchandisePrice>${item.price.toFixed(2)}</MerchandisePrice>
+                      <MerchandisePrice>
+                        ${item.price.toFixed(2)}
+                      </MerchandisePrice>
                     </MerchandiseContent>
                   </MerchandiseCard>
                 ))}
@@ -476,7 +535,7 @@ const CharacterDetail = () => {
             ) : (
               <EmptyMessage>
                 No merchandise available for this character yet.
-                {isCreator && ' Create some merchandise to start selling!'}
+                {isCreator && " Create some merchandise to start selling!"}
               </EmptyMessage>
             )}
           </TabContent>
@@ -487,9 +546,17 @@ const CharacterDetail = () => {
         <ConfirmationModal>
           <ModalContent>
             <ModalTitle>Delete Character</ModalTitle>
-            <p>Are you sure you want to delete {character.name}? This action cannot be undone.</p>
+            <p>
+              Are you sure you want to delete {character.name}? This action
+              cannot be undone.
+            </p>
             <ModalButtons>
-              <Button secondary="true" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
+              <Button
+                secondary="true"
+                onClick={() => setShowDeleteModal(false)}
+              >
+                Cancel
+              </Button>
               <DangerButton onClick={handleDelete}>Delete</DangerButton>
             </ModalButtons>
           </ModalContent>

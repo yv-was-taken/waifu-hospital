@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { getUserCharacters } from '../features/characters/characterSlice';
-import { getCreatorMerchandise } from '../features/merchandise/merchandiseSlice';
-import { getUserOrders } from '../features/cart/cartSlice';
-import Spinner from '../components/layout/Spinner';
-import styled from 'styled-components';
+import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { getUserCharacters } from "../features/characters/characterSlice";
+import { getCreatorMerchandise } from "../features/merchandise/merchandiseSlice";
+import { getUserOrders } from "../features/cart/cartSlice";
+import Spinner from "../components/layout/Spinner";
+import styled from "styled-components";
 
 const DashboardContainer = styled.div`
   padding: 2rem 0;
@@ -119,10 +119,14 @@ const EmptyMessage = styled.p`
 
 const Dashboard = () => {
   const dispatch = useDispatch();
-  const { user, loading: authLoading } = useSelector(state => state.auth);
-  const { userCharacters, loading: charactersLoading } = useSelector(state => state.character);
-  const { creatorMerchandise, loading: merchandiseLoading } = useSelector(state => state.merchandise);
-  const { orders, loading: ordersLoading } = useSelector(state => state.cart);
+  const { user, loading: authLoading } = useSelector((state) => state.auth);
+  const { userCharacters, loading: charactersLoading } = useSelector(
+    (state) => state.character,
+  );
+  const { creatorMerchandise, loading: merchandiseLoading } = useSelector(
+    (state) => state.merchandise,
+  );
+  const { orders, loading: ordersLoading } = useSelector((state) => state.cart);
 
   useEffect(() => {
     dispatch(getUserCharacters());
@@ -147,13 +151,15 @@ const Dashboard = () => {
         <SectionTitle>My Characters</SectionTitle>
         {userCharacters && userCharacters.length > 0 ? (
           <Grid>
-            {userCharacters.map(character => (
+            {userCharacters.map((character) => (
               <CardLink to={`/characters/${character._id}`} key={character._id}>
                 <Card>
                   <CardImage src={character.imageUrl} alt={character.name} />
                   <CardContent>
                     <CardTitle>{character.name}</CardTitle>
-                    <CardText>{character.personality.substring(0, 100)}...</CardText>
+                    <CardText>
+                      {character.personality.substring(0, 100)}...
+                    </CardText>
                   </CardContent>
                 </Card>
               </CardLink>
@@ -161,8 +167,11 @@ const Dashboard = () => {
           </Grid>
         ) : (
           <EmptyMessage>
-            You haven't created any characters yet. 
-            <span> <Link to="/create-character">Create your first character!</Link></span>
+            You haven't created any characters yet.
+            <span>
+              {" "}
+              <Link to="/create-character">Create your first character!</Link>
+            </span>
           </EmptyMessage>
         )}
       </DashboardSection>
@@ -171,7 +180,7 @@ const Dashboard = () => {
         <SectionTitle>My Merchandise</SectionTitle>
         {creatorMerchandise && creatorMerchandise.length > 0 ? (
           <Grid>
-            {creatorMerchandise.map(item => (
+            {creatorMerchandise.map((item) => (
               <CardLink to={`/merchandise/${item._id}`} key={item._id}>
                 <Card>
                   <CardImage src={item.imageUrl} alt={item.name} />
@@ -186,11 +195,14 @@ const Dashboard = () => {
           </Grid>
         ) : (
           <EmptyMessage>
-            You haven't created any merchandise yet. 
+            You haven't created any merchandise yet.
             {userCharacters && userCharacters.length > 0 ? (
               <span> Go to one of your characters to create merchandise.</span>
             ) : (
-              <span> Create a character first to start selling merchandise.</span>
+              <span>
+                {" "}
+                Create a character first to start selling merchandise.
+              </span>
             )}
           </EmptyMessage>
         )}
@@ -200,10 +212,12 @@ const Dashboard = () => {
         <SectionTitle>My Orders</SectionTitle>
         {orders && orders.length > 0 ? (
           <Grid>
-            {orders.map(order => (
+            {orders.map((order) => (
               <Card key={order._id}>
                 <CardContent>
-                  <CardTitle>Order #{order._id.substring(order._id.length - 6)}</CardTitle>
+                  <CardTitle>
+                    Order #{order._id.substring(order._id.length - 6)}
+                  </CardTitle>
                   <CardText>Items: {order.items.length}</CardText>
                   <CardText>Total: ${order.totalAmount.toFixed(2)}</CardText>
                   <CardText>Status: {order.status}</CardText>
@@ -216,7 +230,8 @@ const Dashboard = () => {
           </Grid>
         ) : (
           <EmptyMessage>
-            You haven't placed any orders yet. <Link to="/merchandise">Browse the store</Link>
+            You haven't placed any orders yet.{" "}
+            <Link to="/merchandise">Browse the store</Link>
           </EmptyMessage>
         )}
       </DashboardSection>

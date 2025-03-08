@@ -71,6 +71,22 @@ const MerchandiseSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  // Shopify integration fields
+  shopifyProductId: {
+    type: String,
+  },
+  shopifyProductUrl: {
+    type: String,
+  },
+  shopifyVariants: [
+    {
+      variantId: String,
+      inventory: Number,
+      price: Number,
+      size: String,
+      color: String
+    }
+  ],
   createdAt: {
     type: Date,
     default: Date.now,

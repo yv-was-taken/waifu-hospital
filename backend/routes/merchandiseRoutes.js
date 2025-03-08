@@ -64,4 +64,9 @@ router.put("/:id", authMiddleware, merchandiseController.updateMerchandise);
 // @access  Private
 router.delete("/:id", authMiddleware, merchandiseController.deleteMerchandise);
 
+// @route   POST /api/merchandise/checkout
+// @desc    Create a Shopify checkout for merchandise items
+// @access  Private
+router.post("/checkout", authMiddleware, merchandiseController.createCheckout);
+
 module.exports = router;

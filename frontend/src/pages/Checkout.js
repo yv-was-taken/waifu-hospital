@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { clearCart } from "../features/cart/cartSlice";
+import { clearCart, createShopifyCheckout } from "../features/cart/cartSlice";
 import { setAlert } from "../features/alerts/alertSlice";
 import styled from "styled-components";
 
@@ -236,7 +236,7 @@ const CheckboxLabel = styled.label`
 const Checkout = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { cartItems } = useSelector((state) => state.cart);
+  const { cartItems, shopifyCheckoutUrl, loading } = useSelector((state) => state.cart);
   const { user } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
@@ -248,7 +248,7 @@ const Checkout = () => {
     state: "",
     zip: "",
     country: "US",
-    paymentMethod: "credit",
+    paymentMethod: "shopify",
     cardName: "",
     cardNumber: "",
     cardExpiry: "",
@@ -288,6 +288,13 @@ const Checkout = () => {
       );
     }
   }, [cartItems, navigate, dispatch]);
+  
+  // Redirect to Shopify checkout if URL is available
+  useEffect(() => {
+    if (shopifyCheckoutUrl) {
+      window.location.href = shopifyCheckoutUrl;
+    }
+  }, [shopifyCheckoutUrl]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -350,27 +357,33 @@ const Checkout = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Here you would typically integrate with a payment processor
-    // and send order details to your backend
+    if (formData.paymentMethod === "shopify") {
+      // Create Shopify checkout
+      dispatch(createShopifyCheckout());
+      // The useEffect will handle the redirect once the checkout URL is available
+    } else {
+      // Here you would typically integrate with a payment processor
+      // and send order details to your backend
 
-    // For demo purposes, we'll just simulate a successful order
+      // For demo purposes, we'll just simulate a successful order
 
-    // Simulate API call delay
-    setTimeout(() => {
-      // Clear the cart
-      dispatch(clearCart());
+      // Simulate API call delay
+      setTimeout(() => {
+        // Clear the cart
+        dispatch(clearCart());
 
-      // Show success message
-      dispatch(
-        setAlert({
-          msg: "Order placed successfully!",
-          type: "success",
-        }),
-      );
+        // Show success message
+        dispatch(
+          setAlert({
+            msg: "Order placed successfully!",
+            type: "success",
+          }),
+        );
 
-      // Redirect to a thank you page (or back to dashboard)
-      navigate("/dashboard");
-    }, 1500);
+        // Redirect to a thank you page (or back to dashboard)
+        navigate("/dashboard");
+      }, 1500);
+    }
   };
 
   return (
@@ -614,6 +627,20 @@ const Checkout = () => {
                 <FormRadioOption>
                   <RadioInput
                     type="radio"
+                    id="shopify"
+                    name="paymentMethod"
+                    value="shopify"
+                    checked={formData.paymentMethod === "shopify"}
+                    onChange={handleChange}
+                  />
+                  <RadioLabel htmlFor="shopify">
+                    Shopify Checkout
+                    <PaymentIcon>🛒</PaymentIcon>
+                  </RadioLabel>
+                </FormRadioOption>
+                <FormRadioOption>
+                  <RadioInput
+                    type="radio"
                     id="creditCard"
                     name="paymentMethod"
                     value="credit"
@@ -712,6 +739,13 @@ const Checkout = () => {
               </>
             )}
 
+            {formData.paymentMethod === "shopify" && (
+              <p style={{ marginTop: "1rem", color: "var(--light-text)" }}>
+                You will be redirected to Shopify to complete your purchase securely. 
+                Shopify offers various payment methods including credit cards, Apple Pay, and more.
+              </p>
+            )}
+
             {formData.paymentMethod === "paypal" && (
               <p style={{ marginTop: "1rem", color: "var(--light-text)" }}>
                 You will be redirected to PayPal to complete your payment after
@@ -727,7 +761,9 @@ const Checkout = () => {
             )}
           </FormSection>
 
-          <PlaceOrderButton type="submit">Place Order</PlaceOrderButton>
+          <PlaceOrderButton type="submit" disabled={loading}>
+            {loading ? 'Processing...' : formData.paymentMethod === 'shopify' ? 'Continue to Shopify' : 'Place Order'}
+          </PlaceOrderButton>
         </CheckoutForm>
 
         <OrderSummary>

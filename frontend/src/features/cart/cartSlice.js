@@ -1,6 +1,47 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import api from "../../utils/api";
 import { setAlert } from "../alerts/alertSlice";
+
+// Create Shopify checkout
+export const createShopifyCheckout = createAsyncThunk(
+  "cart/createShopifyCheckout",
+  async (_, { getState, dispatch, rejectWithValue }) => {
+    try {
+      const { cart } = getState();
+      
+      // Format items for the checkout API
+      const items = cart.cartItems.map(item => ({
+        merchandiseId: item._id,
+        quantity: item.quantity,
+        size: item.size,
+        color: item.color
+      }));
+      
+      const res = await api.post("/api/merchandise/checkout", { items });
+      
+      dispatch(
+        setAlert({
+          msg: "Checkout created successfully!",
+          type: "success",
+        })
+      );
+      
+      return res.data;
+    } catch (err) {
+      dispatch(
+        setAlert({
+          msg: err.response?.data?.msg || "Failed to create checkout",
+          type: "error",
+        })
+      );
+      
+      return rejectWithValue(
+        err.response?.data?.msg || "Failed to create checkout"
+      );
+    }
+  }
+);
 
 // Create payment intent
 export const createPaymentIntent = createAsyncThunk(
@@ -120,6 +161,8 @@ const initialState = {
   paymentId: null,
   orders: [],
   currentOrder: null,
+  shopifyCheckoutUrl: null,
+  shopifyCheckoutId: null,
   loading: false,
   error: null,
 };
@@ -194,6 +237,8 @@ const cartSlice = createSlice({
     clearPaymentInfo: (state) => {
       state.clientSecret = null;
       state.paymentId = null;
+      state.shopifyCheckoutUrl = null;
+      state.shopifyCheckoutId = null;
     },
     clearOrderInfo: (state) => {
       state.currentOrder = null;
@@ -201,6 +246,21 @@ const cartSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Create Shopify checkout
+      .addCase(createShopifyCheckout.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createShopifyCheckout.fulfilled, (state, action) => {
+        state.loading = false;
+        state.shopifyCheckoutUrl = action.payload.checkoutUrl;
+        state.shopifyCheckoutId = action.payload.checkoutId;
+      })
+      .addCase(createShopifyCheckout.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      
       // Create payment intent
       .addCase(createPaymentIntent.pending, (state) => {
         state.loading = true;

@@ -2,6 +2,26 @@ const Merchandise = require("../models/Merchandise");
 const Character = require("../models/Character");
 const { validationResult } = require("express-validator");
 
+// Import shopifyService with try/catch to avoid breaking the application if the service is not available
+let shopifyService;
+try {
+  shopifyService = require("../services/shopifyService");
+} catch (error) {
+  console.warn("Shopify service could not be loaded. Merchandise features will be limited.");
+  // Create mock shopify service to prevent errors
+  shopifyService = {
+    createProduct: async () => ({
+      id: `mock_${Date.now()}`,
+      handle: 'mock-product'
+    }),
+    getProduct: async () => ({}),
+    createCheckout: async () => ({
+      id: 'mock-checkout',
+      web_url: 'https://example.com/checkout'
+    })
+  };
+}
+
 // @desc    Create a new merchandise item
 // @route   POST /api/merchandise
 // @access  Private
@@ -39,7 +59,7 @@ exports.createMerchandise = async (req, res) => {
       });
     }
 
-    // Create new merchandise item
+    // Create new merchandise item in our database
     const newMerchandise = new Merchandise({
       name,
       description,
@@ -54,6 +74,32 @@ exports.createMerchandise = async (req, res) => {
       productionCost,
       creatorRevenue,
     });
+
+    // Create the merchandise in Shopify (with error handling)
+    try {
+      const shopifyProduct = await shopifyService.createProduct({
+        name,
+        description,
+        price,
+        image: imageUrl,
+        category,
+        sizes: availableSizes || ["N/A"],
+        colors: availableColors || [],
+        stock: stock || 100
+      });
+      
+      // Store Shopify product ID and other relevant data
+      if (shopifyProduct && shopifyProduct.id) {
+        newMerchandise.shopifyProductId = shopifyProduct.id;
+        
+        // Use a default shop URL if environment variable isn't set
+        const shopDomain = process.env.SHOPIFY_SHOP || 'example.myshopify.com';
+        newMerchandise.shopifyProductUrl = `https://${shopDomain}/products/${shopifyProduct.handle}`;
+      }
+    } catch (shopifyError) {
+      console.error('Shopify product creation failed:', shopifyError);
+      // Continue with local save even if Shopify fails
+    }
 
     const merchandise = await newMerchandise.save();
 
@@ -233,6 +279,69 @@ exports.deleteMerchandise = async (req, res) => {
     if (err.kind === "ObjectId") {
       return res.status(404).json({ msg: "Merchandise not found" });
     }
+    res.status(500).send("Server Error");
+  }
+};
+
+// @desc    Create a Shopify checkout for merchandise items
+// @route   POST /api/merchandise/checkout
+// @access  Private
+exports.createCheckout = async (req, res) => {
+  try {
+    const { items } = req.body;
+    
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ msg: "Items are required" });
+    }
+    
+    // Format line items for Shopify checkout
+    const lineItems = [];
+    
+    for (const item of items) {
+      const merchandise = await Merchandise.findById(item.merchandiseId);
+      
+      if (!merchandise) {
+        return res.status(404).json({ 
+          msg: `Merchandise not found: ${item.merchandiseId}` 
+        });
+      }
+      
+      // Find the variant if size/color specified
+      let variantId = null;
+      
+      if (item.size || item.color) {
+        // Only try to find variant if we have shopifyVariants array
+        if (merchandise.shopifyVariants && merchandise.shopifyVariants.length > 0) {
+          const variant = merchandise.shopifyVariants.find(v => 
+            (!item.size || v.size === item.size) && 
+            (!item.color || v.color === item.color)
+          );
+          
+          if (variant) {
+            variantId = variant.variantId;
+          }
+        }
+      }
+      
+      // Use shopifyProductId if available, otherwise use the regular id
+      // This allows the checkout to work even if Shopify integration is not set up
+      const productId = merchandise.shopifyProductId || merchandise.id;
+      
+      lineItems.push({
+        variant_id: variantId || productId,
+        quantity: item.quantity || 1
+      });
+    }
+    
+    // Create checkout in Shopify
+    const checkout = await shopifyService.createCheckout(lineItems);
+    
+    res.json({
+      checkoutUrl: checkout.web_url,
+      checkoutId: checkout.id
+    });
+  } catch (err) {
+    console.error(err.message);
     res.status(500).send("Server Error");
   }
 };

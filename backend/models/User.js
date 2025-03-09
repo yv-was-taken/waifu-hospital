@@ -40,6 +40,55 @@ const UserSchema = new mongoose.Schema({
       ref: "Character",
     },
   ],
+  // Payment and creator fields
+  stripeConnect: {
+    accountId: {
+      type: String,
+    },
+    isOnboarded: {
+      type: Boolean,
+      default: false,
+    },
+    payoutsEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    onboardingCompleted: {
+      type: Date,
+    },
+    country: {
+      type: String,
+      default: "US",
+    },
+    defaultCurrency: {
+      type: String,
+      default: "usd",
+    }
+  },
+  paymentHistory: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Purchase",
+    },
+  ],
+  balance: {
+    available: {
+      type: Number,
+      default: 0,
+    },
+    pending: {
+      type: Number,
+      default: 0,
+    },
+    totalEarned: {
+      type: Number,
+      default: 0,
+    },
+    lastUpdated: {
+      type: Date,
+      default: Date.now,
+    },
+  },
   createdAt: {
     type: Date,
     default: Date.now,

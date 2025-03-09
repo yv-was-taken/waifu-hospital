@@ -32,6 +32,25 @@ const PurchaseSchema = new mongoose.Schema({
         required: true,
         min: 0,
       },
+      printfulVariantId: {
+        type: String,
+      },
+      creator: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      creatorRevenue: {
+        type: Number,
+        min: 0,
+      },
+      platformFee: {
+        type: Number,
+        min: 0,
+      },
+      productionCost: {
+        type: Number,
+        min: 0,
+      },
     },
   ],
   totalAmount: {
@@ -39,7 +58,30 @@ const PurchaseSchema = new mongoose.Schema({
     required: true,
     min: 0,
   },
+  subtotal: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
+  shippingCost: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
+  taxAmount: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
   shippingAddress: {
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+    },
     street: {
       type: String,
       required: true,
@@ -60,15 +102,42 @@ const PurchaseSchema = new mongoose.Schema({
       type: String,
       required: true,
     },
+    phone: {
+      type: String,
+    },
+    email: {
+      type: String,
+    },
   },
   paymentMethod: {
     type: String,
     enum: ["credit_card", "crypto", "paypal"],
     required: true,
   },
-  paymentId: {
+  // Stripe payment fields
+  stripePaymentIntent: {
     type: String,
   },
+  stripeClientSecret: {
+    type: String,
+  },
+  // Printful order fields
+  printfulOrderId: {
+    type: String,
+  },
+  printfulOrderStatus: {
+    type: String,
+  },
+  printfulShippingMethod: {
+    type: String,
+  },
+  trackingNumber: {
+    type: String,
+  },
+  trackingUrl: {
+    type: String,
+  },
+  // Payment and fulfillment status
   isPaid: {
     type: Boolean,
     default: false,
@@ -95,6 +164,30 @@ const PurchaseSchema = new mongoose.Schema({
     enum: ["pending", "processing", "shipped", "delivered", "cancelled"],
     default: "pending",
   },
+  // Revenue tracking
+  creatorPayouts: [
+    {
+      creator: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      amount: {
+        type: Number,
+        min: 0,
+      },
+      status: {
+        type: String,
+        enum: ["pending", "paid", "failed"],
+        default: "pending",
+      },
+      stripeTransferId: {
+        type: String,
+      },
+      paidAt: {
+        type: Date,
+      },
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,

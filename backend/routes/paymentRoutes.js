@@ -38,10 +38,15 @@ router.post(
   paymentController.processCryptoPayment,
 );
 
-// @route   POST /api/payments/webhook
-// @desc    Webhook for payment provider callbacks
+// @route   POST /api/payments/webhook/stripe
+// @desc    Webhook for Stripe payment callbacks
 // @access  Public
-router.post("/webhook", paymentController.webhook);
+router.post("/webhook/stripe", paymentController.stripeWebhook);
+
+// @route   POST /api/payments/webhook/printful
+// @desc    Webhook for Printful fulfillment callbacks
+// @access  Public
+router.post("/webhook/printful", paymentController.printfulWebhook);
 
 // @route   POST /api/payments/complete
 // @desc    Complete payment and create order
@@ -51,7 +56,6 @@ router.post(
   [
     authMiddleware,
     [
-      check("paymentId", "Payment ID is required").not().isEmpty(),
       check("items", "Items are required").isArray(),
       check("shippingAddress", "Shipping address is required").isObject(),
       check("paymentMethod", "Payment method is required").not().isEmpty(),
@@ -69,5 +73,10 @@ router.get("/orders", authMiddleware, paymentController.getUserOrders);
 // @desc    Get order by ID
 // @access  Private
 router.get("/orders/:id", authMiddleware, paymentController.getOrderById);
+
+// @route   GET /api/payments/creator/sales
+// @desc    Get creator sales and revenue
+// @access  Private
+router.get("/creator/sales", authMiddleware, paymentController.getCreatorSales);
 
 module.exports = router;

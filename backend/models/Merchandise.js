@@ -67,26 +67,46 @@ const MerchandiseSchema = new mongoose.Schema({
     type: Number,
     min: 0,
   },
+  creatorRevenuePercent: {
+    type: Number,
+    default: 80,
+    min: 0,
+    max: 100,
+  },
+  platformFeePercent: {
+    type: Number,
+    default: 20,
+    min: 0,
+    max: 100,
+  },
   sold: {
     type: Number,
     default: 0,
   },
-  // Shopify integration fields
-  shopifyProductId: {
+  // Printful integration fields
+  printfulProductId: {
     type: String,
   },
-  shopifyProductUrl: {
+  printfulExternalId: {
     type: String,
   },
-  shopifyVariants: [
+  printfulVariants: [
     {
       variantId: String,
-      inventory: Number,
-      price: Number,
+      externalId: String,
+      retailPrice: Number,
       size: String,
       color: String
     }
   ],
+  // Stripe Connect integration fields
+  stripeConnectAccountId: {
+    type: String,
+  },
+  isApproved: {
+    type: Boolean,
+    default: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

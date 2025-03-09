@@ -236,7 +236,9 @@ const CheckboxLabel = styled.label`
 const Checkout = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { cartItems, shopifyCheckoutUrl, loading } = useSelector((state) => state.cart);
+  const { cartItems, shopifyCheckoutUrl, loading } = useSelector(
+    (state) => state.cart,
+  );
   const { user } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
@@ -288,7 +290,7 @@ const Checkout = () => {
       );
     }
   }, [cartItems, navigate, dispatch]);
-  
+
   // Redirect to Shopify checkout if URL is available
   useEffect(() => {
     if (shopifyCheckoutUrl) {
@@ -741,8 +743,9 @@ const Checkout = () => {
 
             {formData.paymentMethod === "shopify" && (
               <p style={{ marginTop: "1rem", color: "var(--light-text)" }}>
-                You will be redirected to Shopify to complete your purchase securely. 
-                Shopify offers various payment methods including credit cards, Apple Pay, and more.
+                You will be redirected to Shopify to complete your purchase
+                securely. Shopify offers various payment methods including
+                credit cards, Apple Pay, and more.
               </p>
             )}
 
@@ -762,7 +765,11 @@ const Checkout = () => {
           </FormSection>
 
           <PlaceOrderButton type="submit" disabled={loading}>
-            {loading ? 'Processing...' : formData.paymentMethod === 'shopify' ? 'Continue to Shopify' : 'Place Order'}
+            {loading
+              ? "Processing..."
+              : formData.paymentMethod === "shopify"
+                ? "Continue to Shopify"
+                : "Place Order"}
           </PlaceOrderButton>
         </CheckoutForm>
 

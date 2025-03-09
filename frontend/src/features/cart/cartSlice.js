@@ -9,38 +9,38 @@ export const createShopifyCheckout = createAsyncThunk(
   async (_, { getState, dispatch, rejectWithValue }) => {
     try {
       const { cart } = getState();
-      
+
       // Format items for the checkout API
-      const items = cart.cartItems.map(item => ({
+      const items = cart.cartItems.map((item) => ({
         merchandiseId: item._id,
         quantity: item.quantity,
         size: item.size,
-        color: item.color
+        color: item.color,
       }));
-      
+
       const res = await api.post("/api/merchandise/checkout", { items });
-      
+
       dispatch(
         setAlert({
           msg: "Checkout created successfully!",
           type: "success",
-        })
+        }),
       );
-      
+
       return res.data;
     } catch (err) {
       dispatch(
         setAlert({
           msg: err.response?.data?.msg || "Failed to create checkout",
           type: "error",
-        })
+        }),
       );
-      
+
       return rejectWithValue(
-        err.response?.data?.msg || "Failed to create checkout"
+        err.response?.data?.msg || "Failed to create checkout",
       );
     }
-  }
+  },
 );
 
 // Create payment intent
@@ -260,7 +260,7 @@ const cartSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Create payment intent
       .addCase(createPaymentIntent.pending, (state) => {
         state.loading = true;

@@ -1,5 +1,7 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'dummy_stripe_key');
-const dotenv = require('dotenv');
+const stripe = require("stripe")(
+  process.env.STRIPE_SECRET_KEY || "dummy_stripe_key",
+);
+const dotenv = require("dotenv");
 
 dotenv.config();
 
@@ -10,22 +12,24 @@ dotenv.config();
  */
 const createConnectedAccount = async (userData) => {
   try {
-    if (process.env.STRIPE_SECRET_KEY === 'dummy_stripe_key') {
+    if (process.env.STRIPE_SECRET_KEY === "dummy_stripe_key") {
       return mockCreateConnectedAccount(userData);
     }
 
     const account = await stripe.accounts.create({
-      type: 'express',
-      country: userData.country || 'US',
+      type: "express",
+      country: userData.country || "US",
       email: userData.email,
       capabilities: {
         card_payments: { requested: true },
         transfers: { requested: true },
       },
-      business_type: 'individual',
+      business_type: "individual",
       business_profile: {
         name: userData.username || `${userData.firstName} ${userData.lastName}`,
-        url: userData.website || `https://waifuhospital.com/creators/${userData.id}`,
+        url:
+          userData.website ||
+          `https://waifuhospital.com/creators/${userData.id}`,
       },
       metadata: {
         userId: userData.id,
@@ -34,7 +38,7 @@ const createConnectedAccount = async (userData) => {
 
     return account;
   } catch (error) {
-    console.error('Error creating Stripe connected account:', error.message);
+    console.error("Error creating Stripe connected account:", error.message);
     // Return mock data if API call fails
     return mockCreateConnectedAccount(userData);
   }
@@ -49,7 +53,7 @@ const createConnectedAccount = async (userData) => {
  */
 const createAccountLink = async (accountId, refreshUrl, returnUrl) => {
   try {
-    if (process.env.STRIPE_SECRET_KEY === 'dummy_stripe_key') {
+    if (process.env.STRIPE_SECRET_KEY === "dummy_stripe_key") {
       return mockCreateAccountLink(accountId, refreshUrl, returnUrl);
     }
 
@@ -57,12 +61,12 @@ const createAccountLink = async (accountId, refreshUrl, returnUrl) => {
       account: accountId,
       refresh_url: refreshUrl,
       return_url: returnUrl,
-      type: 'account_onboarding',
+      type: "account_onboarding",
     });
 
     return accountLink;
   } catch (error) {
-    console.error('Error creating Stripe account link:', error.message);
+    console.error("Error creating Stripe account link:", error.message);
     // Return mock data if API call fails
     return mockCreateAccountLink(accountId, refreshUrl, returnUrl);
   }
@@ -75,14 +79,14 @@ const createAccountLink = async (accountId, refreshUrl, returnUrl) => {
  */
 const getAccountDetails = async (accountId) => {
   try {
-    if (process.env.STRIPE_SECRET_KEY === 'dummy_stripe_key') {
+    if (process.env.STRIPE_SECRET_KEY === "dummy_stripe_key") {
       return mockGetAccountDetails(accountId);
     }
 
     const account = await stripe.accounts.retrieve(accountId);
     return account;
   } catch (error) {
-    console.error('Error retrieving Stripe account details:', error.message);
+    console.error("Error retrieving Stripe account details:", error.message);
     // Return mock data if API call fails
     return mockGetAccountDetails(accountId);
   }
@@ -96,14 +100,14 @@ const getAccountDetails = async (accountId) => {
  */
 const updateConnectedAccount = async (accountId, updateData) => {
   try {
-    if (process.env.STRIPE_SECRET_KEY === 'dummy_stripe_key') {
+    if (process.env.STRIPE_SECRET_KEY === "dummy_stripe_key") {
       return mockUpdateConnectedAccount(accountId, updateData);
     }
 
     const account = await stripe.accounts.update(accountId, updateData);
     return account;
   } catch (error) {
-    console.error('Error updating Stripe connected account:', error.message);
+    console.error("Error updating Stripe connected account:", error.message);
     // Return mock data if API call fails
     return mockUpdateConnectedAccount(accountId, updateData);
   }
@@ -116,16 +120,32 @@ const updateConnectedAccount = async (accountId, updateData) => {
  * @param {Number} applicationFeePercent - Platform fee percentage (e.g., 20 for 20%)
  * @returns {Promise<Object>} Payment intent data
  */
-const createPaymentIntentWithFee = async (paymentData, connectedAccountId, applicationFeePercent = 20) => {
+const createPaymentIntentWithFee = async (
+  paymentData,
+  connectedAccountId,
+  applicationFeePercent = 20,
+) => {
   try {
-    if (process.env.STRIPE_SECRET_KEY === 'dummy_stripe_key') {
-      return mockCreatePaymentIntentWithFee(paymentData, connectedAccountId, applicationFeePercent);
+    if (process.env.STRIPE_SECRET_KEY === "dummy_stripe_key") {
+      return mockCreatePaymentIntentWithFee(
+        paymentData,
+        connectedAccountId,
+        applicationFeePercent,
+      );
     }
 
-    const { amount, currency = 'usd', description, metadata, customer } = paymentData;
-    
+    const {
+      amount,
+      currency = "usd",
+      description,
+      metadata,
+      customer,
+    } = paymentData;
+
     // Calculate application fee amount (platform fee)
-    const applicationFeeAmount = Math.round((amount * applicationFeePercent) / 100);
+    const applicationFeeAmount = Math.round(
+      (amount * applicationFeePercent) / 100,
+    );
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
@@ -141,9 +161,16 @@ const createPaymentIntentWithFee = async (paymentData, connectedAccountId, appli
 
     return paymentIntent;
   } catch (error) {
-    console.error('Error creating Stripe payment intent with fee:', error.message);
+    console.error(
+      "Error creating Stripe payment intent with fee:",
+      error.message,
+    );
     // Return mock data if API call fails
-    return mockCreatePaymentIntentWithFee(paymentData, connectedAccountId, applicationFeePercent);
+    return mockCreatePaymentIntentWithFee(
+      paymentData,
+      connectedAccountId,
+      applicationFeePercent,
+    );
   }
 };
 
@@ -154,16 +181,33 @@ const createPaymentIntentWithFee = async (paymentData, connectedAccountId, appli
  * @param {Number} applicationFeePercent - Platform fee percentage (e.g., 20 for 20%)
  * @returns {Promise<Object>} Charge data
  */
-const createDirectChargeWithTransfer = async (chargeData, connectedAccountId, applicationFeePercent = 20) => {
+const createDirectChargeWithTransfer = async (
+  chargeData,
+  connectedAccountId,
+  applicationFeePercent = 20,
+) => {
   try {
-    if (process.env.STRIPE_SECRET_KEY === 'dummy_stripe_key') {
-      return mockCreateDirectChargeWithTransfer(chargeData, connectedAccountId, applicationFeePercent);
+    if (process.env.STRIPE_SECRET_KEY === "dummy_stripe_key") {
+      return mockCreateDirectChargeWithTransfer(
+        chargeData,
+        connectedAccountId,
+        applicationFeePercent,
+      );
     }
 
-    const { amount, currency = 'usd', description, metadata, source, customer } = chargeData;
-    
+    const {
+      amount,
+      currency = "usd",
+      description,
+      metadata,
+      source,
+      customer,
+    } = chargeData;
+
     // Calculate application fee amount (platform fee)
-    const applicationFeeAmount = Math.round((amount * applicationFeePercent) / 100);
+    const applicationFeeAmount = Math.round(
+      (amount * applicationFeePercent) / 100,
+    );
 
     const charge = await stripe.charges.create({
       amount,
@@ -180,9 +224,16 @@ const createDirectChargeWithTransfer = async (chargeData, connectedAccountId, ap
 
     return charge;
   } catch (error) {
-    console.error('Error creating Stripe direct charge with transfer:', error.message);
+    console.error(
+      "Error creating Stripe direct charge with transfer:",
+      error.message,
+    );
     // Return mock data if API call fails
-    return mockCreateDirectChargeWithTransfer(chargeData, connectedAccountId, applicationFeePercent);
+    return mockCreateDirectChargeWithTransfer(
+      chargeData,
+      connectedAccountId,
+      applicationFeePercent,
+    );
   }
 };
 
@@ -194,11 +245,11 @@ const createDirectChargeWithTransfer = async (chargeData, connectedAccountId, ap
  */
 const transferToConnectedAccount = async (transferData, connectedAccountId) => {
   try {
-    if (process.env.STRIPE_SECRET_KEY === 'dummy_stripe_key') {
+    if (process.env.STRIPE_SECRET_KEY === "dummy_stripe_key") {
       return mockTransferToConnectedAccount(transferData, connectedAccountId);
     }
 
-    const { amount, currency = 'usd', description, metadata } = transferData;
+    const { amount, currency = "usd", description, metadata } = transferData;
 
     const transfer = await stripe.transfers.create({
       amount,
@@ -210,7 +261,10 @@ const transferToConnectedAccount = async (transferData, connectedAccountId) => {
 
     return transfer;
   } catch (error) {
-    console.error('Error transferring funds to Stripe connected account:', error.message);
+    console.error(
+      "Error transferring funds to Stripe connected account:",
+      error.message,
+    );
     // Return mock data if API call fails
     return mockTransferToConnectedAccount(transferData, connectedAccountId);
   }
@@ -224,7 +278,7 @@ const transferToConnectedAccount = async (transferData, connectedAccountId) => {
  */
 const createRefundWithFeeReversal = async (chargeId, refundData = {}) => {
   try {
-    if (process.env.STRIPE_SECRET_KEY === 'dummy_stripe_key') {
+    if (process.env.STRIPE_SECRET_KEY === "dummy_stripe_key") {
       return mockCreateRefundWithFeeReversal(chargeId, refundData);
     }
 
@@ -241,7 +295,10 @@ const createRefundWithFeeReversal = async (chargeId, refundData = {}) => {
 
     return refund;
   } catch (error) {
-    console.error('Error creating Stripe refund with fee reversal:', error.message);
+    console.error(
+      "Error creating Stripe refund with fee reversal:",
+      error.message,
+    );
     // Return mock data if API call fails
     return mockCreateRefundWithFeeReversal(chargeId, refundData);
   }
@@ -254,7 +311,7 @@ const createRefundWithFeeReversal = async (chargeId, refundData = {}) => {
  */
 const getConnectedAccountBalance = async (connectedAccountId) => {
   try {
-    if (process.env.STRIPE_SECRET_KEY === 'dummy_stripe_key') {
+    if (process.env.STRIPE_SECRET_KEY === "dummy_stripe_key") {
       return mockGetConnectedAccountBalance(connectedAccountId);
     }
 
@@ -264,7 +321,10 @@ const getConnectedAccountBalance = async (connectedAccountId) => {
 
     return balance;
   } catch (error) {
-    console.error('Error retrieving Stripe connected account balance:', error.message);
+    console.error(
+      "Error retrieving Stripe connected account balance:",
+      error.message,
+    );
     // Return mock data if API call fails
     return mockGetConnectedAccountBalance(connectedAccountId);
   }
@@ -276,9 +336,12 @@ const getConnectedAccountBalance = async (connectedAccountId) => {
  * @param {Object} options - Options including limit, starting_after, etc.
  * @returns {Promise<Object>} Transfers data
  */
-const getConnectedAccountTransfers = async (connectedAccountId, options = {}) => {
+const getConnectedAccountTransfers = async (
+  connectedAccountId,
+  options = {},
+) => {
   try {
-    if (process.env.STRIPE_SECRET_KEY === 'dummy_stripe_key') {
+    if (process.env.STRIPE_SECRET_KEY === "dummy_stripe_key") {
       return mockGetConnectedAccountTransfers(connectedAccountId, options);
     }
 
@@ -293,7 +356,10 @@ const getConnectedAccountTransfers = async (connectedAccountId, options = {}) =>
 
     return transfers;
   } catch (error) {
-    console.error('Error retrieving Stripe connected account transfers:', error.message);
+    console.error(
+      "Error retrieving Stripe connected account transfers:",
+      error.message,
+    );
     // Return mock data if API call fails
     return mockGetConnectedAccountTransfers(connectedAccountId, options);
   }
@@ -306,7 +372,7 @@ const getConnectedAccountTransfers = async (connectedAccountId, options = {}) =>
  */
 const createCustomer = async (customerData) => {
   try {
-    if (process.env.STRIPE_SECRET_KEY === 'dummy_stripe_key') {
+    if (process.env.STRIPE_SECRET_KEY === "dummy_stripe_key") {
       return mockCreateCustomer(customerData);
     }
 
@@ -321,7 +387,7 @@ const createCustomer = async (customerData) => {
 
     return customer;
   } catch (error) {
-    console.error('Error creating Stripe customer:', error.message);
+    console.error("Error creating Stripe customer:", error.message);
     // Return mock data if API call fails
     return mockCreateCustomer(customerData);
   }
@@ -334,11 +400,11 @@ const createCustomer = async (customerData) => {
  */
 const createPaymentMethod = async (paymentMethodData) => {
   try {
-    if (process.env.STRIPE_SECRET_KEY === 'dummy_stripe_key') {
+    if (process.env.STRIPE_SECRET_KEY === "dummy_stripe_key") {
       return mockCreatePaymentMethod(paymentMethodData);
     }
 
-    const { type = 'card', card, billing_details } = paymentMethodData;
+    const { type = "card", card, billing_details } = paymentMethodData;
 
     const paymentMethod = await stripe.paymentMethods.create({
       type,
@@ -348,7 +414,7 @@ const createPaymentMethod = async (paymentMethodData) => {
 
     return paymentMethod;
   } catch (error) {
-    console.error('Error creating Stripe payment method:', error.message);
+    console.error("Error creating Stripe payment method:", error.message);
     // Return mock data if API call fails
     return mockCreatePaymentMethod(paymentMethodData);
   }
@@ -362,7 +428,7 @@ const createPaymentMethod = async (paymentMethodData) => {
  */
 const attachPaymentMethodToCustomer = async (paymentMethodId, customerId) => {
   try {
-    if (process.env.STRIPE_SECRET_KEY === 'dummy_stripe_key') {
+    if (process.env.STRIPE_SECRET_KEY === "dummy_stripe_key") {
       return mockAttachPaymentMethodToCustomer(paymentMethodId, customerId);
     }
 
@@ -372,7 +438,10 @@ const attachPaymentMethodToCustomer = async (paymentMethodId, customerId) => {
 
     return paymentMethod;
   } catch (error) {
-    console.error('Error attaching Stripe payment method to customer:', error.message);
+    console.error(
+      "Error attaching Stripe payment method to customer:",
+      error.message,
+    );
     // Return mock data if API call fails
     return mockAttachPaymentMethodToCustomer(paymentMethodId, customerId);
   }
@@ -387,14 +456,18 @@ const attachPaymentMethodToCustomer = async (paymentMethodId, customerId) => {
  */
 const constructWebhookEvent = (body, signature, endpointSecret) => {
   try {
-    if (process.env.STRIPE_SECRET_KEY === 'dummy_stripe_key') {
+    if (process.env.STRIPE_SECRET_KEY === "dummy_stripe_key") {
       return mockConstructWebhookEvent(body);
     }
 
-    const event = stripe.webhooks.constructEvent(body, signature, endpointSecret);
+    const event = stripe.webhooks.constructEvent(
+      body,
+      signature,
+      endpointSecret,
+    );
     return event;
   } catch (error) {
-    console.error('Error constructing Stripe webhook event:', error.message);
+    console.error("Error constructing Stripe webhook event:", error.message);
     throw error;
   }
 };
@@ -410,19 +483,20 @@ const mockCreateConnectedAccount = (userData) => {
   const mockId = `acct_mock${Date.now()}`;
   return {
     id: mockId,
-    object: 'account',
+    object: "account",
     business_profile: {
       name: userData.username || `${userData.firstName} ${userData.lastName}`,
-      url: userData.website || `https://waifuhospital.com/creators/${userData.id}`,
+      url:
+        userData.website || `https://waifuhospital.com/creators/${userData.id}`,
     },
     capabilities: {
-      card_payments: { requested: true, status: 'pending' },
-      transfers: { requested: true, status: 'pending' },
+      card_payments: { requested: true, status: "pending" },
+      transfers: { requested: true, status: "pending" },
     },
     charges_enabled: false,
-    country: userData.country || 'US',
+    country: userData.country || "US",
     created: Math.floor(Date.now() / 1000),
-    default_currency: 'usd',
+    default_currency: "usd",
     details_submitted: false,
     email: userData.email,
     metadata: {
@@ -433,11 +507,11 @@ const mockCreateConnectedAccount = (userData) => {
       payouts: {
         schedule: {
           delay_days: 2,
-          interval: 'daily',
+          interval: "daily",
         },
       },
     },
-    type: 'express',
+    type: "express",
   };
 };
 
@@ -450,10 +524,10 @@ const mockCreateConnectedAccount = (userData) => {
  */
 const mockCreateAccountLink = (accountId, refreshUrl, returnUrl) => {
   return {
-    object: 'account_link',
+    object: "account_link",
     created: Math.floor(Date.now() / 1000),
     expires_at: Math.floor(Date.now() / 1000) + 3600,
-    url: 'https://connect.stripe.com/setup/mock',
+    url: "https://connect.stripe.com/setup/mock",
   };
 };
 
@@ -465,34 +539,34 @@ const mockCreateAccountLink = (accountId, refreshUrl, returnUrl) => {
 const mockGetAccountDetails = (accountId) => {
   return {
     id: accountId,
-    object: 'account',
+    object: "account",
     business_profile: {
-      name: 'Mock Creator',
-      url: 'https://waifuhospital.com/creators/mock',
+      name: "Mock Creator",
+      url: "https://waifuhospital.com/creators/mock",
     },
     capabilities: {
-      card_payments: { requested: true, status: 'active' },
-      transfers: { requested: true, status: 'active' },
+      card_payments: { requested: true, status: "active" },
+      transfers: { requested: true, status: "active" },
     },
     charges_enabled: true,
-    country: 'US',
+    country: "US",
     created: Math.floor(Date.now() / 1000) - 86400,
-    default_currency: 'usd',
+    default_currency: "usd",
     details_submitted: true,
-    email: 'mock@example.com',
+    email: "mock@example.com",
     metadata: {
-      userId: 'mock_user_id',
+      userId: "mock_user_id",
     },
     payouts_enabled: true,
     settings: {
       payouts: {
         schedule: {
           delay_days: 2,
-          interval: 'daily',
+          interval: "daily",
         },
       },
     },
-    type: 'express',
+    type: "express",
   };
 };
 
@@ -505,35 +579,37 @@ const mockGetAccountDetails = (accountId) => {
 const mockUpdateConnectedAccount = (accountId, updateData) => {
   return {
     id: accountId,
-    object: 'account',
+    object: "account",
     business_profile: {
-      name: updateData.business_profile?.name || 'Mock Creator',
-      url: updateData.business_profile?.url || 'https://waifuhospital.com/creators/mock',
+      name: updateData.business_profile?.name || "Mock Creator",
+      url:
+        updateData.business_profile?.url ||
+        "https://waifuhospital.com/creators/mock",
     },
     capabilities: {
-      card_payments: { requested: true, status: 'active' },
-      transfers: { requested: true, status: 'active' },
+      card_payments: { requested: true, status: "active" },
+      transfers: { requested: true, status: "active" },
     },
     charges_enabled: true,
-    country: updateData.country || 'US',
+    country: updateData.country || "US",
     created: Math.floor(Date.now() / 1000) - 86400,
-    default_currency: updateData.default_currency || 'usd',
+    default_currency: updateData.default_currency || "usd",
     details_submitted: true,
-    email: updateData.email || 'mock@example.com',
+    email: updateData.email || "mock@example.com",
     metadata: {
       ...(updateData.metadata || {}),
-      userId: 'mock_user_id',
+      userId: "mock_user_id",
     },
     payouts_enabled: true,
     settings: {
       payouts: {
         schedule: {
           delay_days: updateData.settings?.payouts?.schedule?.delay_days || 2,
-          interval: updateData.settings?.payouts?.schedule?.interval || 'daily',
+          interval: updateData.settings?.payouts?.schedule?.interval || "daily",
         },
       },
     },
-    type: 'express',
+    type: "express",
   };
 };
 
@@ -544,14 +620,26 @@ const mockUpdateConnectedAccount = (accountId, updateData) => {
  * @param {Number} applicationFeePercent - Platform fee percentage
  * @returns {Object} Mock payment intent data
  */
-const mockCreatePaymentIntentWithFee = (paymentData, connectedAccountId, applicationFeePercent) => {
-  const { amount, currency = 'usd', description, metadata, customer } = paymentData;
+const mockCreatePaymentIntentWithFee = (
+  paymentData,
+  connectedAccountId,
+  applicationFeePercent,
+) => {
+  const {
+    amount,
+    currency = "usd",
+    description,
+    metadata,
+    customer,
+  } = paymentData;
   const mockId = `pi_mock${Date.now()}`;
-  const applicationFeeAmount = Math.round((amount * applicationFeePercent) / 100);
+  const applicationFeeAmount = Math.round(
+    (amount * applicationFeePercent) / 100,
+  );
 
   return {
     id: mockId,
-    object: 'payment_intent',
+    object: "payment_intent",
     amount,
     application_fee_amount: applicationFeeAmount,
     currency,
@@ -562,7 +650,7 @@ const mockCreatePaymentIntentWithFee = (paymentData, connectedAccountId, applica
     },
     client_secret: `${mockId}_secret_mock`,
     created: Math.floor(Date.now() / 1000),
-    status: 'requires_payment_method',
+    status: "requires_payment_method",
     transfer_data: {
       destination: connectedAccountId,
     },
@@ -576,14 +664,26 @@ const mockCreatePaymentIntentWithFee = (paymentData, connectedAccountId, applica
  * @param {Number} applicationFeePercent - Platform fee percentage
  * @returns {Object} Mock charge data
  */
-const mockCreateDirectChargeWithTransfer = (chargeData, connectedAccountId, applicationFeePercent) => {
-  const { amount, currency = 'usd', description, metadata, customer } = chargeData;
+const mockCreateDirectChargeWithTransfer = (
+  chargeData,
+  connectedAccountId,
+  applicationFeePercent,
+) => {
+  const {
+    amount,
+    currency = "usd",
+    description,
+    metadata,
+    customer,
+  } = chargeData;
   const mockId = `ch_mock${Date.now()}`;
-  const applicationFeeAmount = Math.round((amount * applicationFeePercent) / 100);
+  const applicationFeeAmount = Math.round(
+    (amount * applicationFeePercent) / 100,
+  );
 
   return {
     id: mockId,
-    object: 'charge',
+    object: "charge",
     amount,
     application_fee_amount: applicationFeeAmount,
     currency,
@@ -593,7 +693,7 @@ const mockCreateDirectChargeWithTransfer = (chargeData, connectedAccountId, appl
       ...(metadata || {}),
     },
     created: Math.floor(Date.now() / 1000),
-    status: 'succeeded',
+    status: "succeeded",
     transfer_data: {
       destination: connectedAccountId,
     },
@@ -608,12 +708,12 @@ const mockCreateDirectChargeWithTransfer = (chargeData, connectedAccountId, appl
  * @returns {Object} Mock transfer data
  */
 const mockTransferToConnectedAccount = (transferData, connectedAccountId) => {
-  const { amount, currency = 'usd', description, metadata } = transferData;
+  const { amount, currency = "usd", description, metadata } = transferData;
   const mockId = `tr_mock${Date.now()}`;
 
   return {
     id: mockId,
-    object: 'transfer',
+    object: "transfer",
     amount,
     currency,
     destination: connectedAccountId,
@@ -623,7 +723,7 @@ const mockTransferToConnectedAccount = (transferData, connectedAccountId) => {
     },
     created: Math.floor(Date.now() / 1000),
     date: Math.floor(Date.now() / 1000),
-    status: 'pending',
+    status: "pending",
   };
 };
 
@@ -639,16 +739,16 @@ const mockCreateRefundWithFeeReversal = (chargeId, refundData = {}) => {
 
   return {
     id: mockId,
-    object: 'refund',
+    object: "refund",
     amount: amount || 1000,
     charge: chargeId,
     created: Math.floor(Date.now() / 1000),
-    currency: 'usd',
+    currency: "usd",
     metadata: {
       ...(metadata || {}),
     },
     reason: reason || null,
-    status: 'succeeded',
+    status: "succeeded",
   };
 };
 
@@ -659,11 +759,11 @@ const mockCreateRefundWithFeeReversal = (chargeId, refundData = {}) => {
  */
 const mockGetConnectedAccountBalance = (connectedAccountId) => {
   return {
-    object: 'balance',
+    object: "balance",
     available: [
       {
         amount: 5000,
-        currency: 'usd',
+        currency: "usd",
         source_types: {
           card: 5000,
         },
@@ -672,7 +772,7 @@ const mockGetConnectedAccountBalance = (connectedAccountId) => {
     pending: [
       {
         amount: 1000,
-        currency: 'usd',
+        currency: "usd",
         source_types: {
           card: 1000,
         },
@@ -694,23 +794,23 @@ const mockGetConnectedAccountTransfers = (connectedAccountId, options = {}) => {
   for (let i = 0; i < limit; i++) {
     transfers.push({
       id: `tr_mock${Date.now() - i * 1000}`,
-      object: 'transfer',
+      object: "transfer",
       amount: 1000 + i * 100,
-      currency: 'usd',
+      currency: "usd",
       destination: connectedAccountId,
       description: `Mock transfer ${i + 1}`,
       metadata: {},
       created: Math.floor(Date.now() / 1000) - i * 86400,
       date: Math.floor(Date.now() / 1000) - i * 86400,
-      status: 'paid',
+      status: "paid",
     });
   }
 
   return {
-    object: 'list',
+    object: "list",
     data: transfers,
     has_more: false,
-    url: '/v1/transfers',
+    url: "/v1/transfers",
   };
 };
 
@@ -725,10 +825,10 @@ const mockCreateCustomer = (customerData) => {
 
   return {
     id: mockId,
-    object: 'customer',
+    object: "customer",
     created: Math.floor(Date.now() / 1000),
-    email: email || 'mock@example.com',
-    name: name || 'Mock Customer',
+    email: email || "mock@example.com",
+    name: name || "Mock Customer",
     phone: phone || null,
     metadata: {
       ...(metadata || {}),
@@ -742,21 +842,21 @@ const mockCreateCustomer = (customerData) => {
  * @returns {Object} Mock payment method data
  */
 const mockCreatePaymentMethod = (paymentMethodData) => {
-  const { type = 'card', billing_details } = paymentMethodData;
+  const { type = "card", billing_details } = paymentMethodData;
   const mockId = `pm_mock${Date.now()}`;
 
   return {
     id: mockId,
-    object: 'payment_method',
+    object: "payment_method",
     created: Math.floor(Date.now() / 1000),
     type,
     card: {
-      brand: 'visa',
+      brand: "visa",
       exp_month: 12,
       exp_year: 2025,
-      last4: '4242',
-      country: 'US',
-      funding: 'credit',
+      last4: "4242",
+      country: "US",
+      funding: "credit",
     },
     billing_details: billing_details || {
       address: {
@@ -784,16 +884,16 @@ const mockCreatePaymentMethod = (paymentMethodData) => {
 const mockAttachPaymentMethodToCustomer = (paymentMethodId, customerId) => {
   return {
     id: paymentMethodId,
-    object: 'payment_method',
+    object: "payment_method",
     created: Math.floor(Date.now() / 1000),
-    type: 'card',
+    type: "card",
     card: {
-      brand: 'visa',
+      brand: "visa",
       exp_month: 12,
       exp_year: 2025,
-      last4: '4242',
-      country: 'US',
-      funding: 'credit',
+      last4: "4242",
+      country: "US",
+      funding: "credit",
     },
     billing_details: {
       address: {
@@ -819,28 +919,28 @@ const mockAttachPaymentMethodToCustomer = (paymentMethodId, customerId) => {
  */
 const mockConstructWebhookEvent = (body) => {
   try {
-    const parsedBody = typeof body === 'string' ? JSON.parse(body) : body;
+    const parsedBody = typeof body === "string" ? JSON.parse(body) : body;
     return {
       id: `evt_mock${Date.now()}`,
-      object: 'event',
-      api_version: '2020-08-27',
+      object: "event",
+      api_version: "2020-08-27",
       created: Math.floor(Date.now() / 1000),
       data: {
         object: parsedBody,
       },
-      type: parsedBody.type || 'payment_intent.succeeded',
+      type: parsedBody.type || "payment_intent.succeeded",
     };
   } catch (error) {
-    console.error('Error parsing webhook body:', error.message);
+    console.error("Error parsing webhook body:", error.message);
     return {
       id: `evt_mock${Date.now()}`,
-      object: 'event',
-      api_version: '2020-08-27',
+      object: "event",
+      api_version: "2020-08-27",
       created: Math.floor(Date.now() / 1000),
       data: {
         object: {},
       },
-      type: 'unknown',
+      type: "unknown",
     };
   }
 };

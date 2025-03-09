@@ -63,7 +63,7 @@ const UserSchema = new mongoose.Schema({
     defaultCurrency: {
       type: String,
       default: "usd",
-    }
+    },
   },
   paymentHistory: [
     {

@@ -31,14 +31,7 @@ const MerchandiseSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: [
-      "t-shirt",
-      "hoodie",
-      "hat",
-      "mug",
-      "mousepad",
-      "sticker",
-    ],
+    enum: ["t-shirt", "hoodie", "hat", "mug", "mousepad", "sticker"],
     required: true,
   },
   availableSizes: [
@@ -94,8 +87,8 @@ const MerchandiseSchema = new mongoose.Schema({
       externalId: String,
       retailPrice: Number,
       size: String,
-      color: String
-    }
+      color: String,
+    },
   ],
   // Stripe Connect integration fields
   stripeConnectAccountId: {

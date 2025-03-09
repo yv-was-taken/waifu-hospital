@@ -8,24 +8,28 @@ let printfulService;
 try {
   printfulService = require("../services/printfulService");
 } catch (error) {
-  console.warn("Printful service could not be loaded. Merchandise features will be limited.");
+  console.warn(
+    "Printful service could not be loaded. Merchandise features will be limited.",
+  );
   // Create mock printful service to prevent errors
   printfulService = {
     createProduct: async () => ({
       id: `mock_${Date.now()}`,
-      external_id: `product_${Date.now()}`
+      external_id: `product_${Date.now()}`,
     }),
     getProducts: async () => [],
     getProductVariants: async () => [],
     getProductionCosts: async () => ({ productionCost: 10 }),
     createOrder: async () => ({
-      id: `mock_order_${Date.now()}`
+      id: `mock_order_${Date.now()}`,
     }),
-    calculateShipping: async () => [{
-      id: 'STANDARD',
-      name: 'Standard shipping',
-      rate: 7.95
-    }]
+    calculateShipping: async () => [
+      {
+        id: "STANDARD",
+        name: "Standard shipping",
+        rate: 7.95,
+      },
+    ],
   };
 }
 
@@ -34,19 +38,21 @@ let stripeConnectService;
 try {
   stripeConnectService = require("../services/stripeConnectService");
 } catch (error) {
-  console.warn("Stripe Connect service could not be loaded. Payment features will be limited.");
+  console.warn(
+    "Stripe Connect service could not be loaded. Payment features will be limited.",
+  );
   // Create mock stripe connect service to prevent errors
   stripeConnectService = {
     createConnectedAccount: async () => ({
-      id: `acct_mock${Date.now()}`
+      id: `acct_mock${Date.now()}`,
     }),
     createAccountLink: async () => ({
-      url: 'https://connect.stripe.com/setup/mock'
+      url: "https://connect.stripe.com/setup/mock",
     }),
     createPaymentIntentWithFee: async () => ({
       id: `pi_mock${Date.now()}`,
-      client_secret: `pi_mock${Date.now()}_secret_mock`
-    })
+      client_secret: `pi_mock${Date.now()}_secret_mock`,
+    }),
   };
 }
 
@@ -72,7 +78,7 @@ exports.createMerchandise = async (req, res) => {
     productionCost,
     creatorRevenue,
     creatorRevenuePercent = 80,
-    platformFeePercent = 20
+    platformFeePercent = 20,
   } = req.body;
 
   try {
@@ -91,32 +97,33 @@ exports.createMerchandise = async (req, res) => {
 
     // Get user for Stripe Connect account
     const user = await User.findById(req.user.id);
-    
+
     // If user doesn't have a Stripe Connect account, create one
     let stripeConnectAccountId = user.stripeConnect?.accountId;
     if (!stripeConnectAccountId) {
       try {
-        const connectedAccount = await stripeConnectService.createConnectedAccount({
-          id: user._id,
-          email: user.email,
-          username: user.username,
-          country: "US" // Default country
-        });
-        
+        const connectedAccount =
+          await stripeConnectService.createConnectedAccount({
+            id: user._id,
+            email: user.email,
+            username: user.username,
+            country: "US", // Default country
+          });
+
         stripeConnectAccountId = connectedAccount.id;
-        
+
         // Update user with Stripe Connect account ID
         user.stripeConnect = {
           accountId: stripeConnectAccountId,
           isOnboarded: false,
           payoutsEnabled: false,
           country: "US",
-          defaultCurrency: "usd"
+          defaultCurrency: "usd",
         };
-        
+
         await user.save();
       } catch (stripeError) {
-        console.error('Stripe Connect account creation failed:', stripeError);
+        console.error("Stripe Connect account creation failed:", stripeError);
         // Continue with local save even if Stripe fails
       }
     }
@@ -137,7 +144,7 @@ exports.createMerchandise = async (req, res) => {
       creatorRevenue: creatorRevenue || 0,
       creatorRevenuePercent,
       platformFeePercent,
-      stripeConnectAccountId
+      stripeConnectAccountId,
     });
 
     // Create external ID for Printful
@@ -149,7 +156,7 @@ exports.createMerchandise = async (req, res) => {
       // If production cost wasn't provided, estimate it
       if (!productionCost) {
         const productionCostData = await printfulService.getProductionCosts(
-          getVariantIdForCategory(category)
+          getVariantIdForCategory(category),
         );
         newMerchandise.productionCost = productionCostData.productionCost;
       }
@@ -163,28 +170,28 @@ exports.createMerchandise = async (req, res) => {
         availableSizes: availableSizes || ["N/A"],
         availableColors: availableColors || [],
         stock: stock || 100,
-        externalId
+        externalId,
       });
-      
+
       // Store Printful product ID and other relevant data
       if (printfulProduct && printfulProduct.id) {
         newMerchandise.printfulProductId = printfulProduct.id;
-        
+
         // Store variants
         if (printfulProduct.variants && printfulProduct.variants.length > 0) {
-          const printfulVariants = printfulProduct.variants.map(variant => ({
+          const printfulVariants = printfulProduct.variants.map((variant) => ({
             variantId: variant.id,
             externalId: variant.external_id,
             retailPrice: variant.retail_price,
             size: getSizeFromVariant(variant),
-            color: getColorFromVariant(variant)
+            color: getColorFromVariant(variant),
           }));
-          
+
           newMerchandise.printfulVariants = printfulVariants;
         }
       }
     } catch (printfulError) {
-      console.error('Printful product creation failed:', printfulError);
+      console.error("Printful product creation failed:", printfulError);
       // Continue with local save even if Printful fails
     }
 
@@ -203,39 +210,37 @@ exports.createMerchandise = async (req, res) => {
 // Helper function to get variant ID for a category
 const getVariantIdForCategory = (category) => {
   const categoryToVariantId = {
-    't-shirt': 101,
-    'mug': 201,
-    'poster': 301,
-    'sticker': 401,
-    'hoodie': 501,
-    'hat': 601,
-    'phonecase': 701,
-    'other': 999
+    "t-shirt": 101,
+    mug: 201,
+    poster: 301,
+    sticker: 401,
+    hoodie: 501,
+    hat: 601,
+    phonecase: 701,
+    other: 999,
   };
-  
+
   return categoryToVariantId[category] || 999;
 };
 
 // Helper function to extract size from Printful variant
 const getSizeFromVariant = (variant) => {
-  if (!variant.options) return 'N/A';
-  
-  const sizeOption = variant.options.find(option => 
-    option.id === 'size' || option.id === 'model'
+  if (!variant.options) return "N/A";
+
+  const sizeOption = variant.options.find(
+    (option) => option.id === "size" || option.id === "model",
   );
-  
-  return sizeOption && sizeOption.value ? sizeOption.value[0] : 'N/A';
+
+  return sizeOption && sizeOption.value ? sizeOption.value[0] : "N/A";
 };
 
 // Helper function to extract color from Printful variant
 const getColorFromVariant = (variant) => {
-  if (!variant.options) return '';
-  
-  const colorOption = variant.options.find(option => 
-    option.id === 'color'
-  );
-  
-  return colorOption && colorOption.value ? colorOption.value[0] : '';
+  if (!variant.options) return "";
+
+  const colorOption = variant.options.find((option) => option.id === "color");
+
+  return colorOption && colorOption.value ? colorOption.value[0] : "";
 };
 
 // @desc    Get all merchandise
@@ -346,7 +351,7 @@ exports.updateMerchandise = async (req, res) => {
       creatorRevenue,
       creatorRevenuePercent,
       platformFeePercent,
-      isApproved
+      isApproved,
     } = req.body;
 
     // Build merchandise object
@@ -361,8 +366,10 @@ exports.updateMerchandise = async (req, res) => {
     if (stock !== undefined) merchandiseFields.stock = stock;
     if (productionCost) merchandiseFields.productionCost = productionCost;
     if (creatorRevenue) merchandiseFields.creatorRevenue = creatorRevenue;
-    if (creatorRevenuePercent) merchandiseFields.creatorRevenuePercent = creatorRevenuePercent;
-    if (platformFeePercent) merchandiseFields.platformFeePercent = platformFeePercent;
+    if (creatorRevenuePercent)
+      merchandiseFields.creatorRevenuePercent = creatorRevenuePercent;
+    if (platformFeePercent)
+      merchandiseFields.platformFeePercent = platformFeePercent;
     if (isApproved !== undefined) merchandiseFields.isApproved = isApproved;
 
     // Update merchandise
@@ -420,123 +427,133 @@ exports.deleteMerchandise = async (req, res) => {
 exports.createCheckout = async (req, res) => {
   try {
     const { items, shippingAddress } = req.body;
-    
+
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ msg: "Items are required" });
     }
-    
+
     if (!shippingAddress) {
       return res.status(400).json({ msg: "Shipping address is required" });
     }
-    
+
     // Format items for order creation and payment
     const orderItems = [];
     let subtotal = 0;
     const creatorAmounts = {}; // Track amount per creator for Stripe Connect payments
-    
+
     for (const item of items) {
       const merchandise = await Merchandise.findById(item.merchandiseId);
-      
+
       if (!merchandise) {
-        return res.status(404).json({ 
-          msg: `Merchandise not found: ${item.merchandiseId}` 
+        return res.status(404).json({
+          msg: `Merchandise not found: ${item.merchandiseId}`,
         });
       }
-      
+
       // Find the variant if size/color specified
       let variantId = null;
-      
+
       if (item.size || item.color) {
         // Find variant based on size and color
-        if (merchandise.printfulVariants && merchandise.printfulVariants.length > 0) {
-          const variant = merchandise.printfulVariants.find(v => 
-            (!item.size || v.size === item.size) && 
-            (!item.color || v.color === item.color)
+        if (
+          merchandise.printfulVariants &&
+          merchandise.printfulVariants.length > 0
+        ) {
+          const variant = merchandise.printfulVariants.find(
+            (v) =>
+              (!item.size || v.size === item.size) &&
+              (!item.color || v.color === item.color),
           );
-          
+
           if (variant) {
             variantId = variant.variantId;
           }
         }
       }
-      
+
       // If no specific variant found, use first one or default
-      if (!variantId && merchandise.printfulVariants && merchandise.printfulVariants.length > 0) {
+      if (
+        !variantId &&
+        merchandise.printfulVariants &&
+        merchandise.printfulVariants.length > 0
+      ) {
         variantId = merchandise.printfulVariants[0].variantId;
       }
-      
+
       // Calculate price and revenue distribution
       const itemPrice = merchandise.price * (item.quantity || 1);
       const productionCost = merchandise.productionCost * (item.quantity || 1);
-      const platformFee = (itemPrice - productionCost) * (merchandise.platformFeePercent / 100);
+      const platformFee =
+        (itemPrice - productionCost) * (merchandise.platformFeePercent / 100);
       const creatorRevenue = itemPrice - productionCost - platformFee;
-      
+
       // Add to creator amounts for Stripe Connect
       if (merchandise.creator) {
         const creatorId = merchandise.creator.toString();
         if (!creatorAmounts[creatorId]) {
           creatorAmounts[creatorId] = {
             amount: 0,
-            stripeAccount: merchandise.stripeConnectAccountId
+            stripeAccount: merchandise.stripeConnectAccountId,
           };
         }
         creatorAmounts[creatorId].amount += creatorRevenue;
       }
-      
+
       // Add to subtotal
       subtotal += itemPrice;
-      
+
       // Add item to order
       orderItems.push({
         merchandise: merchandise._id,
         quantity: item.quantity || 1,
-        size: item.size || 'N/A',
-        color: item.color || '',
+        size: item.size || "N/A",
+        color: item.color || "",
         price: merchandise.price,
         printfulVariantId: variantId,
         creator: merchandise.creator,
         creatorRevenue: creatorRevenue,
         platformFee: platformFee,
-        productionCost: productionCost
+        productionCost: productionCost,
       });
     }
-    
+
     // Calculate shipping costs using Printful API
     const shippingRates = await printfulService.calculateShipping({
       shippingAddress,
-      items: orderItems.map(item => ({
+      items: orderItems.map((item) => ({
         printfulVariantId: item.printfulVariantId,
-        quantity: item.quantity
-      }))
+        quantity: item.quantity,
+      })),
     });
-    
+
     // Choose standard shipping as default
-    const shippingCost = shippingRates && shippingRates.length > 0 
-      ? shippingRates[0].rate 
-      : 7.95; // Default fallback
+    const shippingCost =
+      shippingRates && shippingRates.length > 0 ? shippingRates[0].rate : 7.95; // Default fallback
 
     // Calculate total amount
     const totalAmount = subtotal + shippingCost;
-    
+
     // Create payment intent with Stripe
     // For this implementation, we'll use the platform account to handle the payment
     // and then distribute to creators via transfers
-    const paymentIntent = await stripeConnectService.createPaymentIntentWithFee({
-      amount: Math.round(totalAmount * 100), // Stripe requires amounts in cents
-      currency: 'usd',
-      description: `Order with ${orderItems.length} items`,
-      metadata: {
-        userId: req.user.id,
-      }
-    });
-    
+    const paymentIntent = await stripeConnectService.createPaymentIntentWithFee(
+      {
+        amount: Math.round(totalAmount * 100), // Stripe requires amounts in cents
+        currency: "usd",
+        description: `Order with ${orderItems.length} items`,
+        metadata: {
+          userId: req.user.id,
+        },
+      },
+    );
+
     // Return checkout information
     res.json({
       clientSecret: paymentIntent.client_secret,
       totalAmount,
       subtotal,
       shippingCost,
-      items: orderItems.map(item => ({
+      items: orderItems.map((item) => ({
         merchandiseId: item.merchandise,
         quantity: item.quantity,
         size: item.size,
@@ -544,10 +561,10 @@ exports.createCheckout = async (req, res) => {
         price: item.price,
         creatorRevenue: item.creatorRevenue,
         platformFee: item.platformFee,
-        productionCost: item.productionCost
+        productionCost: item.productionCost,
       })),
       shippingRates,
-      paymentIntentId: paymentIntent.id
+      paymentIntentId: paymentIntent.id,
     });
   } catch (err) {
     console.error(err.message);
@@ -561,49 +578,52 @@ exports.createCheckout = async (req, res) => {
 exports.getStripeConnectOnboarding = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-    
+
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
-    
+
     // If user doesn't have a Stripe Connect account, create one
     let stripeConnectAccountId = user.stripeConnect?.accountId;
     if (!stripeConnectAccountId) {
       try {
-        const connectedAccount = await stripeConnectService.createConnectedAccount({
-          id: user._id,
-          email: user.email,
-          username: user.username,
-          country: "US" // Default country
-        });
-        
+        const connectedAccount =
+          await stripeConnectService.createConnectedAccount({
+            id: user._id,
+            email: user.email,
+            username: user.username,
+            country: "US", // Default country
+          });
+
         stripeConnectAccountId = connectedAccount.id;
-        
+
         // Update user with Stripe Connect account ID
         user.stripeConnect = {
           accountId: stripeConnectAccountId,
           isOnboarded: false,
           payoutsEnabled: false,
           country: "US",
-          defaultCurrency: "usd"
+          defaultCurrency: "usd",
         };
-        
+
         await user.save();
       } catch (stripeError) {
-        console.error('Stripe Connect account creation failed:', stripeError);
-        return res.status(500).json({ msg: "Failed to create Stripe Connect account" });
+        console.error("Stripe Connect account creation failed:", stripeError);
+        return res
+          .status(500)
+          .json({ msg: "Failed to create Stripe Connect account" });
       }
     }
-    
+
     // Create onboarding link
     const accountLink = await stripeConnectService.createAccountLink(
       stripeConnectAccountId,
-      `${req.protocol}://${req.get('host')}/api/merchandise/stripe-connect-refresh`,
-      `${req.protocol}://${req.get('host')}/api/merchandise/stripe-connect-return`
+      `${req.protocol}://${req.get("host")}/api/merchandise/stripe-connect-refresh`,
+      `${req.protocol}://${req.get("host")}/api/merchandise/stripe-connect-return`,
     );
-    
+
     res.json({
-      url: accountLink.url
+      url: accountLink.url,
     });
   } catch (err) {
     console.error(err.message);
@@ -615,7 +635,7 @@ exports.getStripeConnectOnboarding = async (req, res) => {
 // @route   GET /api/merchandise/stripe-connect-refresh
 // @access  Public
 exports.handleStripeConnectRefresh = async (req, res) => {
-  res.redirect('/dashboard/settings'); // Redirect to settings page
+  res.redirect("/dashboard/settings"); // Redirect to settings page
 };
 
 // @desc    Handle Stripe Connect onboarding return
@@ -623,7 +643,7 @@ exports.handleStripeConnectRefresh = async (req, res) => {
 // @access  Public
 exports.handleStripeConnectReturn = async (req, res) => {
   // This is just a redirect point; the frontend should check the account status
-  res.redirect('/dashboard/settings'); // Redirect to settings page
+  res.redirect("/dashboard/settings"); // Redirect to settings page
 };
 
 // @desc    Check Stripe Connect account status
@@ -632,40 +652,45 @@ exports.handleStripeConnectReturn = async (req, res) => {
 exports.checkStripeConnectStatus = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-    
+
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
-    
+
     const stripeConnectAccountId = user.stripeConnect?.accountId;
-    
+
     if (!stripeConnectAccountId) {
       return res.json({
         isConnected: false,
         isOnboarded: false,
-        payoutsEnabled: false
+        payoutsEnabled: false,
       });
     }
-    
+
     // Check account status
-    const accountDetails = await stripeConnectService.getAccountDetails(stripeConnectAccountId);
-    
+    const accountDetails = await stripeConnectService.getAccountDetails(
+      stripeConnectAccountId,
+    );
+
     // Update user's Stripe Connect status
     user.stripeConnect.isOnboarded = accountDetails.details_submitted;
     user.stripeConnect.payoutsEnabled = accountDetails.payouts_enabled;
-    
-    if (accountDetails.details_submitted && !user.stripeConnect.onboardingCompleted) {
+
+    if (
+      accountDetails.details_submitted &&
+      !user.stripeConnect.onboardingCompleted
+    ) {
       user.stripeConnect.onboardingCompleted = new Date();
     }
-    
+
     await user.save();
-    
+
     res.json({
       isConnected: true,
       isOnboarded: accountDetails.details_submitted,
       payoutsEnabled: accountDetails.payouts_enabled,
       chargesEnabled: accountDetails.charges_enabled,
-      dashboardUrl: accountDetails.dashboard_url
+      dashboardUrl: accountDetails.dashboard_url,
     });
   } catch (err) {
     console.error(err.message);

@@ -647,11 +647,9 @@ exports.completePayment = async (req, res) => {
   try {
     // Validate payment intent and items
     if (!paymentIntentId && paymentMethod === "credit_card") {
-      return res
-        .status(400)
-        .json({
-          msg: "Payment intent ID is required for credit card payments",
-        });
+      return res.status(400).json({
+        msg: "Payment intent ID is required for credit card payments",
+      });
     }
 
     if (!items || !Array.isArray(items) || items.length === 0) {

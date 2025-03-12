@@ -1,6 +1,8 @@
 const Character = require("../models/Character");
 const User = require("../models/User");
 const { validationResult } = require("express-validator");
+const cloudflareImagesService = require("../services/cloudflareImagesService");
+const logger = require("../utils/logger");
 
 // @desc    Create a new character
 // @route   POST /api/characters
@@ -25,11 +27,11 @@ exports.createCharacter = async (req, res) => {
   } = req.body;
 
   try {
-    // Create a new character
+    // Create a new character with initial data
     const newCharacter = new Character({
       name,
       creator: req.user.id,
-      imageUrl,
+      imageUrl, // Keep original URL temporarily
       style,
       description,
       personality,
@@ -39,6 +41,33 @@ exports.createCharacter = async (req, res) => {
       age,
       public: public !== undefined ? public : true,
     });
+
+    // Upload image to Cloudflare Images
+    try {
+      const metadata = { characterId: newCharacter._id.toString() };
+      const uploadResult = await cloudflareImagesService.uploadImageFromUrl(
+        imageUrl,
+        metadata,
+      );
+
+      // Update character with Cloudflare image ID and URL
+      newCharacter.cloudflareImageId = uploadResult.id;
+      newCharacter.imageUrl = cloudflareImagesService.getImageUrl(
+        uploadResult.id,
+      );
+
+      logger.info("Character image uploaded to Cloudflare Images", {
+        characterId: newCharacter._id,
+        cloudflareImageId: uploadResult.id,
+      });
+    } catch (uploadError) {
+      // If upload fails, continue with original URL
+      logger.error(
+        "Failed to upload character image to Cloudflare Images",
+        uploadError,
+      );
+      // We keep the original imageUrl that was set earlier
+    }
 
     // Save character to database
     const character = await newCharacter.save();
@@ -129,6 +158,25 @@ exports.getCharacterById = async (req, res) => {
       return res.status(403).json({ msg: "This character is private" });
     }
 
+    // If the character has a Cloudflare image ID but the URL is not properly formatted,
+    // update the URL to ensure it's using the correct Cloudflare delivery URL
+    if (
+      character.cloudflareImageId &&
+      !character.imageUrl.includes("imagedelivery.net")
+    ) {
+      character.imageUrl = cloudflareImagesService.getImageUrl(
+        character.cloudflareImageId,
+      );
+      await character.save();
+      logger.info(
+        "Updated character image URL to use Cloudflare delivery URL",
+        {
+          characterId: character._id,
+          cloudflareImageId: character.cloudflareImageId,
+        },
+      );
+    }
+
     res.json(character);
   } catch (err) {
     console.error(err.message);
@@ -174,7 +222,6 @@ exports.updateCharacter = async (req, res) => {
     // Build character object
     const characterFields = {};
     if (name) characterFields.name = name;
-    if (imageUrl) characterFields.imageUrl = imageUrl;
     if (style) characterFields.style = style;
     if (description) characterFields.description = description;
     if (personality) characterFields.personality = personality;
@@ -183,6 +230,56 @@ exports.updateCharacter = async (req, res) => {
     if (occupation) characterFields.occupation = occupation;
     if (age) characterFields.age = age;
     if (public !== undefined) characterFields.public = public;
+
+    // If imageUrl is provided and it's different from the current one,
+    // upload the new image to Cloudflare Images
+    if (imageUrl && imageUrl !== character.imageUrl) {
+      try {
+        // Delete the old image from Cloudflare if it exists
+        if (character.cloudflareImageId) {
+          try {
+            await cloudflareImagesService.deleteImage(
+              character.cloudflareImageId,
+            );
+            logger.info("Deleted old character image from Cloudflare Images", {
+              characterId: character._id,
+              cloudflareImageId: character.cloudflareImageId,
+            });
+          } catch (deleteError) {
+            logger.error(
+              "Failed to delete old character image from Cloudflare Images",
+              deleteError,
+            );
+            // Continue with the update even if delete fails
+          }
+        }
+
+        // Upload the new image
+        const metadata = { characterId: character._id.toString() };
+        const uploadResult = await cloudflareImagesService.uploadImageFromUrl(
+          imageUrl,
+          metadata,
+        );
+
+        // Update character fields with new Cloudflare image data
+        characterFields.cloudflareImageId = uploadResult.id;
+        characterFields.imageUrl = cloudflareImagesService.getImageUrl(
+          uploadResult.id,
+        );
+
+        logger.info("Updated character image uploaded to Cloudflare Images", {
+          characterId: character._id,
+          cloudflareImageId: uploadResult.id,
+        });
+      } catch (uploadError) {
+        logger.error(
+          "Failed to upload updated character image to Cloudflare Images",
+          uploadError,
+        );
+        // If Cloudflare upload fails, use the original URL from the request
+        characterFields.imageUrl = imageUrl;
+      }
+    }
 
     // Update and return the character
     const updatedCharacter = await Character.findByIdAndUpdate(
@@ -217,6 +314,26 @@ exports.deleteCharacter = async (req, res) => {
       return res
         .status(401)
         .json({ msg: "Not authorized to delete this character" });
+    }
+
+    // Delete the character's image from Cloudflare Images if it exists
+    if (character.cloudflareImageId) {
+      try {
+        await cloudflareImagesService.deleteImage(character.cloudflareImageId);
+        logger.info(
+          "Deleted character image from Cloudflare Images during character deletion",
+          {
+            characterId: character._id,
+            cloudflareImageId: character.cloudflareImageId,
+          },
+        );
+      } catch (deleteError) {
+        logger.error(
+          "Failed to delete character image from Cloudflare Images during character deletion",
+          deleteError,
+        );
+        // Continue with character deletion even if image deletion fails
+      }
     }
 
     // Remove character from database (modern approach)

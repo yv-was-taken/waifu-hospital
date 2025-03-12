@@ -15,6 +15,10 @@ const CharacterSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  cloudflareImageId: {
+    type: String,
+    default: "",
+  },
   style: {
     type: String,
     enum: [

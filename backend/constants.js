@@ -1,4 +1,4 @@
-export PRODUCT_IDS = {
+const PRODUCT_IDS = {
   //black t shirts
   "Gildan Unisex Softstyle T-Shirt (Black / 3XL)": 629,
   "Gildan Unisex Softstyle T-Shirt (Black / 2XL)": 598,
@@ -8,7 +8,7 @@ export PRODUCT_IDS = {
   "Gildan Unisex Softstyle T-Shirt (Black / S)": 474,
   //white ts
   "Gildan Unisex Softstyle T-Shirt (White / 3XL)": 628,
-  "Gildan Unisex Softstyle T-Shirt (White / 2XL)": 597
+  "Gildan Unisex Softstyle T-Shirt (White / 2XL)": 597,
   "Gildan Unisex Softstyle T-Shirt (White / XL)": 566,
   "Gildan Unisex Softstyle T-Shirt (White / L)": 535,
   "Gildan Unisex Softstyle T-Shirt (White / M)": 504,
@@ -25,18 +25,18 @@ export PRODUCT_IDS = {
   "Gildan Unisex Hooded Sweatshirt (White / 2XL)": 5526,
   "Gildan Unisex Hooded Sweatshirt (White / L)": 5524,
   "Gildan Unisex Hooded Sweatshirt (White / M)": 5523,
-  "Gildan Unisex Hooded Sweatshirt (White / S)": 5522
+  "Gildan Unisex Hooded Sweatshirt (White / S)": 5522,
   //hats
   "Otto Cap Foam Trucker Hat (White / One size)": 15905,
   "Otto Cap Foam Trucker Hat (Black/White/Black / One size)": 15908,
   //coffee mugs
   "Black Glossy Mug (11 oz)": 9323,
-  "White Glossy Mug 11 oz": 1320
+  "White Glossy Mug 11 oz": 1320,
   //mouse pads
   "Gaming Mouse Pad (White / 18″×16″)": 14943,
   "Gaming Mouse Pad (White / 36″×18″)": 14942,
   //stickers
-  "Kiss Cut Vinyl Stickers (3″×3″in)": 10163
+  "Kiss Cut Vinyl Stickers (3″×3″in)": 10163,
   "Kiss Cut Vinyl Stickers (4″×4″in)": 10164,
   "Kiss Cut Vinyl Stickers (5.5″×5.5″in)": 10165,
   "Kiss Cut Vinyl Stickers (White / 15″×3.75″)": 16362,
@@ -45,7 +45,7 @@ export PRODUCT_IDS = {
   "Kiss-Cut Holographic Stickers (5.5″×5.5″in)": 16707,
 };
 
-export PRODUCT_ID_RETAIL_PRICES = {
+const PRODUCT_ID_RETAIL_PRICES = {
   //t shirts
   629: "39.99",
   598: "39.99",
@@ -89,5 +89,10 @@ export PRODUCT_ID_RETAIL_PRICES = {
   //holographic stickers
   16705: "1.99",
   16706: "2.49",
-  16707: "4.99"
-}
+  16707: "4.99",
+};
+
+module.exports = {
+  PRODUCT_IDS,
+  PRODUCT_ID_RETAIL_PRICES,
+};

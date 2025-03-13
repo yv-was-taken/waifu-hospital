@@ -2,6 +2,7 @@ const Merchandise = require("../models/Merchandise");
 const Character = require("../models/Character");
 const User = require("../models/User");
 const { validationResult } = require("express-validator");
+const { PRODUCT_ID_RETAIL_PRICES } = require("../constants");
 
 // Import printfulService with try/catch to avoid breaking the application if the service is not available
 let printfulService;
@@ -72,6 +73,7 @@ exports.createMerchandise = async (req, res) => {
     imageUrl,
     character,
     category,
+    variantId, // Add variant ID to use with Printful
     availableSizes,
     availableColors,
     stock,
@@ -128,15 +130,26 @@ exports.createMerchandise = async (req, res) => {
       }
     }
 
+    // Ensure we're using the fixed price from the constants for this variant ID
+    // Verify the price matches our fixed retail price for this variant ID
+    const expectedPrice = parseFloat(PRODUCT_ID_RETAIL_PRICES[variantId]);
+
+    if (price !== expectedPrice) {
+      console.warn(
+        `Price mismatch for variantId ${variantId}. Expected: ${expectedPrice}, Received: ${price}. Using expected price.`,
+      );
+    }
+
     // Create new merchandise item in our database
     const newMerchandise = new Merchandise({
       name,
       description,
-      price,
+      price: expectedPrice, // Always use the price from our constants
       imageUrl,
       character,
       creator: req.user.id,
       category,
+      variantId,
       availableSizes: availableSizes || ["N/A"],
       availableColors: availableColors || [],
       stock: stock || 100,
@@ -155,21 +168,16 @@ exports.createMerchandise = async (req, res) => {
     try {
       // If production cost wasn't provided, estimate it
       if (!productionCost) {
-        const productionCostData = await printfulService.getProductionCosts(
-          getVariantIdForCategory(category),
-        );
+        const productionCostData =
+          await printfulService.getProductionCosts(variantId);
         newMerchandise.productionCost = productionCostData.productionCost;
       }
 
+      // Create product in Printful with the exact variant ID from the request
       const printfulProduct = await printfulService.createProduct({
         name,
-        description,
-        price,
         imageUrl,
-        category,
-        availableSizes: availableSizes || ["N/A"],
-        availableColors: availableColors || [],
-        stock: stock || 100,
+        variantId,
         externalId,
       });
 
@@ -178,14 +186,19 @@ exports.createMerchandise = async (req, res) => {
         newMerchandise.printfulProductId = printfulProduct.id;
 
         // Store variants
-        if (printfulProduct.variants && printfulProduct.variants.length > 0) {
-          const printfulVariants = printfulProduct.variants.map((variant) => ({
-            variantId: variant.id,
-            externalId: variant.external_id,
-            retailPrice: variant.retail_price,
-            size: getSizeFromVariant(variant),
-            color: getColorFromVariant(variant),
-          }));
+        if (
+          printfulProduct.sync_variants &&
+          printfulProduct.sync_variants.length > 0
+        ) {
+          const printfulVariants = printfulProduct.sync_variants.map(
+            (variant) => ({
+              variantId: variant.id,
+              externalId: variant.external_id,
+              retailPrice: variant.retail_price || price, // Use price from request if no retail_price
+              size: "N/A", // Size is not specified in the new API format
+              color: "Default", // Color is not specified in the new API format
+            }),
+          );
 
           newMerchandise.printfulVariants = printfulVariants;
         }

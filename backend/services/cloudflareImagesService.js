@@ -3,22 +3,44 @@ const FormData = require("form-data");
 
 /**
  * Service for interacting with Cloudflare Images API
+ * Based on Cloudflare Images documentation: https://developers.cloudflare.com/images/
  */
 class CloudflareImagesService {
   constructor() {
     this.apiKey = process.env.CLOUDFLARE_IMAGES_API_KEY;
-    this.accountId = process.env.CLOUDFLARE_ACCOUNT_ID || "your-account-id"; // Should be configured in .env
+    this.accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+
+    if (!this.accountId) {
+      throw new Error(
+        "CLOUDFLARE_ACCOUNT_ID is not set. Image uploads will fail.",
+      );
+    }
+
+    if (!this.apiKey) {
+      throw new Error(
+        "CLOUDFLARE_IMAGES_API_KEY is not set. Image uploads will fail.",
+      );
+    }
+
     this.baseUrl = `https://api.cloudflare.com/client/v4/accounts/${this.accountId}/images/v1`;
-    this.deliveryUrl = `https://imagedelivery.net/${this.accountId}`; // Adjust as needed
+
+    // The account hash is used in the delivery URL per Cloudflare docs
+    // This is typically your account ID but may be a separate delivery ID
+    this.deliveryUrl = "https://imagedelivery.net";
   }
 
   /**
    * Upload an image to Cloudflare Images from a URL
    * @param {string} imageUrl - URL of the image to upload
-   * @param {string} metadata - Optional metadata for the image (like characterId)
+   * @param {Object} metadata - Optional metadata for the image (like characterId)
    * @returns {Promise<Object>} The uploaded image data
    */
   async uploadImageFromUrl(imageUrl, metadata = {}) {
+    if (!this.accountId || !this.apiKey) {
+      console.error("Cloudflare account ID or API key not configured");
+      throw new Error("Cloudflare account ID or API key not configured");
+    }
+
     console.log("Uploading image to Cloudflare Images", { imageUrl });
 
     try {
@@ -40,6 +62,9 @@ class CloudflareImagesService {
         formData.append("metadata", JSON.stringify(metadata));
       }
 
+      // According to Cloudflare docs, we need to set requireSignedURLs if needed
+      formData.append("requireSignedURLs", "false");
+
       // Upload to Cloudflare Images
       const response = await axios.post(this.baseUrl, formData, {
         headers: {
@@ -48,10 +73,23 @@ class CloudflareImagesService {
         },
       });
 
-      console.log("Image uploaded to Cloudflare Images successfully");
+      if (!response.data.success) {
+        throw new Error(
+          response.data.errors?.[0]?.message || "Cloudflare API error",
+        );
+      }
+
+      console.log("Image uploaded to Cloudflare Images successfully", {
+        id: response.data.result.id,
+      });
       return response.data.result;
     } catch (error) {
-      console.error("Failed to upload image to Cloudflare Images", error);
+      console.error(
+        "Failed to upload image to Cloudflare Images",
+        error.response?.data || error.message,
+      );
+      //@TODO should return object (like null) indicating error uploading...
+      //then handled on frontend in production. this is fine for now in development
       throw new Error("Failed to upload image to Cloudflare Images");
     }
   }
@@ -62,6 +100,11 @@ class CloudflareImagesService {
    * @returns {Promise<Object>} The image data
    */
   async getImage(imageId) {
+    if (!this.accountId || !this.apiKey) {
+      console.error("Cloudflare account ID or API key not configured");
+      throw new Error("Cloudflare account ID or API key not configured");
+    }
+
     console.log("Retrieving image from Cloudflare Images", { imageId });
 
     try {
@@ -71,10 +114,21 @@ class CloudflareImagesService {
         },
       });
 
+      if (!response.data.success) {
+        throw new Error(
+          response.data.errors?.[0]?.message || "Cloudflare API error",
+        );
+      }
+
       console.log("Image retrieved from Cloudflare Images successfully");
       return response.data.result;
     } catch (error) {
-      console.error("Failed to retrieve image from Cloudflare Images", error);
+      console.error(
+        "Failed to retrieve image from Cloudflare Images",
+        error.response?.data || error.message,
+      );
+      //@TODO should return object (like null) indicating error uploading...
+      //then handled on frontend in production. this is fine for now in development
       throw new Error("Failed to retrieve image from Cloudflare Images");
     }
   }
@@ -85,19 +139,36 @@ class CloudflareImagesService {
    * @returns {Promise<boolean>} True if deletion was successful
    */
   async deleteImage(imageId) {
+    if (!this.accountId || !this.apiKey) {
+      console.error("Cloudflare account ID or API key not configured");
+      throw new Error("Cloudflare account ID or API key not configured");
+    }
+
     console.log("Deleting image from Cloudflare Images", { imageId });
 
     try {
-      await axios.delete(`${this.baseUrl}/${imageId}`, {
+      const response = await axios.delete(`${this.baseUrl}/${imageId}`, {
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
         },
       });
 
+      if (!response.data.success) {
+        throw new Error(
+          response.data.errors?.[0]?.message || "Cloudflare API error",
+        );
+      }
+
       console.log("Image deleted from Cloudflare Images successfully");
       return true;
     } catch (error) {
-      console.error("Failed to delete image from Cloudflare Images", error);
+      console.error(
+        "Failed to delete image from Cloudflare Images",
+        error.response?.data || error.message,
+      );
+      //@TODO should return object (like null) indicating error uploading...
+      //then handled on frontend in production. this is fine for now in development
+      throw new Error("Failed to retrieve image from Cloudflare Images");
       throw new Error("Failed to delete image from Cloudflare Images");
     }
   }
@@ -109,7 +180,9 @@ class CloudflareImagesService {
    * @returns {string} The URL of the image
    */
   getImageUrl(imageId, variant = "public") {
-    return `${this.deliveryUrl}/${imageId}/${variant}`;
+    // Per Cloudflare docs: https://developers.cloudflare.com/images/cloudflare-images/serve-images/
+    // URL format is: https://imagedelivery.net/<accountHash>/<imageId>/<variant>
+    return `${this.deliveryUrl}/${this.accountId}/${imageId}/${variant}`;
   }
 }
 

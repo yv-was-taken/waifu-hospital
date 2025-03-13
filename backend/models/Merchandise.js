@@ -34,6 +34,10 @@ const MerchandiseSchema = new mongoose.Schema({
     enum: ["t-shirt", "hoodie", "hat", "mug", "mousepad", "sticker"],
     required: true,
   },
+  variantId: {
+    type: Number,
+    required: true,
+  },
   availableSizes: [
     {
       type: String,

@@ -1,34 +1,34 @@
 export PRODUCT_IDS = {
   //black t shirts
-  "Gildan 64000 Unisex Softstyle T-Shirt with Tear Away (Black / 3XL)": 629,
-  "Gildan 64000 Unisex Softstyle T-Shirt with Tear Away (Black / 2XL)": 598,
-  "Gildan 64000 Unisex Softstyle T-Shirt with Tear Away (Black / XL)": 567,
-  "Gildan 64000 Unisex Softstyle T-Shirt with Tear Away (Black / L)": 536,
-  "Gildan 64000 Unisex Softstyle T-Shirt with Tear Away (Black / M)": 505,
-  "Gildan 64000 Unisex Softstyle T-Shirt with Tear Away (Black / S)": 474,
-  //white t shirts
-  "Gildan 64000 Unisex Softstyle T-Shirt with Tear Away (White / 3XL)": 628,
-  "Gildan 64000 Unisex Softstyle T-Shirt with Tear Away (White / 2XL)": 597
-  "Gildan 64000 Unisex Softstyle T-Shirt with Tear Away (White / XL)": 566,
-  "Gildan 64000 Unisex Softstyle T-Shirt with Tear Away (White / L)": 535,
-  "Gildan 64000 Unisex Softstyle T-Shirt with Tear Away (White / M)": 504,
-  "Gildan 64000 Unisex Softstyle T-Shirt with Tear Away (White / S)": 473,
+  "Gildan Unisex Softstyle T-Shirt (Black / 3XL)": 629,
+  "Gildan Unisex Softstyle T-Shirt (Black / 2XL)": 598,
+  "Gildan Unisex Softstyle T-Shirt (Black / XL)": 567,
+  "Gildan Unisex Softstyle T-Shirt (Black / L)": 536,
+  "Gildan Unisex Softstyle T-Shirt (Black / M)": 505,
+  "Gildan Unisex Softstyle T-Shirt (Black / S)": 474,
+  //white ts
+  "Gildan Unisex Softstyle T-Shirt (White / 3XL)": 628,
+  "Gildan Unisex Softstyle T-Shirt (White / 2XL)": 597
+  "Gildan Unisex Softstyle T-Shirt (White / XL)": 566,
+  "Gildan Unisex Softstyle T-Shirt (White / L)": 535,
+  "Gildan Unisex Softstyle T-Shirt (White / M)": 504,
+  "Gildan Unisex Softstyle T-Shirt (White / S)": 473,
   //black hoodies
-  "Gildan 18500 Unisex Heavy Blend Hooded Sweatshirt (Black / 3XL)": 5535,
-  "Gildan 18500 Unisex Heavy Blend Hooded Sweatshirt (Black / 2XL)": 5534,
-  "Gildan 18500 Unisex Heavy Blend Hooded Sweatshirt (Black / XL)": 5533,
-  "Gildan 18500 Unisex Heavy Blend Hooded Sweatshirt (Black / L)": 5532,
-  "Gildan 18500 Unisex Heavy Blend Hooded Sweatshirt (Black / M)": 5531,
-  "Gildan 18500 Unisex Heavy Blend Hooded Sweatshirt (Black / S)": 5530,
-  //white hoodies
-  "Gildan 18500 Unisex Heavy Blend Hooded Sweatshirt (White / 3XL)": 5527,
-  "Gildan 18500 Unisex Heavy Blend Hooded Sweatshirt (White / 2XL)": 5526,
-  "Gildan 18500 Unisex Heavy Blend Hooded Sweatshirt (White / L)": 5524,
-  "Gildan 18500 Unisex Heavy Blend Hooded Sweatshirt (White / M)": 5523,
-  "Gildan 18500 Unisex Heavy Blend Hooded Sweatshirt (White / S)": 5522
+  "Gildan Unisex Hooded Sweatshirt (Black / 3XL)": 5535,
+  "Gildan Unisex Hooded Sweatshirt (Black / 2XL)": 5534,
+  "Gildan Unisex Hooded Sweatshirt (Black / XL)": 5533,
+  "Gildan Unisex Hooded Sweatshirt (Black / L)": 5532,
+  "Gildan Unisex Hooded Sweatshirt (Black / M)": 5531,
+  "Gildan Unisex Hooded Sweatshirt (Black / S)": 5530,
+  //white s
+  "Gildan Unisex Hooded Sweatshirt (White / 3XL)": 5527,
+  "Gildan Unisex Hooded Sweatshirt (White / 2XL)": 5526,
+  "Gildan Unisex Hooded Sweatshirt (White / L)": 5524,
+  "Gildan Unisex Hooded Sweatshirt (White / M)": 5523,
+  "Gildan Unisex Hooded Sweatshirt (White / S)": 5522
   //hats
-  "Otto Cap Foam Trucker Hat | Otto Cap 39-165 (White / One size)": 15905,
-  "Otto Cap Foam Trucker Hat | Otto Cap 39-165 (Black/White/Black / One size)": 15908,
+  "Otto Cap Foam Trucker Hat (White / One size)": 15905,
+  "Otto Cap Foam Trucker Hat (Black/White/Black / One size)": 15908,
   //coffee mugs
   "Black Glossy Mug (11 oz)": 9323,
   "White Glossy Mug 11 oz": 1320
@@ -43,4 +43,51 @@ export PRODUCT_IDS = {
   "Kiss-Cut Holographic Stickers (3″×3″in)": 16705,
   "Kiss-Cut Holographic Stickers (4″×4″in)": 16706,
   "Kiss-Cut Holographic Stickers (5.5″×5.5″in)": 16707,
+};
+
+export PRODUCT_ID_RETAIL_PRICES = {
+  //t shirts
+  629: "39.99",
+  598: "39.99",
+  567: "39.99",
+  536: "39.99",
+  505: "39.99",
+  474: "39.99",
+  628: "39.99",
+  597: "39.99",
+  566: "39.99",
+  535: "39.99",
+  504: "39.99",
+  473: "39.99",
+  //hoodies
+  5535: "69.99",
+  5534: "69.99",
+  5533: "69.99",
+  5532: "69.99",
+  5531: "69.99",
+  5530: "69.99",
+  5527: "69.99",
+  5526: "69.99",
+  5524: "69.99",
+  5523: "69.99",
+  5522: "69.99",
+  //hats
+  15905: "29.99",
+  15908: "29.99",
+  //mugs
+  9323: "19.99",
+  1320: "19.99",
+  //mouse pad
+  14943: "19.99",
+  14942: "29.99",
+  //@dev may want to change these prices. some market research needed..
+  //vinyl stickers
+  10163: "0.99",
+  10164: "1.49",
+  10165: "1.99",
+  16362: "4.99",
+  //holographic stickers
+  16705: "1.99",
+  16706: "2.49",
+  16707: "4.99"
 }

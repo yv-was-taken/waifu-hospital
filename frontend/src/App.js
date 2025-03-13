@@ -17,6 +17,7 @@ import MerchandiseStore from "./pages/MerchandiseStore";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
+import CreateMerchandise from "./pages/CreateMerchandise";
 import PrivateRoute from "./components/routing/PrivateRoute";
 import NotFound from "./pages/NotFound";
 
@@ -53,6 +54,10 @@ const App = () => {
           <Route
             path="/characters/:id/chat"
             element={<PrivateRoute component={CharacterChat} />}
+          />
+          <Route
+            path="/characters/:id/create-merchandise"
+            element={<PrivateRoute component={CreateMerchandise} />}
           />
           <Route path="/merchandise" element={<MerchandiseStore />} />
           <Route path="/merchandise/:id" element={<ProductDetail />} />

@@ -64,7 +64,7 @@ const getProductVariants = async (productId) => {
 
 /**
  * Create a new product in Printful
- * @param {Object} productData - Product data including name, image, etc.
+ * @param {Object} productData - Product data including name, imageUrl, variantId, etc.
  * @returns {Promise<Object>} Created product data
  */
 const createProduct = async (productData) => {
@@ -77,89 +77,31 @@ const createProduct = async (productData) => {
     const syncProduct = {
       sync_product: {
         name: productData.name,
-        thumbnail: productData.imageUrl,
-        external_id: productData.externalId || `product_${Date.now()}`,
       },
-      sync_variants: prepareSyncVariants(productData),
+      sync_variants: [
+        {
+          variant_id: productData.variantId,
+          files: [
+            {
+              url: productData.imageUrl,
+            },
+          ],
+        },
+      ],
     };
 
-    const response = await printfulClient.post("/sync/products", syncProduct);
+    // Add external ID if provided
+    if (productData.externalId) {
+      syncProduct.sync_product.external_id = productData.externalId;
+    }
+
+    const response = await printfulClient.post("/store/products", syncProduct);
     return response.data.result;
   } catch (error) {
     console.error("Error creating Printful product:", error.message);
     // Return mock data if API call fails
     return mockCreateProduct(productData);
   }
-};
-
-/**
- * Prepare variant data for Printful API
- * @param {Object} productData - Product data with variants info
- * @returns {Array} Array of sync variants
- */
-const prepareSyncVariants = (productData) => {
-  // This would create variants based on the product category, available sizes, and colors
-  // For t-shirts, hoodies, etc., we need to specify size and color variants
-
-  const variants = [];
-  const sizes = productData.availableSizes?.length
-    ? productData.availableSizes
-    : ["N/A"];
-  const colors = productData.availableColors?.length
-    ? productData.availableColors
-    : ["Default"];
-
-  // Base variant properties depend on product category
-  const variantProperties = getVariantPropertiesForCategory(
-    productData.category,
-  );
-
-  // For products with size and color, create a variant for each combination
-  sizes.forEach((size) => {
-    colors.forEach((color) => {
-      if (
-        size === "N/A" &&
-        productData.category !== "t-shirt" &&
-        productData.category !== "hoodie"
-      ) {
-        // Skip size variant for products that don't have sizes
-        return;
-      }
-
-      const variantData = {
-        external_id: `${productData.externalId || "product"}_${size}_${color}_${Date.now()}`,
-        retail_price: productData.price.toString(),
-        variant_id: variantProperties.variant_id,
-        files: [
-          {
-            url: productData.imageUrl,
-            position: variantProperties.print_position || "front",
-          },
-        ],
-        options: [],
-      };
-
-      // Add size option if applicable
-      if (size !== "N/A" && variantProperties.size_option) {
-        variantData.options.push({
-          id: variantProperties.size_option,
-          value: [size],
-        });
-      }
-
-      // Add color option if applicable
-      if (color !== "Default" && variantProperties.color_option) {
-        variantData.options.push({
-          id: variantProperties.color_option,
-          value: [color],
-        });
-      }
-
-      variants.push(variantData);
-    });
-  });
-
-  return variants;
 };
 
 /**
@@ -481,18 +423,24 @@ const mockProductVariants = (productId) => {
  */
 const mockCreateProduct = (productData) => {
   const mockId = Date.now();
+
   return {
     id: mockId,
     name: productData.name,
     external_id: productData.externalId || `product_${mockId}`,
-    variants: [
+    sync_product: {
+      id: mockId,
+      name: productData.name,
+      thumbnail_url: productData.imageUrl,
+    },
+    sync_variants: [
       {
         id: mockId + 1,
         product_id: mockId,
         name: `${productData.name} Default`,
-        retail_price: productData.price,
-        variant_id: getVariantPropertiesForCategory(productData.category)
-          .variant_id,
+        retail_price: "25.00", // Default price
+        variant_id: productData.variantId,
+        external_id: `variant_${mockId}_1`,
         files: [
           {
             id: mockId + 100,

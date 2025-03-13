@@ -51,13 +51,17 @@ exports.createCharacter = async (req, res) => {
 
       // Update character with Cloudflare image ID and URL
       newCharacter.cloudflareImageId = uploadResult.id;
-      newCharacter.imageUrl = cloudflareImagesService.getImageUrl(
+
+      // Generate and store the Cloudflare delivery URL
+      const cloudflareImageUrl = cloudflareImagesService.getImageUrl(
         uploadResult.id,
       );
+      newCharacter.imageUrl = cloudflareImageUrl;
 
       console.log("Character image uploaded to Cloudflare Images", {
         characterId: newCharacter._id,
         cloudflareImageId: uploadResult.id,
+        imageUrl: cloudflareImageUrl,
       });
     } catch (uploadError) {
       // If upload fails, continue with original URL
@@ -161,17 +165,22 @@ exports.getCharacterById = async (req, res) => {
     // update the URL to ensure it's using the correct Cloudflare delivery URL
     if (
       character.cloudflareImageId &&
-      !character.imageUrl.includes("imagedelivery.net")
+      (!character.imageUrl.includes("imagedelivery.net") ||
+        !character.imageUrl.includes(character.cloudflareImageId))
     ) {
-      character.imageUrl = cloudflareImagesService.getImageUrl(
+      // Regenerate the URL with the correct format
+      const cloudflareImageUrl = cloudflareImagesService.getImageUrl(
         character.cloudflareImageId,
       );
+      character.imageUrl = cloudflareImageUrl;
+
       await character.save();
       console.log(
         "Updated character image URL to use Cloudflare delivery URL",
         {
           characterId: character._id,
           cloudflareImageId: character.cloudflareImageId,
+          updatedImageUrl: cloudflareImageUrl,
         },
       );
     }

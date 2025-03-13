@@ -1,5 +1,4 @@
 const { OpenAI } = require("openai");
-const logger = require("../utils/logger");
 
 /**
  * Service handling AI image generation
@@ -22,7 +21,7 @@ class ImageService {
    * @throws {Error} If the API call fails
    */
   async generateImage({ description, personality, style }) {
-    logger.debug("Generating image", { description, personality, style });
+    console.log("Generating image", { description, personality, style });
 
     // Create a rich prompt based on character details
     const prompt = this.createImagePrompt({ description, personality, style });
@@ -36,10 +35,10 @@ class ImageService {
         size: "1024x1024",
       });
 
-      logger.info("Image generated successfully");
+      console.log("Image generated successfully");
       return response.data[0].url;
     } catch (error) {
-      logger.error("Failed to generate image", error);
+      console.error("Failed to generate image", error);
       return this.getFallbackImage(style);
     }
   }
@@ -113,7 +112,7 @@ class ImageService {
         "https://i.pinimg.com/564x/b5/86/80/b58680b0d06c752b0d3f3e6e5ea47c04.jpg",
     };
 
-    logger.info("Using fallback image", { style });
+    console.log("Using fallback image", { style });
     return placeholderImages[style] || placeholderImages.anime;
   }
 }

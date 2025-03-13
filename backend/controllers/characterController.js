@@ -2,7 +2,6 @@ const Character = require("../models/Character");
 const User = require("../models/User");
 const { validationResult } = require("express-validator");
 const cloudflareImagesService = require("../services/cloudflareImagesService");
-const logger = require("../utils/logger");
 
 // @desc    Create a new character
 // @route   POST /api/characters
@@ -56,13 +55,13 @@ exports.createCharacter = async (req, res) => {
         uploadResult.id,
       );
 
-      logger.info("Character image uploaded to Cloudflare Images", {
+      console.log("Character image uploaded to Cloudflare Images", {
         characterId: newCharacter._id,
         cloudflareImageId: uploadResult.id,
       });
     } catch (uploadError) {
       // If upload fails, continue with original URL
-      logger.error(
+      console.error(
         "Failed to upload character image to Cloudflare Images",
         uploadError,
       );
@@ -168,7 +167,7 @@ exports.getCharacterById = async (req, res) => {
         character.cloudflareImageId,
       );
       await character.save();
-      logger.info(
+      console.log(
         "Updated character image URL to use Cloudflare delivery URL",
         {
           characterId: character._id,
@@ -241,12 +240,12 @@ exports.updateCharacter = async (req, res) => {
             await cloudflareImagesService.deleteImage(
               character.cloudflareImageId,
             );
-            logger.info("Deleted old character image from Cloudflare Images", {
+            console.log("Deleted old character image from Cloudflare Images", {
               characterId: character._id,
               cloudflareImageId: character.cloudflareImageId,
             });
           } catch (deleteError) {
-            logger.error(
+            console.error(
               "Failed to delete old character image from Cloudflare Images",
               deleteError,
             );
@@ -267,12 +266,12 @@ exports.updateCharacter = async (req, res) => {
           uploadResult.id,
         );
 
-        logger.info("Updated character image uploaded to Cloudflare Images", {
+        console.log("Updated character image uploaded to Cloudflare Images", {
           characterId: character._id,
           cloudflareImageId: uploadResult.id,
         });
       } catch (uploadError) {
-        logger.error(
+        console.error(
           "Failed to upload updated character image to Cloudflare Images",
           uploadError,
         );
@@ -320,7 +319,7 @@ exports.deleteCharacter = async (req, res) => {
     if (character.cloudflareImageId) {
       try {
         await cloudflareImagesService.deleteImage(character.cloudflareImageId);
-        logger.info(
+        console.log(
           "Deleted character image from Cloudflare Images during character deletion",
           {
             characterId: character._id,
@@ -328,7 +327,7 @@ exports.deleteCharacter = async (req, res) => {
           },
         );
       } catch (deleteError) {
-        logger.error(
+        console.error(
           "Failed to delete character image from Cloudflare Images during character deletion",
           deleteError,
         );

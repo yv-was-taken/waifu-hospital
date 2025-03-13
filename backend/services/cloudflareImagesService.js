@@ -1,6 +1,5 @@
 const axios = require("axios");
 const FormData = require("form-data");
-const logger = require("../utils/logger");
 
 /**
  * Service for interacting with Cloudflare Images API
@@ -20,7 +19,7 @@ class CloudflareImagesService {
    * @returns {Promise<Object>} The uploaded image data
    */
   async uploadImageFromUrl(imageUrl, metadata = {}) {
-    logger.debug("Uploading image to Cloudflare Images", { imageUrl });
+    console.log("Uploading image to Cloudflare Images", { imageUrl });
 
     try {
       // First, fetch the image from the provided URL
@@ -49,10 +48,10 @@ class CloudflareImagesService {
         },
       });
 
-      logger.info("Image uploaded to Cloudflare Images successfully");
+      console.log("Image uploaded to Cloudflare Images successfully");
       return response.data.result;
     } catch (error) {
-      logger.error("Failed to upload image to Cloudflare Images", error);
+      console.error("Failed to upload image to Cloudflare Images", error);
       throw new Error("Failed to upload image to Cloudflare Images");
     }
   }
@@ -63,7 +62,7 @@ class CloudflareImagesService {
    * @returns {Promise<Object>} The image data
    */
   async getImage(imageId) {
-    logger.debug("Retrieving image from Cloudflare Images", { imageId });
+    console.log("Retrieving image from Cloudflare Images", { imageId });
 
     try {
       const response = await axios.get(`${this.baseUrl}/${imageId}`, {
@@ -72,10 +71,10 @@ class CloudflareImagesService {
         },
       });
 
-      logger.info("Image retrieved from Cloudflare Images successfully");
+      console.log("Image retrieved from Cloudflare Images successfully");
       return response.data.result;
     } catch (error) {
-      logger.error("Failed to retrieve image from Cloudflare Images", error);
+      console.error("Failed to retrieve image from Cloudflare Images", error);
       throw new Error("Failed to retrieve image from Cloudflare Images");
     }
   }
@@ -86,7 +85,7 @@ class CloudflareImagesService {
    * @returns {Promise<boolean>} True if deletion was successful
    */
   async deleteImage(imageId) {
-    logger.debug("Deleting image from Cloudflare Images", { imageId });
+    console.log("Deleting image from Cloudflare Images", { imageId });
 
     try {
       await axios.delete(`${this.baseUrl}/${imageId}`, {
@@ -95,10 +94,10 @@ class CloudflareImagesService {
         },
       });
 
-      logger.info("Image deleted from Cloudflare Images successfully");
+      console.log("Image deleted from Cloudflare Images successfully");
       return true;
     } catch (error) {
-      logger.error("Failed to delete image from Cloudflare Images", error);
+      console.error("Failed to delete image from Cloudflare Images", error);
       throw new Error("Failed to delete image from Cloudflare Images");
     }
   }

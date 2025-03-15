@@ -69,4 +69,13 @@ router.delete("/:id", authMiddleware, merchandiseController.deleteMerchandise);
 // @access  Private
 router.post("/checkout", authMiddleware, merchandiseController.createCheckout);
 
+// @route   POST /api/merchandise/generate-mockups
+// @desc    Generate product mockups for character image
+// @access  Private
+router.post(
+  "/generate-mockups",
+  authMiddleware,
+  merchandiseController.generateMockups,
+);
+
 module.exports = router;

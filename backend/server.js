@@ -47,11 +47,11 @@ app.use(
 app.use(express.json());
 
 // Request logger for debugging
-app.use((req, res, next) => {
-  console.log(`Incoming request: ${req.method} ${req.url}`);
-  console.log("Headers:", JSON.stringify(req.headers, null, 2));
-  next();
-});
+//app.use((req, res, next) => {
+//  console.log(`Incoming request: ${req.method} ${req.url}`);
+//  console.log("Headers:", JSON.stringify(req.headers, null, 2));
+//  next();
+//});
 
 // Enhanced error handling middleware
 app.use((err, req, res, next) => {

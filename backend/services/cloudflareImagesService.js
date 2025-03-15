@@ -9,6 +9,7 @@ class CloudflareImagesService {
   constructor() {
     this.apiKey = process.env.CLOUDFLARE_IMAGES_API_KEY;
     this.accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+    this.accountHash = process.env.CLOUDFLARE_ACCOUNT_HASH; // Add account hash for delivery URLs
 
     if (!this.accountId) {
       throw new Error(
@@ -22,10 +23,16 @@ class CloudflareImagesService {
       );
     }
 
+    if (!this.accountHash) {
+      throw new Error(
+        "CLOUDFLARE_ACCOUNT_HASH is not set. Image delivery will fail.",
+      );
+    }
+
     this.baseUrl = `https://api.cloudflare.com/client/v4/accounts/${this.accountId}/images/v1`;
 
     // The account hash is used in the delivery URL per Cloudflare docs
-    // This is typically your account ID but may be a separate delivery ID
+    // This is different from the account ID used for API calls
     this.deliveryUrl = "https://imagedelivery.net";
   }
 
@@ -168,7 +175,6 @@ class CloudflareImagesService {
       );
       //@TODO should return object (like null) indicating error uploading...
       //then handled on frontend in production. this is fine for now in development
-      throw new Error("Failed to retrieve image from Cloudflare Images");
       throw new Error("Failed to delete image from Cloudflare Images");
     }
   }
@@ -182,7 +188,8 @@ class CloudflareImagesService {
   getImageUrl(imageId, variant = "public") {
     // Per Cloudflare docs: https://developers.cloudflare.com/images/cloudflare-images/serve-images/
     // URL format is: https://imagedelivery.net/<accountHash>/<imageId>/<variant>
-    return `${this.deliveryUrl}/${this.accountId}/${imageId}/${variant}`;
+    // Note: accountHash is different from accountId - it's specifically for delivery URLs
+    return `${this.deliveryUrl}/${this.accountHash}/${imageId}/${variant}`;
   }
 }
 

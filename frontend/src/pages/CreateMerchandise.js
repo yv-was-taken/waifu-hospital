@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { createMerchandise } from "../features/merchandise/merchandiseSlice";
 import { getCharacterById } from "../features/characters/characterSlice";
+import { generateProductMockups } from "../utils/api";
 import Spinner from "../components/layout/Spinner";
 import styled from "styled-components";
 
@@ -150,8 +151,38 @@ const PRODUCT_CATEGORIES = {
   ],
 };
 
+// Product category display names
+const CATEGORY_DISPLAY_NAMES = {
+  "t-shirt": "T-Shirt",
+  hoodie: "Hoodie",
+  hat: "Hat",
+  mug: "Mug",
+  mousepad: "Mouse Pad",
+  sticker: "Sticker",
+};
+
+// Default product for each category
+const DEFAULT_PRODUCTS = {
+  "t-shirt": "Gildan Unisex Softstyle T-Shirt (Black / M)",
+  hoodie: "Gildan Unisex Hooded Sweatshirt (Black / M)",
+  hat: "Otto Cap Foam Trucker Hat (White / One size)",
+  mug: "Black Glossy Mug (11 oz)",
+  mousepad: "Gaming Mouse Pad (White / 18″×16″)",
+  sticker: "Kiss Cut Vinyl Stickers (3″×3″in)",
+};
+
+// Default variant IDs for mockups
+const DEFAULT_VARIANT_IDS = {
+  "t-shirt": 505, // Black / M
+  hoodie: 5531, // Black / M
+  hat: 15905, // White / One size
+  mug: 9323, // Black
+  mousepad: 14943, // 18×16
+  sticker: 10163, // 3×3
+};
+
 const FormContainer = styled.div`
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 2rem 0;
 `;
@@ -170,43 +201,130 @@ const Form = styled.form`
 `;
 
 const FormGroup = styled.div`
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 `;
 
 const Label = styled.label`
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
+  font-size: 1.1rem;
 `;
 
-const Input = styled.input`
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+const InfoText = styled.div`
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
 `;
 
-const Select = styled.select`
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-  background-size: 1em;
+const ProductsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
 `;
 
-const TextArea = styled.textarea`
-  width: 100%;
-  padding: 0.75rem;
+const ProductCard = styled.div`
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: ${(props) =>
+    props.selected ? "rgba(255, 107, 129, 0.05)" : "white"};
+  border-color: ${(props) =>
+    props.selected ? "var(--primary-color)" : "#ddd"};
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  }
+`;
+
+const ProductImage = styled.div`
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background-color: #f9f9f9;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+`;
+
+const ProductInfo = styled.div`
+  padding: 1rem;
+`;
+
+const ProductName = styled.h3`
+  margin: 0 0 0.5rem 0;
   font-size: 1rem;
-  min-height: 120px;
+  display: flex;
+  align-items: center;
+`;
+
+const ProductPrice = styled.div`
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 0.5rem;
+`;
+
+const CheckboxContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+`;
+
+const Checkbox = styled.input`
+  margin-right: 0.5rem;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+`;
+
+const CheckboxLabel = styled.label`
+  cursor: pointer;
+  user-select: none;
+`;
+
+const MockupLoadingPlaceholder = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: #f5f5f5;
+  color: #999;
+  font-size: 0.9rem;
+`;
+
+const RevenueInfo = styled.div`
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+  border: 1px solid #eee;
+`;
+
+const RevenueTitle = styled.h3`
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+`;
+
+const RevenueText = styled.p`
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
 `;
 
 const Button = styled.button`
@@ -220,7 +338,6 @@ const Button = styled.button`
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  margin-top: 1rem;
 
   &:hover {
     background-color: var(--primary-dark);
@@ -232,11 +349,6 @@ const Button = styled.button`
   }
 `;
 
-const ButtonGroup = styled.div`
-  display: flex;
-  justify-content: space-between;
-`;
-
 const CancelButton = styled(Button)`
   background-color: transparent;
   color: var(--primary-color);
@@ -245,19 +357,6 @@ const CancelButton = styled(Button)`
   &:hover {
     background-color: rgba(255, 107, 129, 0.1);
   }
-`;
-
-const ProductPreview = styled.div`
-  margin-top: 2rem;
-  text-align: center;
-`;
-
-const PreviewImage = styled.img`
-  max-width: 100%;
-  max-height: 300px;
-  margin-bottom: 1rem;
-  border-radius: 4px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 `;
 
 const CreateMerchandise = () => {
@@ -272,16 +371,21 @@ const CreateMerchandise = () => {
     (state) => state.merchandise,
   );
 
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    price: "",
-    imageUrl: "",
-    category: "t-shirt",
-    productName: "",
-    variantId: "",
-    creatorRevenuePercent: 80,
+  const [selectedCategories, setSelectedCategories] = useState({
+    "t-shirt": false,
+    hoodie: false,
+    mug: false,
+    hat: false,
+    mousepad: false,
+    sticker: false,
   });
+
+  const [mockups, setMockups] = useState({});
+  const [mockupLoading, setMockupLoading] = useState(false);
+  const [mockupError, setMockupError] = useState(null);
+
+  // Fixed creator revenue percentage
+  const creatorRevenuePercent = 80;
 
   useEffect(() => {
     if (!character || character._id !== id) {
@@ -290,62 +394,136 @@ const CreateMerchandise = () => {
   }, [dispatch, id, character]);
 
   useEffect(() => {
-    // Set default product when category changes
-    if (
-      formData.category &&
-      PRODUCT_CATEGORIES[formData.category]?.length > 0
-    ) {
-      const defaultProduct = PRODUCT_CATEGORIES[formData.category][0];
-      const variantId = PRODUCT_IDS[defaultProduct];
-      const defaultPrice = PRODUCT_ID_RETAIL_PRICES[variantId];
-
-      setFormData({
-        ...formData,
-        productName: defaultProduct,
-        variantId: variantId,
-        price: defaultPrice,
-      });
+    // Generate mockups when character is loaded
+    if (character && character.imageUrl) {
+      generateMockups();
     }
-  }, [formData.category]);
+  }, [character]);
 
-  const onChange = (e) => {
-    const { name, value } = e.target;
+  const generateMockups = async () => {
+    if (!character || !character.imageUrl) return;
 
-    if (name === "productName") {
-      const variantId = PRODUCT_IDS[value];
-      const fixedPrice = PRODUCT_ID_RETAIL_PRICES[variantId];
+    setMockupLoading(true);
+    setMockupError(null);
 
-      setFormData({
-        ...formData,
-        [name]: value,
-        variantId: variantId,
-        price: fixedPrice,
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
+    try {
+      // Generate mockups only for the first two product categories to reduce API load
+      // We'll prioritize T-shirt and hoodie since they're the most popular
+      const priorityCategories = ["t-shirt", "hoodie"];
+      const otherCategories = Object.keys(DEFAULT_VARIANT_IDS).filter(
+        (category) => !priorityCategories.includes(category),
+      );
+
+      // Only request the priority categories initially
+      //const initialProducts = priorityCategories.map(category => ({
+      //  category,
+      //  variantId: DEFAULT_VARIANT_IDS[category],
+      //  position: "front" // Default to front view
+      //}));
+      const mockupProductCategory = "t-shirt";
+      const mockupProduct = {
+        category: mockupProductCategory,
+        variantId: DEFAULT_VARIANT_IDS[mockupProductCategory],
+        position: "front",
+      };
+
+      // Call the mockup generation API with just the priority products
+      const response = await generateProductMockups(
+        character.imageUrl,
+        mockupProduct,
+      );
+
+      if (response && response.mockups) {
+        console.log("Initial mockups response: ", response);
+        setMockups(response.mockups);
+      }
+    } catch (error) {
+      console.error("Error generating mockups:", error);
+      setMockupError(
+        "Failed to generate product mockups. You can still create merchandise, but previews are unavailable.",
+      );
+      setMockups({});
+    } finally {
+      setMockupLoading(false);
     }
+  };
+
+  const toggleCategory = (category) => {
+    setSelectedCategories({
+      ...selectedCategories,
+      [category]: !selectedCategories[category],
+    });
+  };
+
+  const generateMerchandiseName = (category) => {
+    if (!character) return "";
+    return `${character.name} ${CATEGORY_DISPLAY_NAMES[category]}`;
+  };
+
+  const generateDescription = (category) => {
+    if (!character) return "";
+    return `Official ${CATEGORY_DISPLAY_NAMES[category]} featuring ${character.name}. High-quality merchandise with an exclusive design.`;
+  };
+
+  const getCategoryPrice = (category) => {
+    const defaultProduct = DEFAULT_PRODUCTS[category];
+    const variantId = PRODUCT_IDS[defaultProduct];
+    return PRODUCT_ID_RETAIL_PRICES[variantId];
+  };
+
+  const getMockupUrl = (category) => {
+    if (mockups && mockups[category] && mockups[category].length > 0) {
+      // Try both mockupUrl (our custom property) and mockup_url (Printful's standard property)
+      return mockups[category][0].mockupUrl || null;
+    }
+
+    return null;
   };
 
   const onSubmit = (e) => {
     e.preventDefault();
 
-    // Add character ID to form data
-    const merchandiseData = {
-      ...formData,
-      character: id,
+    // Create merchandise for each selected category
+    const selectedCategoriesToCreate = Object.keys(selectedCategories).filter(
+      (category) => selectedCategories[category],
+    );
+
+    if (selectedCategoriesToCreate.length === 0) {
+      alert("Please select at least one product category");
+      return;
+    }
+
+    // Create all selected merchandise items one after another
+    const createAllItems = async () => {
+      for (const category of selectedCategoriesToCreate) {
+        const defaultProduct = DEFAULT_PRODUCTS[category];
+        const variantId = PRODUCT_IDS[defaultProduct];
+        const price = PRODUCT_ID_RETAIL_PRICES[variantId];
+
+        const merchandiseData = {
+          name: generateMerchandiseName(category),
+          description: generateDescription(category),
+          price: parseFloat(price),
+          imageUrl: character.imageUrl, // Use character image
+          category,
+          productName: defaultProduct,
+          variantId,
+          creatorRevenuePercent,
+          character: id,
+        };
+
+        try {
+          await dispatch(createMerchandise(merchandiseData)).unwrap();
+        } catch (err) {
+          console.error(`Error creating ${category} merchandise:`, err);
+        }
+      }
+
+      // Navigate back to character page after all items are created
+      navigate(`/characters/${id}`);
     };
 
-    dispatch(createMerchandise(merchandiseData))
-      .unwrap()
-      .then(() => {
-        navigate(`/characters/${id}`);
-      })
-      .catch((err) => {
-        console.error("Error creating merchandise:", err);
-      });
+    createAllItems();
   };
 
   if (characterLoading) {
@@ -363,115 +541,76 @@ const CreateMerchandise = () => {
   return (
     <FormContainer>
       <FormTitle>Create Merchandise for {character.name}</FormTitle>
+
       <Form onSubmit={onSubmit}>
         <FormGroup>
-          <Label htmlFor="name">Merchandise Name</Label>
-          <Input
-            type="text"
-            name="name"
-            id="name"
-            value={formData.name}
-            onChange={onChange}
-            required
-            placeholder="e.g., Character T-Shirt"
-          />
-        </FormGroup>
+          <Label>Select Products to Create</Label>
+          {mockupLoading ? (
+            <MockupLoadingPlaceholder>
+              Loading mockup...
+            </MockupLoadingPlaceholder>
+          ) : getMockupUrl("t-shirt") ? (
+            <ProductImage>
+              <img
+                src={getMockupUrl("t-shirt")}
+                alt={`${character.name} on ${CATEGORY_DISPLAY_NAMES["t-shirt"]}`}
+              />
+            </ProductImage>
+          ) : (
+            <MockupLoadingPlaceholder>
+              {character.name} on {CATEGORY_DISPLAY_NAMES["t-shirt"]}
+            </MockupLoadingPlaceholder>
+          )}
+          {mockupError && (
+            <InfoText style={{ color: "#f44336" }}>{mockupError}</InfoText>
+          )}
 
-        <FormGroup>
-          <Label htmlFor="description">Description</Label>
-          <TextArea
-            name="description"
-            id="description"
-            value={formData.description}
-            onChange={onChange}
-            required
-            placeholder="Describe your merchandise..."
-          />
-        </FormGroup>
-
-        <FormGroup>
-          <Label htmlFor="price">Price (USD)</Label>
-          <Input
-            type="number"
-            name="price"
-            id="price"
-            min="0.01"
-            step="0.01"
-            value={formData.price}
-            disabled
-            required
-          />
-          <small>Price is set based on the selected product type.</small>
-        </FormGroup>
-
-        <FormGroup>
-          <Label htmlFor="imageUrl">Image URL</Label>
-          <Input
-            type="url"
-            name="imageUrl"
-            id="imageUrl"
-            value={formData.imageUrl}
-            onChange={onChange}
-            required
-            placeholder="https://example.com/image.jpg"
-          />
-        </FormGroup>
-
-        {formData.imageUrl && (
-          <ProductPreview>
-            <PreviewImage src={formData.imageUrl} alt="Product preview" />
-          </ProductPreview>
-        )}
-
-        <FormGroup>
-          <Label htmlFor="category">Category</Label>
-          <Select
-            name="category"
-            id="category"
-            value={formData.category}
-            onChange={onChange}
-            required
-          >
-            <option value="t-shirt">T-Shirt</option>
-            <option value="hoodie">Hoodie</option>
-            <option value="mug">Mug</option>
-            <option value="hat">Hat</option>
-            <option value="mousepad">Mouse Pad</option>
-            <option value="sticker">Sticker</option>
-          </Select>
-        </FormGroup>
-
-        <FormGroup>
-          <Label htmlFor="productName">Product Type</Label>
-          <Select
-            name="productName"
-            id="productName"
-            value={formData.productName}
-            onChange={onChange}
-            required
-          >
-            {PRODUCT_CATEGORIES[formData.category]?.map((product) => (
-              <option key={product} value={product}>
-                {product}
-              </option>
+          <ProductsGrid>
+            {Object.keys(CATEGORY_DISPLAY_NAMES).map((category) => (
+              <ProductCard
+                key={category}
+                selected={selectedCategories[category]}
+                onClick={() => toggleCategory(category)}
+              >
+                <ProductInfo>
+                  <ProductName>{CATEGORY_DISPLAY_NAMES[category]}</ProductName>
+                  <ProductPrice>
+                    Sale Price: ${getCategoryPrice(category)}
+                  </ProductPrice>
+                  <CheckboxContainer>
+                    <Checkbox
+                      type="checkbox"
+                      id={`category-${category}`}
+                      checked={selectedCategories[category]}
+                      onChange={() => toggleCategory(category)}
+                    />
+                    <CheckboxLabel htmlFor={`category-${category}`}>
+                      Add to collection
+                    </CheckboxLabel>
+                  </CheckboxContainer>
+                </ProductInfo>
+              </ProductCard>
             ))}
-          </Select>
+          </ProductsGrid>
+
+          <InfoText>
+            Select the products you want to create using {character.name}'s
+            image. All available sizes and colors will be included
+            automatically.
+          </InfoText>
         </FormGroup>
 
-        <FormGroup>
-          <Label htmlFor="creatorRevenuePercent">Your Revenue Percentage</Label>
-          <Input
-            type="number"
-            name="creatorRevenuePercent"
-            id="creatorRevenuePercent"
-            min="1"
-            max="100"
-            value={formData.creatorRevenuePercent}
-            onChange={onChange}
-            required
-          />
-          <small>Platform fee: {100 - formData.creatorRevenuePercent}%</small>
-        </FormGroup>
+        <RevenueInfo>
+          <RevenueTitle>Revenue Split</RevenueTitle>
+          <RevenueText>
+            <strong>Creator Revenue: {creatorRevenuePercent}%</strong> - You'll
+            receive 80% of the profit after production costs.
+          </RevenueText>
+          <RevenueText>
+            Platform Fee: {100 - creatorRevenuePercent}% - To cover processing,
+            hosting, and support.
+          </RevenueText>
+        </RevenueInfo>
 
         <ButtonGroup>
           <CancelButton
@@ -480,7 +619,7 @@ const CreateMerchandise = () => {
           >
             Cancel
           </CancelButton>
-          <Button type="submit" disabled={merchandiseLoading}>
+          <Button type="submit" disabled={merchandiseLoading || mockupLoading}>
             {merchandiseLoading ? "Creating..." : "Create Merchandise"}
           </Button>
         </ButtonGroup>

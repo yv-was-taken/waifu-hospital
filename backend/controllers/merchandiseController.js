@@ -3,36 +3,53 @@ const Character = require("../models/Character");
 const User = require("../models/User");
 const { validationResult } = require("express-validator");
 const { PRODUCT_ID_RETAIL_PRICES } = require("../constants");
+const printfulService = require("../services/printfulService");
 
 // Import printfulService with try/catch to avoid breaking the application if the service is not available
-let printfulService;
-try {
-  printfulService = require("../services/printfulService");
-} catch (error) {
-  console.warn(
-    "Printful service could not be loaded. Merchandise features will be limited.",
-  );
-  // Create mock printful service to prevent errors
-  printfulService = {
-    createProduct: async () => ({
-      id: `mock_${Date.now()}`,
-      external_id: `product_${Date.now()}`,
-    }),
-    getProducts: async () => [],
-    getProductVariants: async () => [],
-    getProductionCosts: async () => ({ productionCost: 10 }),
-    createOrder: async () => ({
-      id: `mock_order_${Date.now()}`,
-    }),
-    calculateShipping: async () => [
-      {
-        id: "STANDARD",
-        name: "Standard shipping",
-        rate: 7.95,
-      },
-    ],
-  };
-}
+//let printfulService;
+//try {
+//  printfulService = require("../services/printfulService");
+//} catch (error) {
+//  console.warn(
+//    "Printful service could not be loaded. Merchandise features will be limited.",
+//  );
+//  // Create mock printful service to prevent errors
+//  printfulService = {
+//    createProduct: async () => ({
+//      id: `mock_${Date.now()}`,
+//      external_id: `product_${Date.now()}`,
+//    }),
+//    getProducts: async () => [],
+//    getProductVariants: async () => [],
+//    getProductionCosts: async () => ({ productionCost: 10 }),
+//    createOrder: async () => ({
+//      id: `mock_order_${Date.now()}`,
+//    }),
+//    calculateShipping: async () => [
+//      {
+//        id: "STANDARD",
+//        name: "Standard shipping",
+//        rate: 7.95,
+//      },
+//    ],
+//    generateMockup: async (mockupData) => ({
+//      status: "completed",
+//      mockups: [
+//        {
+//          placement: mockupData.position || "front",
+//          variant_ids: [mockupData.variantId],
+//          mockup_url: "https://www.printful.com/static/images/mockup-generator/examples/t-shirt-mockup.jpg",
+//          extra: [
+//            {
+//              title: "Front",
+//              url: "https://www.printful.com/static/images/mockup-generator/examples/t-shirt-mockup.jpg",
+//            },
+//          ],
+//        },
+//      ],
+//    }),
+//  };
+//}
 
 // Import stripeConnectService with try/catch
 let stripeConnectService;
@@ -657,6 +674,51 @@ exports.handleStripeConnectRefresh = async (req, res) => {
 exports.handleStripeConnectReturn = async (req, res) => {
   // This is just a redirect point; the frontend should check the account status
   res.redirect("/dashboard/settings"); // Redirect to settings page
+};
+
+// @desc    Generate product mockups for character image
+// @route   POST /api/merchandise/generate-mockups
+// @access  Private
+exports.generateMockups = async (req, res) => {
+  try {
+    const { imageUrl, product } = req.body;
+
+    if (!imageUrl) {
+      return res.status(400).json({ msg: "Image URL is required" });
+    }
+
+    if (!product) {
+      return res
+        .status(400)
+        .json({ msg: "At least one product must be specified" });
+    }
+
+    // Continue processing remaining products asynchronously in the background
+    // This won't block the response and will allow additional mockups to be generated
+    const { variantId, category, position = "front" } = product;
+
+    const mockupResult = await printfulService.generateMockup({
+      imageUrl,
+      position,
+      category,
+    });
+    //console.log("mockup result: ", mockupResult);
+
+    // Format the response to match what the frontend expects
+    const mockups = {
+      [category]: [
+        {
+          mockupUrl: mockupResult.mockups[0].mockup_url,
+          position: position,
+        },
+      ],
+    };
+
+    res.json({ mockups });
+  } catch (err) {
+    console.error("Error generating mockups:", err.message);
+    res.status(500).send("Server Error");
+  }
 };
 
 // @desc    Check Stripe Connect account status

@@ -34,4 +34,23 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
+/**
+ * Generate product mockups using Printful API
+ * @param {string} imageUrl - URL of the character image to place on products
+ * @param {Object} product - Product to generate mockups for (with variantId, category, etc.)
+ * @returns {Promise} Promise resolving to mockup data
+ */
+export const generateProductMockups = async (imageUrl, product) => {
+  try {
+    const response = await api.post("/api/merchandise/generate-mockups", {
+      imageUrl,
+      product,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error generating mockups:", error);
+    throw error;
+  }
+};
+
 export default api;

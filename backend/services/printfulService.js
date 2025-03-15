@@ -1,17 +1,23 @@
 const axios = require("axios");
 const dotenv = require("dotenv");
+const {
+  PRODUCT_IDS_BY_CATEGORY,
+  VARIANT_IDS,
+  VARIANT_IDS_BY_PRODUCT_ID,
+} = require("../constants");
 
 dotenv.config();
 
 // Configure Printful API client
-const PRINTFUL_API_KEY = process.env.PRINTFUL_API_KEY || "dummy_printful_key";
+const PRINTFUL_STORE_API_KEY =
+  process.env.PRINTFUL_STORE_API_KEY || "dummy_printful_key";
 const PRINTFUL_API_URL = "https://api.printful.com";
 
 // Configure axios instance for Printful API
 const printfulClient = axios.create({
   baseURL: PRINTFUL_API_URL,
   headers: {
-    Authorization: `Bearer ${PRINTFUL_API_KEY}`,
+    Authorization: `Bearer ${PRINTFUL_STORE_API_KEY}`,
     "Content-Type": "application/json",
   },
 });
@@ -23,7 +29,7 @@ const printfulClient = axios.create({
 const getProducts = async () => {
   try {
     // For development without API key
-    if (PRINTFUL_API_KEY === "dummy_printful_key") {
+    if (PRINTFUL_STORE_API_KEY === "dummy_printful_key") {
       return mockCatalogProducts();
     }
 
@@ -44,7 +50,7 @@ const getProducts = async () => {
 const getProductVariants = async (productId) => {
   try {
     // For development without API key
-    if (PRINTFUL_API_KEY === "dummy_printful_key") {
+    if (PRINTFUL_STORE_API_KEY === "dummy_printful_key") {
       return mockProductVariants(productId);
     }
 
@@ -70,7 +76,7 @@ const getProductVariants = async (productId) => {
 const createProduct = async (productData) => {
   try {
     // For development without API key
-    if (PRINTFUL_API_KEY === "dummy_printful_key") {
+    if (PRINTFUL_STORE_API_KEY === "dummy_printful_key") {
       return mockCreateProduct(productData);
     }
 
@@ -175,7 +181,7 @@ const getVariantPropertiesForCategory = (category) => {
 const createOrder = async (orderData) => {
   try {
     // For development without API key
-    if (PRINTFUL_API_KEY === "dummy_printful_key") {
+    if (PRINTFUL_STORE_API_KEY === "dummy_printful_key") {
       return mockCreateOrder(orderData);
     }
 
@@ -214,7 +220,7 @@ const createOrder = async (orderData) => {
 const calculateShipping = async (orderData) => {
   try {
     // For development without API key
-    if (PRINTFUL_API_KEY === "dummy_printful_key") {
+    if (PRINTFUL_STORE_API_KEY === "dummy_printful_key") {
       return mockShippingRates();
     }
 
@@ -249,7 +255,7 @@ const calculateShipping = async (orderData) => {
 const getProductionCosts = async (variantId) => {
   try {
     // For development without API key
-    if (PRINTFUL_API_KEY === "dummy_printful_key") {
+    if (PRINTFUL_STORE_API_KEY === "dummy_printful_key") {
       return mockProductionCosts(variantId);
     }
 
@@ -276,7 +282,7 @@ const getProductionCosts = async (variantId) => {
 const getOrderStatus = async (orderId) => {
   try {
     // For development without API key
-    if (PRINTFUL_API_KEY === "dummy_printful_key") {
+    if (PRINTFUL_STORE_API_KEY === "dummy_printful_key") {
       return mockOrderStatus(orderId);
     }
 
@@ -297,7 +303,7 @@ const getOrderStatus = async (orderId) => {
 const cancelOrder = async (orderId) => {
   try {
     // For development without API key
-    if (PRINTFUL_API_KEY === "dummy_printful_key") {
+    if (PRINTFUL_STORE_API_KEY === "dummy_printful_key") {
       return { success: true, message: "Order cancelled" };
     }
 
@@ -312,323 +318,108 @@ const cancelOrder = async (orderId) => {
   }
 };
 
-// Mock functions for development
-
 /**
- * Mock catalog products
- * @returns {Array} List of mock products
+ * Generate mockup for a product using Printful's Mockup Generator API
+ * @param {Object} mockupData - Data for generating the mockup
+ * @returns {Promise<Object>} Mockup task result
  */
-const mockCatalogProducts = () => {
-  return [
-    {
-      id: 1,
-      name: "Classic T-Shirt",
-      thumbnail_url: "https://example.com/tshirt.jpg",
-      variants: [
-        { id: 101, name: "White S", price: 18.95 },
-        { id: 102, name: "White M", price: 18.95 },
-        { id: 103, name: "White L", price: 18.95 },
-        { id: 104, name: "Black S", price: 18.95 },
-        { id: 105, name: "Black M", price: 18.95 },
-        { id: 106, name: "Black L", price: 18.95 },
-      ],
-    },
-    {
-      id: 2,
-      name: "Coffee Mug",
-      thumbnail_url: "https://example.com/mug.jpg",
-      variants: [
-        { id: 201, name: "White 11oz", price: 12.95 },
-        { id: 202, name: "Black 11oz", price: 12.95 },
-      ],
-    },
-    {
-      id: 3,
-      name: "Poster",
-      thumbnail_url: "https://example.com/poster.jpg",
-      variants: [
-        { id: 301, name: "18x24", price: 19.95 },
-        { id: 302, name: "24x36", price: 29.95 },
-      ],
-    },
-    {
-      id: 4,
-      name: "Sticker",
-      thumbnail_url: "https://example.com/sticker.jpg",
-      variants: [
-        { id: 401, name: "3x3", price: 3.95 },
-        { id: 402, name: "5x5", price: 5.95 },
-      ],
-    },
-    {
-      id: 5,
-      name: "Hoodie",
-      thumbnail_url: "https://example.com/hoodie.jpg",
-      variants: [
-        { id: 501, name: "Gray S", price: 34.95 },
-        { id: 502, name: "Gray M", price: 34.95 },
-        { id: 503, name: "Gray L", price: 34.95 },
-        { id: 504, name: "Black S", price: 34.95 },
-        { id: 505, name: "Black M", price: 34.95 },
-        { id: 506, name: "Black L", price: 34.95 },
-      ],
-    },
-  ];
-};
+const generateMockup = async (mockupData) => {
+  console.log("\n generating mockup..");
+  try {
+    // For development without API key
+    if (PRINTFUL_STORE_API_KEY === "dummy_printful_key") {
+      return mockGenerateMockup(mockupData);
+    }
 
-/**
- * Mock product variants
- * @param {Number} productId - Product ID
- * @returns {Array} List of mock variants
- */
-const mockProductVariants = (productId) => {
-  const variantsByProduct = {
-    1: [
-      { id: 101, name: "White S", price: 18.95, variant_id: 101 },
-      { id: 102, name: "White M", price: 18.95, variant_id: 102 },
-      { id: 103, name: "White L", price: 18.95, variant_id: 103 },
-      { id: 104, name: "Black S", price: 18.95, variant_id: 104 },
-      { id: 105, name: "Black M", price: 18.95, variant_id: 105 },
-      { id: 106, name: "Black L", price: 18.95, variant_id: 106 },
-    ],
-    2: [
-      { id: 201, name: "White 11oz", price: 12.95, variant_id: 201 },
-      { id: 202, name: "Black 11oz", price: 12.95, variant_id: 202 },
-    ],
-    3: [
-      { id: 301, name: "18x24", price: 19.95, variant_id: 301 },
-      { id: 302, name: "24x36", price: 29.95, variant_id: 302 },
-    ],
-    4: [
-      { id: 401, name: "3x3", price: 3.95, variant_id: 401 },
-      { id: 402, name: "5x5", price: 5.95, variant_id: 402 },
-    ],
-    5: [
-      { id: 501, name: "Gray S", price: 34.95, variant_id: 501 },
-      { id: 502, name: "Gray M", price: 34.95, variant_id: 502 },
-      { id: 503, name: "Gray L", price: 34.95, variant_id: 503 },
-      { id: 504, name: "Black S", price: 34.95, variant_id: 504 },
-      { id: 505, name: "Black M", price: 34.95, variant_id: 505 },
-      { id: 506, name: "Black L", price: 34.95, variant_id: 506 },
-    ],
-  };
+    const { imageUrl, position = "front", category } = mockupData;
 
-  return variantsByProduct[productId] || [];
-};
+    const productId = PRODUCT_IDS_BY_CATEGORY[category];
+    const variantIdsForProduct = VARIANT_IDS_BY_PRODUCT_ID[productId];
 
-/**
- * Mock create product
- * @param {Object} productData - Product data
- * @returns {Object} Mock created product
- */
-const mockCreateProduct = (productData) => {
-  const mockId = Date.now();
-
-  return {
-    id: mockId,
-    name: productData.name,
-    external_id: productData.externalId || `product_${mockId}`,
-    sync_product: {
-      id: mockId,
-      name: productData.name,
-      thumbnail_url: productData.imageUrl,
-    },
-    sync_variants: [
-      {
-        id: mockId + 1,
-        product_id: mockId,
-        name: `${productData.name} Default`,
-        retail_price: "25.00", // Default price
-        variant_id: productData.variantId,
-        external_id: `variant_${mockId}_1`,
-        files: [
-          {
-            id: mockId + 100,
-            type: "default",
-            url: productData.imageUrl,
-          },
-        ],
+    const requestData = {
+      variant_ids: variantIdsForProduct,
+      format: "png",
+      product_options: {
+        lifelike: true,
       },
-    ],
-    thumbnail_url: productData.imageUrl,
-    is_ignored: false,
-  };
-};
-
-/**
- * Mock create order
- * @param {Object} orderData - Order data
- * @returns {Object} Mock created order
- */
-const mockCreateOrder = (orderData) => {
-  const mockId = Date.now();
-  return {
-    id: mockId,
-    external_id: `order_${mockId}`,
-    status: "pending",
-    shipping: "STANDARD",
-    shipping_service_name: "Standard shipping",
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-    recipient: {
-      name: `${orderData.shippingAddress.firstName} ${orderData.shippingAddress.lastName}`,
-      address1: orderData.shippingAddress.street,
-      city: orderData.shippingAddress.city,
-      state_code: orderData.shippingAddress.state,
-      country_code: orderData.shippingAddress.country,
-      zip: orderData.shippingAddress.postalCode,
-      email: orderData.email,
-      phone: orderData.phone,
-    },
-    items: orderData.items.map((item, index) => ({
-      id: mockId + index + 1,
-      external_id: `item_${mockId}_${index}`,
-      variant_id: item.printfulVariantId,
-      quantity: item.quantity,
-      price: item.price.toString(),
-      retail_price: item.price.toString(),
-      name: `Mock Item ${index + 1}`,
       files: [
         {
-          id: mockId + 100 + index,
-          type: "default",
-          url: "https://example.com/mockImage.jpg",
+          placement: position,
+          image_url: imageUrl,
+          position: {
+            area_width: 1800,
+            area_height: 2400,
+            width: 1800,
+            height: 1800,
+            top: 300,
+            left: 0,
+          },
         },
       ],
-    })),
-    costs: {
-      subtotal: orderData.items.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0,
-      ),
-      shipping: 7.95,
-      tax: 0,
-      total:
-        orderData.items.reduce(
-          (sum, item) => sum + item.price * item.quantity,
-          0,
-        ) + 7.95,
-    },
-  };
+    };
+
+    console.log("starting mockup generation... fetching taskKey");
+    //console.log('request data: ', JSON.stringify(requestData))
+    // Start the mockup generation task
+    const createTaskResponse = await printfulClient.post(
+      `/mockup-generator/create-task/${productId}`,
+      requestData,
+    );
+    console.log("mockGenerator task creation response: ", createTaskResponse);
+    const taskKey = createTaskResponse.data.result.task_key;
+    console.log("mockup generation task started. task key: ", taskKey);
+
+    // Poll for task completion
+    const mockupResult = await pollMockupTask(taskKey);
+
+    console.log("\nmockup generation successful ");
+    //console.log("mockup generation result: ", mockupResult)
+
+    return mockupResult;
+  } catch (error) {
+    console.error("Error generating mockup:", error);
+    return null; //mockGenerateMockup(mockupData);
+  }
 };
 
 /**
- * Mock shipping rates
- * @returns {Array} Mock shipping rates
+ * Poll the mockup generation task until it completes
+ * @param {String} taskKey - Task key from the create-task response
+ * @returns {Promise<Object>} Mockup result
  */
-const mockShippingRates = () => {
-  return [
-    {
-      id: "STANDARD",
-      name: "Standard shipping",
-      rate: 7.95,
-      currency: "USD",
-      minDeliveryDays: 4,
-      maxDeliveryDays: 6,
-    },
-    {
-      id: "EXPRESS",
-      name: "Express shipping",
-      rate: 14.95,
-      currency: "USD",
-      minDeliveryDays: 2,
-      maxDeliveryDays: 3,
-    },
-  ];
-};
+const pollMockupTask = async (taskKey) => {
+  const maxAttempts = 3;
+  //according to printful docs, min wait time is 10 seconds
+  const delayMs = 10001;
 
-/**
- * Mock production costs
- * @param {String} variantId - Variant ID
- * @returns {Object} Mock production costs
- */
-const mockProductionCosts = (variantId) => {
-  // Base costs for different categories
-  const baseCosts = {
-    // T-shirts (IDs 101-106)
-    101: 9.95,
-    102: 9.95,
-    103: 9.95,
-    104: 9.95,
-    105: 9.95,
-    106: 9.95,
-    // Mugs (IDs 201-202)
-    201: 5.95,
-    202: 5.95,
-    // Posters (IDs 301-302)
-    301: 8.95,
-    302: 12.95,
-    // Stickers (IDs 401-402)
-    401: 1.95,
-    402: 2.95,
-    // Hoodies (IDs 501-506)
-    501: 19.95,
-    502: 19.95,
-    503: 19.95,
-    504: 19.95,
-    505: 19.95,
-    506: 19.95,
-  };
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const response = await printfulClient.get(
+        `/mockup-generator/task?task_key=${taskKey}`,
+      );
+      const result = response.data.result;
 
-  return {
-    variantId,
-    productionCost: baseCosts[variantId.toString()] || 10.0,
-  };
-};
+      if (result.status === "completed") {
+        console.log("mockup generation successful");
+        return result;
+      } else if (result.status === "failed") {
+        throw new Error(`Mockup generation failed: ${result.error}`);
+      }
 
-/**
- * Mock order status
- * @param {String} orderId - Order ID
- * @returns {Object} Mock order status
- */
-const mockOrderStatus = (orderId) => {
-  // Randomly select a status for demo purposes
-  const statuses = [
-    "pending",
-    "processing",
-    "fulfilled",
-    "shipped",
-    "delivered",
-  ];
-  const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+      // Wait before trying again
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    } catch (error) {
+      console.error(
+        `Error polling mockup task (attempt ${attempt + 1}):`,
+        error.message,
+      );
+      if (attempt === maxAttempts - 1) {
+        throw error;
+      }
+    }
+  }
 
-  return {
-    id: orderId,
-    external_id: `order_${orderId}`,
-    status: randomStatus,
-    shipping: "STANDARD",
-    created: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-    updated: new Date().toISOString(),
-    shipping_service_name: "Standard shipping",
-    recipient: {
-      name: "John Doe",
-      address1: "123 Main St",
-      city: "Anytown",
-      state_code: "CA",
-      country_code: "US",
-      zip: "12345",
-    },
-    items: [
-      {
-        id: orderId + 1,
-        external_id: `item_${orderId}_1`,
-        variant_id: 101,
-        quantity: 1,
-        price: "18.95",
-        retail_price: "18.95",
-        name: "Mock T-Shirt",
-        status: randomStatus,
-      },
-    ],
-    tracking_number:
-      randomStatus === "shipped" || randomStatus === "delivered"
-        ? "MOCK123456789"
-        : null,
-    tracking_url:
-      randomStatus === "shipped" || randomStatus === "delivered"
-        ? "https://example.com/tracking/MOCK123456789"
-        : null,
-  };
+  throw new Error("Mockup generation timed out");
 };
 
 module.exports = {
@@ -640,4 +431,5 @@ module.exports = {
   getProductionCosts,
   getOrderStatus,
   cancelOrder,
+  generateMockup,
 };

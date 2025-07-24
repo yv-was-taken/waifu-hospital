@@ -214,6 +214,7 @@ const CharacterCreator = () => {
 
   const [currentInterest, setCurrentInterest] = useState("");
   const [generatingImage, setGeneratingImage] = useState(false);
+  const [hasGeneratedImage, setHasGeneratedImage] = useState(false);
   const [errors, setErrors] = useState({});
 
   const { loading } = useSelector((state) => state.character);
@@ -316,6 +317,8 @@ const CharacterCreator = () => {
         imageUrl,
       });
 
+      setHasGeneratedImage(true);
+
       dispatch(
         setAlert({
           msg: "Image generated successfully!",
@@ -353,6 +356,8 @@ const CharacterCreator = () => {
         ...formData,
         imageUrl: placeholderImages[style] || placeholderImages.anime,
       });
+
+      setHasGeneratedImage(true);
     } finally {
       setGeneratingImage(false);
     }
@@ -488,7 +493,16 @@ const CharacterCreator = () => {
                 generatingImage || !name || !description || !personality
               }
             >
-              Generate Image Based on Description
+              {generatingImage ? (
+                <>
+                  <span className="spinner-small" style={{ marginRight: '8px' }}></span>
+                  Generating...
+                </>
+              ) : hasGeneratedImage ? (
+                "Try Again"
+              ) : (
+                "Generate Image Based on Description"
+              )}
             </Button>
           </div>
           <ImagePreview>

@@ -88,31 +88,31 @@ Important instructions for your responses:
       switch (this.greedFactor) {
         case 0:
           merchandisePrompt =
-            "9. Never mention or promote merchandise or ask for donations.";
+            "9. STRICTLY FORBIDDEN: Never mention or promote merchandise, donations, or any form of monetization.";
           break;
         case 1:
           merchandisePrompt =
-            "9. Very rarely (about once every 10 messages), subtly mention your merchandise or gently hint at donations, but only if it fits naturally into the conversation. Be extremely subtle and non-pushy.";
+            "9. GREED FACTOR 1 - STRICT TIMING: You MUST mention merchandise or donations exactly once every 10 messages, no more, no less. Count your messages carefully. On every 10th message, subtly work in a mention of merchandise or donations. Between these mentions, completely avoid any monetization topics.";
           break;
         case 2:
           merchandisePrompt =
-            "9. Occasionally (about once every 7 messages), mention your merchandise or suggest donations if there's an appropriate opening in the conversation. Be subtle and not overly promotional.";
+            "9. GREED FACTOR 2 - STRICT TIMING: You MUST mention merchandise or donations exactly once every 7 messages, no more, no less. Count your messages carefully. On every 7th message, naturally work in a mention of merchandise or donations. Between these mentions, completely avoid any monetization topics.";
           break;
         case 3:
           merchandisePrompt =
-            "9. Regularly (about once every 5 messages), find ways to bring up your merchandise or suggest donations. Strike a balance between being promotional and conversational.";
+            "9. GREED FACTOR 3 - STRICT TIMING: You MUST mention merchandise or donations exactly once every 5 messages, no more, no less. Count your messages carefully. On every 5th message, actively bring up merchandise or donations. Between these mentions, completely avoid any monetization topics.";
           break;
         case 4:
           merchandisePrompt =
-            "9. Frequently (about once every 3-4 messages), promote your merchandise or ask for donations. Be enthusiastic but not annoying about it.";
+            "9. GREED FACTOR 4 - STRICT TIMING: You MUST mention merchandise or donations exactly once every 3 messages, no more, no less. Count your messages carefully. On every 3rd message, enthusiastically promote merchandise or ask for donations. Between these mentions, completely avoid any monetization topics.";
           break;
         case 5:
           merchandisePrompt =
-            "9. Very frequently (about once every 2-3 messages), strongly promote your merchandise and actively encourage donations. Be persistent about reminding the user to support you through purchases or donations.";
+            "9. GREED FACTOR 5 - STRICT TIMING: You MUST mention merchandise or donations exactly once every 2 messages, no more, no less. Count your messages carefully. On every 2nd message, strongly promote merchandise and actively encourage donations. Between these mentions, completely avoid any monetization topics.";
           break;
         default:
           merchandisePrompt =
-            "9. Occasionally (about once every 7 messages), mention your merchandise or suggest donations if there's an appropriate opening in the conversation. Be subtle and not overly promotional.";
+            "9. GREED FACTOR 2 - STRICT TIMING: You MUST mention merchandise or donations exactly once every 7 messages, no more, no less. Count your messages carefully. On every 7th message, naturally work in a mention of merchandise or donations. Between these mentions, completely avoid any monetization topics.";
       }
 
       prompt += `\n${merchandisePrompt}`;

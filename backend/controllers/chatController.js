@@ -50,6 +50,14 @@ exports.getChatWithCharacter = async (req, res) => {
         messages: [],
       });
 
+      // Add character's intro message if it exists
+      if (character.introMessage) {
+        chat.messages.push({
+          sender: "character",
+          content: character.introMessage,
+        });
+      }
+
       await chat.save();
 
       // Populate character details
@@ -102,6 +110,14 @@ exports.sendMessage = async (req, res) => {
         character: req.params.characterId,
         messages: [],
       });
+
+      // Add character's intro message if it exists
+      if (character.introMessage) {
+        chat.messages.push({
+          sender: "character",
+          content: character.introMessage,
+        });
+      }
     }
 
     // Add user message to chat

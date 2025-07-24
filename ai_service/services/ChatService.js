@@ -122,6 +122,52 @@ class ChatService {
   }
 
   /**
+   * Generate an introductory message for a character
+   * @param {Object} character - Character object with name, personality, etc.
+   * @returns {Promise<string>} The AI-generated intro message
+   */
+  async generateIntroMessage(character) {
+    try {
+      // Check if the API key is set
+      if (!process.env.OPENAI_CHAT_API_KEY) {
+        console.error("OPENAI_CHAT_API_KEY is not set in the environment variables");
+        return null;
+      }
+
+      // Create a prompt for generating an intro message
+      const systemPrompt = `You are ${character.name}, a character with the following traits:
+Personality: ${character.personality}
+${character.background ? `Background: ${character.background}` : ''}
+${character.occupation ? `Occupation: ${character.occupation}` : ''}
+${character.interests && character.interests.length > 0 ? `Interests: ${character.interests.join(', ')}` : ''}
+
+Generate a warm, friendly introductory message that this character would send when meeting someone for the first time. The message should:
+1. Reflect the character's personality traits
+2. Be welcoming and inviting for conversation
+3. Give a hint about what makes this character unique
+4. Be 1-3 sentences long
+5. Feel natural and conversational, not robotic`;
+
+      const userPrompt = "Generate an introductory message for when someone starts chatting with you for the first time.";
+
+      const completion = await this.openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        max_tokens: 150,
+        temperature: 0.8,
+      });
+
+      return completion.choices[0].message.content;
+    } catch (error) {
+      console.error("Failed to generate intro message:", error.message);
+      return null;
+    }
+  }
+
+  /**
    * Get a fallback response when AI service fails
    * @param {string} characterId - ID of the character to respond as
    * @returns {string} A character-aware fallback response

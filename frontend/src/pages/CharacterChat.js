@@ -3,7 +3,6 @@ import { useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getCharacterById } from "../features/characters/characterSlice";
 import api from "../utils/api";
-import aiApi, { sendChatMessage } from "../utils/aiApi";
 import Spinner from "../components/layout/Spinner";
 import styled from "styled-components";
 
@@ -260,24 +259,18 @@ const CharacterChat = () => {
     // Fetch chat history or create a new chat
     const fetchChat = async () => {
       try {
-        // In a real app, this would call the backend API
-        // For this MVP, we'll simulate it
-        setTimeout(() => {
-          setChat({
-            _id: "chat_" + id,
-            character: id,
-            user: user?._id,
-            messages: [],
-          });
-          setLoading(false);
-        }, 1000);
+        const res = await api.get(`/api/chat/${id}`);
+        setChat(res.data);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching chat:", error);
         setLoading(false);
       }
     };
 
-    fetchChat();
+    if (user) {
+      fetchChat();
+    }
   }, [dispatch, id, user]);
 
   // Scroll to bottom when messages change
@@ -307,45 +300,20 @@ const CharacterChat = () => {
     setSending(true);
 
     try {
-      // Call the AI service using our sendChatMessage utility function
-      const aiResponse = await sendChatMessage(id, message);
-
-      if (aiResponse) {
-        setChat((prev) => ({
-          ...prev,
-          messages: [
-            ...prev.messages,
-            { sender: "character", content: aiResponse },
-          ],
-        }));
-      } else {
-        throw new Error("Invalid response from AI service");
-      }
+      // Send message via backend API
+      const res = await api.post(`/api/chat/${id}`, { message });
+      
+      // Update the entire chat with the response
+      setChat(res.data);
     } catch (error) {
-      console.error("Error sending message to AI service:", error);
-
-      // Fallback to static responses if AI service fails
-      const fallbackResponses = [
-        `That's interesting! Tell me more about it.`,
-        `I see. How does that make you feel?`,
-        `Hmm, I never thought about it that way.`,
-        `That's cool! I'd like to know more about you.`,
-        `That sounds wonderful! What else do you enjoy?`,
-        `Really? That's fascinating!`,
-        `I understand. Let's talk more about that.`,
-        `That's a good point. I appreciate your perspective.`,
-        `Thanks for sharing that with me!`,
-        `I'm glad you told me that. It helps me understand you better.`,
-      ];
-
-      const fallbackResponse =
-        fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-
+      console.error("Error sending message:", error);
+      
+      // Add error message to chat
       setChat((prev) => ({
         ...prev,
         messages: [
           ...prev.messages,
-          { sender: "character", content: fallbackResponse },
+          { sender: "character", content: "Sorry, I'm having trouble responding right now. Please try again later." },
         ],
       }));
     } finally {

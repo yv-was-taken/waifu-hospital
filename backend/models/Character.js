@@ -64,6 +64,10 @@ const CharacterSchema = new mongoose.Schema({
     max: 5,
     default: 0,
   },
+  introMessage: {
+    type: String,
+    default: "",
+  },
   public: {
     type: Boolean,
     default: true,

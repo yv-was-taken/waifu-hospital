@@ -58,6 +58,41 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
+// AI Intro Message Generation endpoint
+app.post("/api/generate-intro", async (req, res) => {
+  const { character } = req.body;
+
+  if (!character || !character.name || !character.personality) {
+    console.warn("API request missing character data");
+    return res.status(400).json({ error: "Character name and personality are required" });
+  }
+
+  console.log("Received intro generation request", {
+    characterName: character.name,
+  });
+
+  try {
+    // Generate intro message using ChatService
+    const introMessage = await ChatService.generateIntroMessage(character);
+    
+    if (introMessage) {
+      console.log("Generated intro message", {
+        characterName: character.name,
+        messageLength: introMessage.length,
+      });
+      res.json({ introMessage });
+    } else {
+      // Fallback intro message
+      const fallback = `Hello! I'm ${character.name}. It's wonderful to meet you! I'm excited to chat with you today.`;
+      res.json({ introMessage: fallback });
+    }
+  } catch (error) {
+    console.error("Error generating intro message", error);
+    const fallback = `Hello! I'm ${character.name}. It's wonderful to meet you! I'm excited to chat with you today.`;
+    res.json({ introMessage: fallback });
+  }
+});
+
 // AI Image Generation endpoint
 app.post("/api/generate-image", async (req, res) => {
   const { description, personality, style } = req.body;

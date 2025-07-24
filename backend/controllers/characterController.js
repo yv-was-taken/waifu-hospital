@@ -2,6 +2,7 @@ const Character = require("../models/Character");
 const User = require("../models/User");
 const { validationResult } = require("express-validator");
 const cloudflareImagesService = require("../services/cloudflareImagesService");
+const axios = require("axios");
 
 // @desc    Create a new character
 // @route   POST /api/characters
@@ -74,6 +75,34 @@ exports.createCharacter = async (req, res) => {
 
     // Save character to database
     const character = await newCharacter.save();
+
+    // Generate intro message using AI service
+    try {
+      const aiServiceUrl = process.env.AI_SERVICE_URL || "http://ai_service:5001";
+      const response = await axios.post(`${aiServiceUrl}/api/generate-intro`, {
+        character: {
+          name: character.name,
+          personality: character.personality,
+          background: character.background,
+          occupation: character.occupation,
+          interests: character.interests
+        }
+      });
+
+      if (response.data && response.data.introMessage) {
+        character.introMessage = response.data.introMessage;
+        await character.save();
+        console.log("Generated intro message for character", {
+          characterId: character._id,
+          introLength: response.data.introMessage.length
+        });
+      }
+    } catch (introError) {
+      console.error("Failed to generate intro message for character", introError.message);
+      // Set a default intro message
+      character.introMessage = `Hello! I'm ${character.name}. It's wonderful to meet you! I'm excited to chat with you today.`;
+      await character.save();
+    }
 
     // Add character to user's characters array
     await User.findByIdAndUpdate(
@@ -295,6 +324,32 @@ exports.updateCharacter = async (req, res) => {
       { $set: characterFields },
       { new: true },
     );
+
+    // If personality changed, regenerate intro message
+    if (personality && personality !== character.personality) {
+      try {
+        const aiServiceUrl = process.env.AI_SERVICE_URL || "http://ai_service:5001";
+        const response = await axios.post(`${aiServiceUrl}/api/generate-intro`, {
+          character: {
+            name: updatedCharacter.name,
+            personality: updatedCharacter.personality,
+            background: updatedCharacter.background,
+            occupation: updatedCharacter.occupation,
+            interests: updatedCharacter.interests
+          }
+        });
+
+        if (response.data && response.data.introMessage) {
+          updatedCharacter.introMessage = response.data.introMessage;
+          await updatedCharacter.save();
+          console.log("Regenerated intro message for character due to personality change", {
+            characterId: updatedCharacter._id
+          });
+        }
+      } catch (introError) {
+        console.error("Failed to regenerate intro message for character", introError.message);
+      }
+    }
 
     res.json(updatedCharacter);
   } catch (err) {

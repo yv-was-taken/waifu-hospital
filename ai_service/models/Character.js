@@ -33,7 +33,7 @@ class Character {
     this.background = background || "";
     this.occupation = occupation || "";
     this.age = age || null;
-    this.greedFactor = greedFactor || 2; //@dev default set to 2
+    this.greedFactor = greedFactor !== undefined ? greedFactor : 2; //@dev default set to 2
   }
 
   /**

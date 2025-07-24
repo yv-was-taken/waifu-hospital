@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../utils/api";
-import axios from "axios";
 import { setAuthToken } from "../../utils/setAuthToken";
 import { setAlert } from "../alerts/alertSlice";
 

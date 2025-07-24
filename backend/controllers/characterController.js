@@ -23,7 +23,7 @@ exports.createCharacter = async (req, res) => {
     interests,
     occupation,
     age,
-    public,
+    public: isPublic,
   } = req.body;
 
   try {
@@ -39,7 +39,7 @@ exports.createCharacter = async (req, res) => {
       interests,
       occupation,
       age,
-      public: public !== undefined ? public : true,
+      public: isPublic !== undefined ? isPublic : true,
     });
 
     // Upload image to Cloudflare Images
@@ -253,7 +253,7 @@ exports.updateCharacter = async (req, res) => {
       interests,
       occupation,
       age,
-      public,
+      public: isPublic,
     } = req.body;
 
     // Build character object
@@ -266,7 +266,7 @@ exports.updateCharacter = async (req, res) => {
     if (interests) characterFields.interests = interests;
     if (occupation) characterFields.occupation = occupation;
     if (age) characterFields.age = age;
-    if (public !== undefined) characterFields.public = public;
+    if (isPublic !== undefined) characterFields.public = isPublic;
 
     // If imageUrl is provided and it's different from the current one,
     // upload the new image to Cloudflare Images

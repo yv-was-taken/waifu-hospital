@@ -4,97 +4,110 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-WaifuHospital is a full-stack web application featuring anime-styled medical characters. It uses a microservices architecture with three main components:
-- **Frontend**: React SPA with Redux state management
+WaifuHospital is a full-stack web application featuring anime-styled medical characters with AI-powered chat interactions and merchandise capabilities. It uses a microservices architecture with:
+- **Frontend**: React SPA with Redux Toolkit state management
 - **Backend**: Express/Node.js REST API with MongoDB
-- **AI Service**: Microservice for AI-powered character interactions using OpenAI
+- **AI Service**: Microservice for OpenAI-powered character interactions
 
 ## Development Commands
 
 ### Full Stack (Docker Compose)
 ```bash
-# Start all services (MongoDB, backend, frontend, AI service)
-docker-compose up
-
-# Stop all services
-docker-compose down
+docker-compose up        # Start all services (MongoDB, backend, frontend, AI service)
+docker-compose down      # Stop all services
+docker-compose logs -f   # View logs from all services
+docker-compose ps        # Check service status
 ```
 
-### Frontend (React)
+### Individual Services
 ```bash
+# Frontend (React) - Port 3000
 cd frontend
-npm start          # Development server (port 3000)
+npm start          # Development server with hot reload
 npm run build      # Production build
 npm test           # Run tests (interactive watch mode)
-```
 
-### Backend API (Express)
-```bash
+# Backend API (Express) - Port 5000
 cd backend
-npm run dev        # Development with Nodemon (port 5000)
+npm run dev        # Development with Nodemon
 npm start          # Production mode
-```
 
-### AI Service
-```bash
+# AI Service - Port 5001
 cd ai_service
-npm run dev        # Development with Nodemon (port 5001)
+npm run dev        # Development with Nodemon
 npm start          # Production mode
 ```
 
-## Architecture & Key Components
+## Architecture & Key Design Patterns
 
-### Frontend Structure
-- **State Management**: Redux Toolkit with feature slices:
-  - `features/auth/` - Authentication state and user management
-  - `features/characters/` - Character data and operations
-  - `features/cart/` - Shopping cart functionality
-  - `features/merchandise/` - Merchandise management
-  - `features/alerts/` - Global alert/notification system
+### Microservices Communication
+- Frontend → Backend: REST API calls via `frontend/src/utils/api.js` with JWT auth tokens
+- Backend → AI Service: HTTP requests for chat/image generation
+- AI Service → Backend: Fetches character data when needed
 
-- **API Communication**: Centralized in `utils/api.js` with JWT token handling
-- **Routing**: React Router v6 with protected routes via `ProtectedRoute` component
+### Authentication Flow
+1. JWT tokens stored in localStorage on frontend
+2. Token sent via `x-auth-token` header on all authenticated requests
+3. Backend middleware (`middleware/authMiddleware.js`) validates tokens
+4. User object attached to `req.user` for authenticated routes
 
-### Backend Structure
-- **Authentication**: JWT-based with middleware in `middleware/auth.js`
-- **Database Models** (Mongoose):
-  - `User` - User accounts with auth
-  - `Character` - Anime character profiles
-  - `Chat` - Conversation history
-  - `Merchandise` - Product listings
-  - `Purchase` - Transaction records
+### State Management (Frontend)
+Redux Toolkit with feature-based slices:
+- **auth**: User authentication, login/logout, token management
+- **characters**: Character CRUD operations, likes, public/private visibility
+- **cart**: Shopping cart for merchandise
+- **merchandise**: Product listings, Printful integration
+- **alerts**: Global notification system
 
-- **External Integrations**:
-  - **Stripe** (`services/stripe.js`) - Payment processing
-  - **Printful** (`services/printful.js`) - Print-on-demand merchandise
-  - **Shopify** (`services/shopify.js`) - E-commerce integration
-  - **Cloudflare** (`services/cloudflare.js`) - Image hosting
+### AI Character System
+1. **Character Creation**: User creates character → Backend generates intro message via AI Service
+2. **Chat Flow**: Frontend → Backend `/api/chat/:characterId` → AI Service with character context
+3. **Personality System**: Characters have `greedFactor` (0-5) that determines merchandise promotion frequency
+4. **Image Generation**: AI Service uses OpenAI DALL-E for character images based on style/description
 
-### AI Service
-- **OpenAI Integration**: Character personality responses
-- **Endpoints**: `/chat` for AI-powered conversations
-- **Models**: Character personality contexts
+### External Service Integrations
+- **Cloudflare Images**: Character image hosting with automatic upload/deletion
+- **Stripe**: Payment processing with webhook handling
+- **Printful**: Print-on-demand merchandise with mockup generation
+- **Shopify**: E-commerce storefront integration
 
-## Environment Configuration
+## API Routes Structure
 
-Each service requires `.env` files with service-specific variables:
-- Frontend: API endpoints
-- Backend: Database URI, JWT secret, service API keys
-- AI Service: OpenAI API key
+### Backend Routes
+- `/api/users` - User registration, login, profile management
+- `/api/characters` - Character CRUD, likes, public browsing
+- `/api/chat/:characterId` - Chat history and message sending
+- `/api/merchandise` - Product listings and Printful integration
+- `/api/payments` - Stripe payment processing
+
+### AI Service Routes
+- `/api/chat` - Generate AI responses for character conversations
+- `/api/generate-image` - Create character images with DALL-E
+- `/api/generate-intro` - Generate character introduction messages
+- `/api/characters/:id` - Fetch character data from backend
+
+## Environment Variables
+
+Each service has its own `.env` file (see `.env.example` files in each directory):
+- **Backend**: MongoDB URI, JWT secret, service API keys, Cloudflare credentials
+- **Frontend**: Backend and AI service URLs (prefixed with `REACT_APP_`)
+- **AI Service**: OpenAI API keys, backend URL
 
 ## Current Development Priorities
 
-From `todo.md`, top priorities include:
+From `todo.md`, top priorities:
 1. Stripe payment integration completion
 2. Firebase authentication migration
 3. Security implementations (captcha, rate limiting)
 4. Merchandise marketplace with queue system for Printful API limits
 5. Paywalling for image generation and conversation limits
 
-## Important Notes
+## Important Technical Notes
 
-- No TypeScript - project uses plain JavaScript
-- No test infrastructure currently implemented
-- Frontend uses Create React App with built-in ESLint
-- Backend and AI service lack linting configuration
-- All services containerized with Docker for consistent development
+- **No TypeScript** - Plain JavaScript throughout
+- **No test infrastructure** - Tests not yet implemented
+- **No linting** - Only frontend has ESLint (Create React App default)
+- **Docker networking** - Services communicate using container names (e.g., `http://backend:5000`)
+- **Character intro messages** - Auto-generated on creation, regenerated if personality changes
+- **Image delivery** - Cloudflare Images used for CDN delivery of character images
+- **Chat persistence** - Messages stored in MongoDB, intro message displayed on new chat creation

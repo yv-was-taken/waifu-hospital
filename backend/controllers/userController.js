@@ -272,3 +272,61 @@ exports.getUserById = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+// @desc    Get current user (alias for getUserProfile)
+// @route   GET /api/users/me
+// @access  Private
+exports.getMe = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ msg: "User not found" });
+    }
+
+    const user = await User.findById(req.user.id)
+      .select("-password")
+      .populate("characters");
+
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+};
+
+// @desc    Update user profile (alias for updateUserProfile)
+// @route   PUT /api/users/me
+// @access  Private
+exports.updateProfile = async (req, res) => {
+  const { username, email, bio, profilePicture, password } = req.body;
+
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { 
+        ...(username && { username }),
+        ...(email && { email }),
+        ...(bio && { bio }),
+        ...(profilePicture && { profilePicture }),
+        ...(password && { password })
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    // Remove password from response
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    res.json(userResponse);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+};

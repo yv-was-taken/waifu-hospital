@@ -5,11 +5,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import Alert from './Alert';
 import alertsReducer from '../../features/alerts/alertSlice';
 
-// Mock styled-components
-jest.mock('styled-components', () => ({
-  __esModule: true,
-  default: (component) => (props) => React.createElement(component, props),
-}));
+// Styled-components mocked globally in setupTests.js
 
 const createMockStore = (initialAlerts = []) => {
   return configureStore({
@@ -271,9 +267,9 @@ describe('Alert Component', () => {
     // Initially no alerts
     expect(screen.queryByText('New alert')).not.toBeInTheDocument();
     
-    // Add an alert to the store
+    // Add an alert to the store using the correct action
     store.dispatch({
-      type: 'alert/addAlert',
+      type: 'alert/setAlert',
       payload: {
         id: '1',
         msg: 'New alert',

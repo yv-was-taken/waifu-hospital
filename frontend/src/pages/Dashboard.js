@@ -158,7 +158,7 @@ const Dashboard = () => {
                   <CardContent>
                     <CardTitle>{character.name}</CardTitle>
                     <CardText>
-                      {character.personality.substring(0, 100)}...
+                      {character.personality ? character.personality.substring(0, 100) + '...' : 'No personality description available.'}
                     </CardText>
                   </CardContent>
                 </Card>

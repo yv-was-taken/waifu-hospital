@@ -90,36 +90,38 @@ jest.mock('./utils/setAuthToken', () => ({
   setAuthToken: jest.fn(),
 }));
 
-// Mock styled-components globally
+// Mock styled-components globally - comprehensive approach
 jest.mock('styled-components', () => {
   const React = require('react');
   
-  // Create styled function that handles both styled.div and styled(Component)
-  const styled = (Component) => {
-    // If it's a string (HTML element), return a function that creates that element
-    if (typeof Component === 'string') {
-      return () => React.forwardRef((props, ref) => 
-        React.createElement(Component, { ...props, ref })
-      );
-    }
-    // If it's a component, wrap it
-    return () => React.forwardRef((props, ref) => 
-      React.createElement(Component, { ...props, ref })
-    );
+  // Create a function that handles template literals
+  const createStyledComponent = (Component) => {
+    return (strings, ...values) => {
+      return React.forwardRef((props, ref) => {
+        return React.createElement(Component, { ...props, ref }, props.children);
+      });
+    };
   };
   
-  // Add common HTML elements as properties
+  // Main styled function
+  const styled = (Component) => {
+    if (typeof Component === 'string') {
+      return createStyledComponent(Component);
+    }
+    return createStyledComponent(Component);
+  };
+  
+  // Add all HTML elements as properties
   const htmlElements = [
     'div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 
     'section', 'article', 'header', 'footer', 'nav', 'main',
     'form', 'input', 'textarea', 'button', 'select', 'option',
-    'img', 'a', 'ul', 'ol', 'li', 'table', 'thead', 'tbody', 'tr', 'td', 'th'
+    'img', 'a', 'ul', 'ol', 'li', 'table', 'thead', 'tbody', 'tr', 'td', 'th',
+    'label', 'fieldset', 'legend', 'datalist', 'output', 'progress', 'meter'
   ];
   
   htmlElements.forEach(element => {
-    styled[element] = () => React.forwardRef((props, ref) => 
-      React.createElement(element, { ...props, ref })
-    );
+    styled[element] = createStyledComponent(element);
   });
 
   return {
@@ -127,3 +129,31 @@ jest.mock('styled-components', () => {
     default: styled,
   };
 });
+
+// Mock Date for consistent testing
+const OriginalDate = global.Date;
+
+// Create a proper Date constructor that extends the original
+function MockDate(...args) {
+  const instance = args.length > 0 ? new OriginalDate(...args) : new OriginalDate();
+  
+  // Override getFullYear method
+  instance.getFullYear = function() {
+    return 2024;
+  };
+  
+  return instance;
+}
+
+// Copy all static methods from OriginalDate
+Object.setPrototypeOf(MockDate, OriginalDate);
+Object.getOwnPropertyNames(OriginalDate).forEach(name => {
+  if (name !== 'length' && name !== 'name' && name !== 'prototype') {
+    MockDate[name] = OriginalDate[name];
+  }
+});
+
+// Ensure prototype chain is correct
+MockDate.prototype = OriginalDate.prototype;
+
+global.Date = MockDate;

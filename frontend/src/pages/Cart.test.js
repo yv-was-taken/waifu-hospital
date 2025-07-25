@@ -21,11 +21,16 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }));
 
+// Mock API calls
+import api from '../utils/api';
+jest.mock('../utils/api');
+const mockApi = api;
+
 const createMockStore = (cartState = {}, alertState = []) => {
   return configureStore({
     reducer: {
       cart: cartReducer,
-      alerts: alertReducer,
+      alert: alertReducer,
     },
     preloadedState: {
       cart: {
@@ -37,7 +42,7 @@ const createMockStore = (cartState = {}, alertState = []) => {
         error: null,
         ...cartState,
       },
-      alerts: alertState,
+      alert: alertState,
     },
   });
 };
@@ -78,6 +83,14 @@ const renderWithProviders = (component, store) => {
 describe('Cart Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    
+    // Setup default successful API responses
+    mockApi.post.mockResolvedValue({
+      data: {
+        success: true,
+        checkoutUrl: 'https://checkout.example.com'
+      }
+    });
   });
 
   describe('Loading state', () => {
@@ -363,7 +376,7 @@ describe('Cart Component', () => {
       await waitFor(() => {
         expect(dispatchSpy).toHaveBeenCalledWith(
           expect.objectContaining({
-            type: 'alerts/setAlert',
+            type: 'alert/setAlert',
             payload: expect.objectContaining({
               msg: 'Item removed from cart',
               type: 'success'
@@ -477,7 +490,7 @@ describe('Cart Component', () => {
       await waitFor(() => {
         expect(dispatchSpy).toHaveBeenCalledWith(
           expect.objectContaining({
-            type: 'alerts/setAlert',
+            type: 'alert/setAlert',
             payload: expect.objectContaining({
               msg: 'Cart cleared',
               type: 'success'
@@ -576,7 +589,7 @@ describe('Cart Component', () => {
       const store = createMockStore({ cartItems: freeItems });
       renderWithProviders(<Cart />, store);
       
-      expect(screen.getByText('$0.00')).toBeInTheDocument();
+      expect(screen.getAllByText('$0.00')).toHaveLength(5); // Item price, subtotal, shipping, tax, total
     });
 
     it('should handle large quantities correctly', () => {
@@ -592,7 +605,7 @@ describe('Cart Component', () => {
       
       expect(screen.getByDisplayValue('99')).toBeInTheDocument();
       // Price should be calculated correctly: $24.99 * 99 = $2474.01
-      expect(screen.getByText('$2474.01')).toBeInTheDocument();
+      expect(screen.getAllByText('$2474.01')).toHaveLength(2); // Appears in subtotal and item total
     });
 
     it('should handle very long item names', () => {

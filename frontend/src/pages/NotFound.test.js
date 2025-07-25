@@ -27,13 +27,13 @@ describe('NotFound Component', () => {
   it('should render description text', () => {
     renderWithRouter(<NotFound />);
     
-    expect(screen.getByText("The page you are looking for doesn't exist.")).toBeInTheDocument();
+    expect(screen.getByText("The page you are looking for doesn't exist or has been moved.")).toBeInTheDocument();
   });
 
-  it('should render Go Home link', () => {
+  it('should render Back to Home link', () => {
     renderWithRouter(<NotFound />);
     
-    const homeLink = screen.getByRole('link', { name: 'Go Home' });
+    const homeLink = screen.getByRole('link', { name: 'Back to Home' });
     expect(homeLink).toBeInTheDocument();
     expect(homeLink).toHaveAttribute('href', '/');
   });

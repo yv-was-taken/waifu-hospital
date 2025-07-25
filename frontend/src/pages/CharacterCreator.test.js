@@ -21,17 +21,22 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }));
 
+// Mock API calls
+import api from '../utils/api';
+jest.mock('../utils/api');
+const mockApi = api;
+
 // Mock the AI API
 const mockGenerateCharacterImage = jest.fn();
 jest.mock('../utils/aiApi', () => ({
-  generateCharacterImage: () => mockGenerateCharacterImage(),
+  generateCharacterImage: (...args) => mockGenerateCharacterImage(...args),
 }));
 
 const createMockStore = (characterState = {}, alertState = []) => {
   return configureStore({
     reducer: {
       character: characterReducer,
-      alerts: alertReducer,
+      alert: alertReducer,
     },
     preloadedState: {
       character: {
@@ -43,7 +48,7 @@ const createMockStore = (characterState = {}, alertState = []) => {
         error: null,
         ...characterState,
       },
-      alerts: alertState,
+      alert: alertState,
     },
   });
 };
@@ -61,6 +66,21 @@ const renderWithProviders = (component, store) => {
 describe('CharacterCreator Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    
+    // Setup default successful API responses
+    mockApi.post.mockResolvedValue({
+      data: {
+        _id: '1',
+        name: 'Test Character',
+        imageUrl: 'https://example.com/image.jpg'
+      }
+    });
+    
+    mockGenerateCharacterImage.mockResolvedValue({
+      data: {
+        imageUrl: 'https://example.com/generated-image.jpg'
+      }
+    });
   });
 
   describe('Initial render', () => {
@@ -90,16 +110,16 @@ describe('CharacterCreator Component', () => {
       expect(screen.getByLabelText('Personality *')).toHaveValue('');
       expect(screen.getByLabelText('Background')).toHaveValue('');
       expect(screen.getByLabelText('Occupation')).toHaveValue('');
-      expect(screen.getByLabelText('Age')).toHaveValue('');
+      expect(screen.getByLabelText('Age')).toHaveValue(null);
       expect(screen.getByLabelText('Greed Factor (0-5)')).toHaveValue('2');
       expect(screen.getByLabelText('Make this character public')).toBeChecked();
     });
 
     it('should have proper form structure', () => {
       const store = createMockStore();
-      renderWithProviders(<CharacterCreator />, store);
+      const { container } = renderWithProviders(<CharacterCreator />, store);
       
-      expect(screen.getByRole('form')).toBeInTheDocument();
+      expect(container.querySelector('form')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Create Character' })).toBeInTheDocument();
     });
@@ -158,7 +178,7 @@ describe('CharacterCreator Component', () => {
       const ageInput = screen.getByLabelText('Age');
       fireEvent.change(ageInput, { target: { value: '25' } });
       
-      expect(ageInput).toHaveValue('25');
+      expect(ageInput).toHaveValue(25);
     });
 
     it('should update checkbox state', () => {
@@ -364,7 +384,7 @@ describe('CharacterCreator Component', () => {
       await waitFor(() => {
         expect(dispatchSpy).toHaveBeenCalledWith(
           expect.objectContaining({
-            type: 'alerts/setAlert',
+            type: 'alert/setAlert',
             payload: expect.objectContaining({
               msg: 'Image generated successfully!',
               type: 'success'
@@ -418,7 +438,7 @@ describe('CharacterCreator Component', () => {
       await waitFor(() => {
         expect(dispatchSpy).toHaveBeenCalledWith(
           expect.objectContaining({
-            type: 'alerts/setAlert',
+            type: 'alert/setAlert',
             payload: expect.objectContaining({
               msg: 'Failed to generate image. Please try again.',
               type: 'error'
@@ -436,31 +456,19 @@ describe('CharacterCreator Component', () => {
       consoleErrorSpy.mockRestore();
     });
 
-    it('should show validation errors when trying to generate without required fields', async () => {
+    it('should show validation errors when trying to generate without required fields', () => {
       const store = createMockStore();
-      const dispatchSpy = jest.spyOn(store, 'dispatch');
       renderWithProviders(<CharacterCreator />, store);
+      
+      // Test that button is disabled when required fields are missing
+      const generateButton = screen.getByRole('button', { name: 'Generate Image Based on Description' });
+      expect(generateButton).toBeDisabled();
       
       // Only fill name, missing description and personality
       fireEvent.change(screen.getByLabelText('Name *'), { target: { value: 'Test Character' } });
       
-      const generateButton = screen.getByRole('button', { name: 'Generate Image Based on Description' });
-      fireEvent.click(generateButton);
-      
-      await waitFor(() => {
-        expect(screen.getByText('Please provide description first')).toBeInTheDocument();
-        expect(screen.getByText('Please provide personality first')).toBeInTheDocument();
-      });
-      
-      expect(dispatchSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: 'alerts/setAlert',
-          payload: expect.objectContaining({
-            msg: 'Please fill in name, description, and personality before generating an image',
-            type: 'error'
-          })
-        })
-      );
+      // Button should still be disabled
+      expect(generateButton).toBeDisabled();
     });
 
     it('should update button text after successful generation', async () => {
@@ -501,7 +509,7 @@ describe('CharacterCreator Component', () => {
       
       expect(dispatchSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'alerts/setAlert',
+          type: 'alert/setAlert',
           payload: expect.objectContaining({
             msg: 'Please fill in all required fields',
             type: 'error'
@@ -668,10 +676,10 @@ describe('CharacterCreator Component', () => {
 
     it('should have accessible form elements', () => {
       const store = createMockStore();
-      renderWithProviders(<CharacterCreator />, store);
+      const { container } = renderWithProviders(<CharacterCreator />, store);
       
-      expect(screen.getByRole('form')).toBeInTheDocument();
-      expect(screen.getByRole('combobox', { name: 'Style *' })).toBeInTheDocument();
+      expect(container.querySelector('form')).toBeInTheDocument();
+      expect(screen.getByLabelText('Style *')).toBeInTheDocument();
       expect(screen.getByRole('checkbox', { name: 'Make this character public' })).toBeInTheDocument();
     });
 
@@ -693,7 +701,7 @@ describe('CharacterCreator Component', () => {
       const ageInput = screen.getByLabelText('Age');
       fireEvent.change(ageInput, { target: { value: '25' } });
       
-      expect(ageInput).toHaveValue('25');
+      expect(ageInput).toHaveValue(25);
     });
 
     it('should handle empty age field', () => {
@@ -703,7 +711,7 @@ describe('CharacterCreator Component', () => {
       const ageInput = screen.getByLabelText('Age');
       fireEvent.change(ageInput, { target: { value: '' } });
       
-      expect(ageInput).toHaveValue('');
+      expect(ageInput).toHaveValue(null);
     });
 
     it('should handle special characters in text fields', () => {

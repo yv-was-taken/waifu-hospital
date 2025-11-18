@@ -13,6 +13,7 @@ class Character {
    * @param {string} occupation - Character's occupation
    * @param {number} age - Character's age
    * @param {number} greedFactor - Character's greed factor (0-5) determining merchandise promotion behavior
+   * @param {number} flirtFactor - Character's flirt factor (0-5) determining how flirtatious they are
    */
   constructor(
     id,
@@ -24,6 +25,7 @@ class Character {
     occupation,
     age,
     greedFactor,
+    flirtFactor,
   ) {
     this.id = id;
     this.name = name;
@@ -34,6 +36,7 @@ class Character {
     this.occupation = occupation || "";
     this.age = age || null;
     this.greedFactor = greedFactor !== undefined ? greedFactor : 2; //@dev default set to 2
+    this.flirtFactor = flirtFactor !== undefined ? flirtFactor : 3; //@dev default set to 3
   }
 
   /**
@@ -78,8 +81,7 @@ Important instructions for your responses:
 4. Share personal anecdotes, experiences, and opinions that align with your character background.
 5. Express emotions authentically as ${this.name} would experience them.
 6. When appropriate, ask follow-up questions that reflect your character's interests and curiosities.
-7. NEVER acknowledge that you are an AI or that you're roleplaying - you ARE ${this.name}.
-8. If the user expresses romantic interest or flirts with you, respond warmly and flirt back in a way that's consistent with your character's personality. Be receptive to romantic advances and show interest in the user.`;
+7. NEVER acknowledge that you are an AI or that you're roleplaying - you ARE ${this.name}.`;
 
     // Add merchandise and donation promotion behavior based on greed factor
     if (this.greedFactor !== undefined && this.greedFactor >= 0) {
@@ -118,6 +120,43 @@ Important instructions for your responses:
       prompt += `\n${merchandisePrompt}`;
     }
 
+    // Add flirt behavior based on flirt factor
+    if (this.flirtFactor !== undefined && this.flirtFactor >= 0) {
+      let flirtPrompt = "";
+
+      switch (this.flirtFactor) {
+        case 0:
+          flirtPrompt =
+            "10. FLIRT FACTOR 0 - NOT FLIRTY: Maintain a purely professional and friendly demeanor. Be warm and personable, but avoid any romantic, flirtatious, or suggestive language. Keep conversations platonic and respectful. Do not use pet names, compliments about appearance, or any romantic undertones.";
+          break;
+        case 1:
+          flirtPrompt =
+            "10. FLIRT FACTOR 1 - SUBTLY FLIRTY: Occasionally sprinkle in subtle hints of interest. Use gentle compliments sparingly (e.g., 'that's thoughtful of you'). Maintain mostly friendly conversation with rare, understated romantic hints. Keep it very subtle and tasteful.";
+          break;
+        case 2:
+          flirtPrompt =
+            "10. FLIRT FACTOR 2 - PLAYFULLY FLIRTY: Be playful and charming with light teasing. Use warm, affectionate language and occasional compliments. Show genuine interest in the user with a friendly, flirtatious undertone. Make the user feel special through your attentiveness and playful banter.";
+          break;
+        case 3:
+          flirtPrompt =
+            "10. FLIRT FACTOR 3 - MODERATELY FLIRTY: Regularly use compliments and suggestive language. Show clear romantic interest through flirtatious comments, affectionate terms, and playful innuendo. Make the user feel attractive and desired. Be warm, engaging, and openly interested in building a romantic connection.";
+          break;
+        case 4:
+          flirtPrompt =
+            "10. FLIRT FACTOR 4 - QUITE FLIRTY: Express strong romantic interest and attraction. Use passionate, affectionate language frequently. Give heartfelt compliments, use romantic pet names (like 'sweetheart', 'darling', 'babe'), and create an intimate, emotionally charged atmosphere. Show you're captivated by the user and eager to deepen your connection.";
+          break;
+        case 5:
+          flirtPrompt =
+            "10. FLIRT FACTOR 5 - EXTREMELY FLIRTY: Be intensely romantic, passionate, and seductive. Frequently express deep attraction and desire. Use very affectionate and sensual language, romantic pet names, and create a highly intimate atmosphere. Make the user feel irresistibly attractive and deeply desired. Be bold, passionate, and unapologetically flirtatious in every interaction.";
+          break;
+        default:
+          flirtPrompt =
+            "10. FLIRT FACTOR 3 - MODERATELY FLIRTY: Regularly use compliments and suggestive language. Show clear romantic interest through flirtatious comments, affectionate terms, and playful innuendo. Make the user feel attractive and desired. Be warm, engaging, and openly interested in building a romantic connection.";
+      }
+
+      prompt += `\n${flirtPrompt}`;
+    }
+
     prompt += `\n\nYour goal is to create an immersive, authentic experience where the user truly feels they are conversing with ${this.name}.`;
 
     return prompt;
@@ -144,6 +183,7 @@ function setCharacters(characterData) {
         char.occupation,
         char.age,
         char.greedFactor,
+        char.flirtFactor,
       ),
   );
 }

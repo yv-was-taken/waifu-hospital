@@ -23,6 +23,8 @@ exports.createCharacter = async (req, res) => {
     interests,
     occupation,
     age,
+    greedFactor,
+    flirtFactor,
     public: isPublic,
   } = req.body;
 
@@ -39,6 +41,8 @@ exports.createCharacter = async (req, res) => {
       interests,
       occupation,
       age,
+      greedFactor,
+      flirtFactor,
       public: isPublic !== undefined ? isPublic : true,
     });
 
@@ -253,6 +257,8 @@ exports.updateCharacter = async (req, res) => {
       interests,
       occupation,
       age,
+      greedFactor,
+      flirtFactor,
       public: isPublic,
     } = req.body;
 
@@ -266,6 +272,8 @@ exports.updateCharacter = async (req, res) => {
     if (interests) characterFields.interests = interests;
     if (occupation) characterFields.occupation = occupation;
     if (age) characterFields.age = age;
+    if (greedFactor !== undefined) characterFields.greedFactor = greedFactor;
+    if (flirtFactor !== undefined) characterFields.flirtFactor = flirtFactor;
     if (isPublic !== undefined) characterFields.public = isPublic;
 
     // If imageUrl is provided and it's different from the current one,

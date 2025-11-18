@@ -209,6 +209,7 @@ const CharacterCreator = () => {
     occupation: "",
     age: "",
     greedFactor: 2,
+    flirtFactor: 3,
     public: true,
   });
 
@@ -232,6 +233,7 @@ const CharacterCreator = () => {
     occupation,
     age,
     greedFactor,
+    flirtFactor,
     public: isPublic,
   } = formData;
 
@@ -594,6 +596,45 @@ const CharacterCreator = () => {
           >
             This determines how often your character will promote merchandise or
             ask for donations during chat conversations.
+          </div>
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="flirtFactor">Flirt Factor (0-5)</Label>
+          <Select
+            name="flirtFactor"
+            id="flirtFactor"
+            value={flirtFactor}
+            onChange={onChange}
+          >
+            <option value="0">
+              0 - Not flirty at all (purely professional and friendly)
+            </option>
+            <option value="1">
+              1 - Slightly flirty (subtle hints, occasional compliments)
+            </option>
+            <option value="2">
+              2 - Somewhat flirty (playful teasing, warm and charming)
+            </option>
+            <option value="3">
+              3 - Moderately flirty (frequent compliments, suggestive language)
+            </option>
+            <option value="4">
+              4 - Quite flirty (romantic interest, affectionate language)
+            </option>
+            <option value="5">
+              5 - Extremely flirty (very romantic, passionate, seductive)
+            </option>
+          </Select>
+          <div
+            style={{
+              fontSize: "0.9rem",
+              marginTop: "0.5rem",
+              color: "var(--light-text)",
+            }}
+          >
+            This determines how flirtatious and romantic your character will be
+            during conversations.
           </div>
         </FormGroup>
 

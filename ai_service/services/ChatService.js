@@ -50,6 +50,7 @@ class ChatService {
             charData.occupation,
             charData.age,
             charData.greedFactor,
+            charData.flirtFactor,
           );
         }
       } catch (error) {

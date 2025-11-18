@@ -198,21 +198,25 @@ const getCharacterReply = async (character, messages) => {
   try {
     // Call AI service if configured
     if (process.env.AI_SERVICE_URL) {
+      // Get the last user message
+      const lastUserMessage = messages
+        .slice()
+        .reverse()
+        .find((msg) => msg.sender === "user");
+
+      if (!lastUserMessage) {
+        throw new Error("No user message found");
+      }
+
       const response = await axios.post(
         `${process.env.AI_SERVICE_URL}/api/chat`,
         {
-          character: {
-            name: character.name,
-            personality: character.personality,
-            background: character.background,
-            interests: character.interests,
-            occupation: character.occupation,
-          },
-          messages: messages,
+          message: lastUserMessage.content,
+          characterId: character._id.toString(),
         },
       );
 
-      return response.data.reply;
+      return response.data.response;
     }
 
     // Fallback responses if AI service is not available

@@ -64,6 +64,12 @@ const CharacterSchema = new mongoose.Schema({
     max: 5,
     default: 0,
   },
+  flirtFactor: {
+    type: Number,
+    min: 0,
+    max: 5,
+    default: 3,
+  },
   introMessage: {
     type: String,
     default: "",

@@ -24,6 +24,8 @@ exports.getUserChats = async (req, res) => {
 // @access  Private
 exports.getChatWithCharacter = async (req, res) => {
   try {
+    const { savedChatId } = req.query;
+
     // Check if character exists
     const character = await Character.findById(req.params.characterId);
     if (!character) {
@@ -49,7 +51,28 @@ exports.getChatWithCharacter = async (req, res) => {
         character: req.params.characterId,
         messages: [],
       });
+    }
 
+    // If savedChatId is provided, load that saved chat
+    if (savedChatId) {
+      const SavedChat = require("../models/SavedChat");
+      const savedChat = await SavedChat.findById(savedChatId);
+
+      if (savedChat && savedChat.user.toString() === req.user.id) {
+        chat.messages = savedChat.messages;
+      } else {
+        // Reset to intro if saved chat not found
+        chat.messages = [];
+        if (character.introMessage) {
+          chat.messages.push({
+            sender: "character",
+            content: character.introMessage,
+          });
+        }
+      }
+    } else {
+      // Reset existing chat messages for new conversation
+      chat.messages = [];
       // Add character's intro message if it exists
       if (character.introMessage) {
         chat.messages.push({
@@ -57,18 +80,18 @@ exports.getChatWithCharacter = async (req, res) => {
           content: character.introMessage,
         });
       }
-
-      await chat.save();
-
-      // Populate character details
-      chat = await Chat.findById(chat._id).populate("character", [
-        "name",
-        "imageUrl",
-        "personality",
-        "background",
-        "description",
-      ]);
     }
+
+    await chat.save();
+
+    // Populate character details
+    chat = await Chat.findById(chat._id).populate("character", [
+      "name",
+      "imageUrl",
+      "personality",
+      "background",
+      "description",
+    ]);
 
     res.json(chat);
   } catch (err) {

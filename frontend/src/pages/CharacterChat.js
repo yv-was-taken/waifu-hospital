@@ -239,12 +239,163 @@ const EmptyText = styled.p`
   max-width: 400px;
 `;
 
+const SaveChatButton = styled.button`
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  z-index: 1;
+
+  &:hover {
+    background-color: var(--secondary-dark);
+  }
+
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+`;
+
+const SavedChatsButton = styled.button`
+  background-color: transparent;
+  color: white;
+  border: 2px solid white;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1;
+  margin-left: 0.5rem;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+`;
+
+const HeaderButtons = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+  margin-right: 1rem;
+  z-index: 1;
+`;
+
+const SavedChatsSidebar = styled.div`
+  position: fixed;
+  top: 0;
+  right: ${(props) => (props.show ? "0" : "-350px")};
+  width: 350px;
+  height: 100vh;
+  background-color: white;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  transition: right 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+`;
+
+const SidebarHeader = styled.div`
+  padding: 1.5rem;
+  background-color: var(--primary-color);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const SidebarTitle = styled.h3`
+  margin: 0;
+  font-size: 1.2rem;
+`;
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+const SavedChatsList = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+`;
+
+const SavedChatItem = styled.div`
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: var(--light-bg);
+    border-color: var(--primary-color);
+  }
+`;
+
+const SavedChatTitle = styled.div`
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: 0.3rem;
+`;
+
+const SavedChatDate = styled.div`
+  font-size: 0.8rem;
+  color: var(--light-text);
+`;
+
+const NewChatButton = styled.button`
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.8rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 1rem;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: var(--primary-dark);
+  }
+`;
+
+const EmptySavedChats = styled.div`
+  padding: 2rem;
+  text-align: center;
+  color: var(--light-text);
+`;
+
 const CharacterChat = () => {
   const { id } = useParams();
   const [message, setMessage] = useState("");
   const [chat, setChat] = useState({ messages: [] });
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [savedChats, setSavedChats] = useState([]);
+  const [showSavedChats, setShowSavedChats] = useState(false);
   const chatBodyRef = useRef(null);
 
   const dispatch = useDispatch();
@@ -268,8 +419,19 @@ const CharacterChat = () => {
       }
     };
 
+    // Fetch saved chats for this character
+    const fetchSavedChats = async () => {
+      try {
+        const res = await api.get(`/api/saved-chats/character/${id}`);
+        setSavedChats(res.data);
+      } catch (error) {
+        console.error("Error fetching saved chats:", error);
+      }
+    };
+
     if (user) {
       fetchChat();
+      fetchSavedChats();
     }
   }, [dispatch, id, user]);
 
@@ -279,6 +441,50 @@ const CharacterChat = () => {
       chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
     }
   }, [chat.messages]);
+
+  const handleSaveChat = async () => {
+    if (chat.messages.length <= 1) {
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await api.post(`/api/saved-chats/${id}`);
+      setSavedChats([res.data, ...savedChats]);
+      // Automatically open the saved chats sidebar to show the new save
+      setShowSavedChats(true);
+    } catch (error) {
+      console.error("Error saving chat:", error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleLoadSavedChat = async (savedChatId) => {
+    setLoading(true);
+    try {
+      const res = await api.get(`/api/chat/${id}?savedChatId=${savedChatId}`);
+      setChat(res.data);
+      setShowSavedChats(false);
+    } catch (error) {
+      console.error("Error loading saved chat:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStartNewChat = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get(`/api/chat/${id}`);
+      setChat(res.data);
+      setShowSavedChats(false);
+    } catch (error) {
+      console.error("Error starting new chat:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -330,13 +536,22 @@ const CharacterChat = () => {
   }
 
   return (
-    <ChatContainer>
-      <ChatHeader>
-        <HeaderBackground image={character.imageUrl} />
-        <CharacterImage src={character.imageUrl} alt={character.name} />
-        <CharacterName>{character.name}</CharacterName>
-        <BackLink to={`/characters/${id}`}>Back to Profile</BackLink>
-      </ChatHeader>
+    <>
+      <ChatContainer>
+        <ChatHeader>
+          <HeaderBackground image={character.imageUrl} />
+          <CharacterImage src={character.imageUrl} alt={character.name} />
+          <CharacterName>{character.name}</CharacterName>
+          <HeaderButtons>
+            <SaveChatButton onClick={handleSaveChat} disabled={saving || chat.messages.length <= 1}>
+              {saving ? "Saving..." : "Remember this chat"}
+            </SaveChatButton>
+            <SavedChatsButton onClick={() => setShowSavedChats(true)}>
+              Saved Chats ({savedChats.length})
+            </SavedChatsButton>
+          </HeaderButtons>
+          <BackLink to={`/characters/${id}`}>Back to Profile</BackLink>
+        </ChatHeader>
 
       <ChatBody ref={chatBodyRef}>
         {chat.messages.length === 0 ? (
@@ -399,6 +614,37 @@ const CharacterChat = () => {
         </MessageForm>
       </ChatFooter>
     </ChatContainer>
+
+    <SavedChatsSidebar show={showSavedChats}>
+      <SidebarHeader>
+        <SidebarTitle>Saved Chats</SidebarTitle>
+        <CloseButton onClick={() => setShowSavedChats(false)}>×</CloseButton>
+      </SidebarHeader>
+      <NewChatButton onClick={handleStartNewChat}>
+        Start New Chat
+      </NewChatButton>
+      <SavedChatsList>
+        {savedChats.length === 0 ? (
+          <EmptySavedChats>
+            No saved chats yet. Click "Remember this chat" to save your conversations!
+          </EmptySavedChats>
+        ) : (
+          savedChats.map((savedChat) => (
+            <SavedChatItem
+              key={savedChat._id}
+              onClick={() => handleLoadSavedChat(savedChat._id)}
+            >
+              <SavedChatTitle>{savedChat.title}</SavedChatTitle>
+              <SavedChatDate>
+                {new Date(savedChat.savedAt).toLocaleDateString()} at{" "}
+                {new Date(savedChat.savedAt).toLocaleTimeString()}
+              </SavedChatDate>
+            </SavedChatItem>
+          ))
+        )}
+      </SavedChatsList>
+    </SavedChatsSidebar>
+  </>
   );
 };
 

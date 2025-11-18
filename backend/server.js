@@ -19,6 +19,7 @@ const path = require("path");
 const userRoutes = require("./routes/userRoutes");
 const characterRoutes = require("./routes/characterRoutes");
 const chatRoutes = require("./routes/chatRoutes");
+const savedChatRoutes = require("./routes/savedChatRoutes");
 const merchandiseRoutes = require("./routes/merchandiseRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 
@@ -123,6 +124,7 @@ const startServer = async () => {
     app.use("/api/users", userRoutes);
     app.use("/api/characters", characterRoutes);
     app.use("/api/chat", chatRoutes);
+    app.use("/api/saved-chats", savedChatRoutes);
     app.use("/api/merchandise", merchandiseRoutes);
     app.use("/api/payments", paymentRoutes);
 

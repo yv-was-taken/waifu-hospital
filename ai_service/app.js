@@ -92,6 +92,71 @@ app.post("/api/generate-intro", async (req, res) => {
   }
 });
 
+// AI Chat Summary endpoint
+app.post("/api/generate-summary", async (req, res) => {
+  const { messages } = req.body;
+
+  if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    console.warn("API request missing messages");
+    return res.status(400).json({ error: "Messages array is required" });
+  }
+
+  console.log("Received summary generation request", {
+    messageCount: messages.length,
+  });
+
+  try {
+    // Use ChatService to generate summary since it already has OpenAI configured
+    if (!process.env.OPENAI_CHAT_API_KEY) {
+      console.warn("OPENAI_CHAT_API_KEY not set, using fallback");
+      const fallbackSummary = `Conversation (${messages.length} messages)`;
+      return res.json({ summary: fallbackSummary });
+    }
+
+    // Extract conversation content
+    const conversationText = messages
+      .map((msg) => `${msg.sender === 'user' ? 'User' : 'Character'}: ${msg.content}`)
+      .join('\n');
+
+    // Import OpenAI
+    const { OpenAI } = require("openai");
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_CHAT_API_KEY,
+    });
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "You are a helpful assistant that generates brief, concise summaries of conversations. Create a short title (3-7 words) that captures the main topic or theme of the conversation.",
+        },
+        {
+          role: "user",
+          content: `Summarize the main topic of this conversation in 3-7 words:\n\n${conversationText}`,
+        },
+      ],
+      max_tokens: 50,
+      temperature: 0.7,
+    });
+
+    const summary = completion.choices[0].message.content.trim();
+
+    console.log("Generated chat summary", {
+      messageCount: messages.length,
+      summaryLength: summary.length,
+    });
+
+    res.json({ summary });
+  } catch (error) {
+    console.error("Error generating chat summary:", error.message);
+
+    // Fallback summary based on message count
+    const fallbackSummary = `Conversation (${messages.length} messages)`;
+    res.json({ summary: fallbackSummary });
+  }
+});
+
 // AI Image Generation endpoint
 app.post("/api/generate-image", async (req, res) => {
   const { description, personality, style } = req.body;
